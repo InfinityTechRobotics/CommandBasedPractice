@@ -20,6 +20,9 @@ public class Shooter {
 
     double TURRET_ADJUSTMENT_THRESHOLD = 1.0;
 
+    double SERVO_MIN_POS = 0;
+    double SERVO_MAX_POS = 1;
+
 
     public void init(HardwareMap hardwareMap) {
         servoStop = hardwareMap.get(Servo.class, "servoStop");
@@ -72,4 +75,17 @@ public class Shooter {
         return servoTurret.getPosition();
     }
 
+
+    public double newTurretPositionClamped (double currentPos, double error) {
+        double value = currentPos + error * SERVO_TURRET_PROPORTIONAL_TERM;
+
+        return clamp(value, SERVO_MIN_POS, SERVO_MAX_POS);
+
+    }
+
+    public double clamp (double value, double min, double max) {
+
+       return Math.max(min, Math.min(max, value));
+
+    }
 }

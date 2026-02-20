@@ -2,21 +2,22 @@ package org.firstinspires.ftc.teamcode.shadowday;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
 
-public class servoPractice extends OpMode {
+public class servoTest extends OpMode {
 
     private Servo servo;
 
-    double servoPos;
+    double servoPosition = 0.5;
 
     @Override
     public void init() { // runs once
 
-        servo = hardwareMap.get(Servo.class, "servoTest");
+        servo = hardwareMap.get(Servo.class, "servoWebcam");
+
+        servo.setPosition(servoPosition);
 
 
     }
@@ -25,20 +26,21 @@ public class servoPractice extends OpMode {
     public void loop() {
 
         if (gamepad1.xWasPressed()) {
-           servoPos = 0;
+           servoPosition -= 0.01;
         } else if (gamepad1.bWasPressed()) {
-            servoPos = 1;
+            servoPosition += 0.01 ;
         } else if (gamepad1.yWasPressed()) {
-            servoPos += 0.01;
+            servoPosition += 0.1;
         } else if (gamepad1.aWasPressed()) {
-            servoPos -= 0.01;
+            servoPosition -= 0.1;
         }
 
-        servo.setPosition(servoPos);
+        servo.setPosition(servoPosition);
 
-        telemetry.addData("Motor Power is:", servoPos);
-
+        telemetry.addData("servo pos is:", servoPosition);
         telemetry.update();
+
+        // range is 0 - 1
 
     }
 
