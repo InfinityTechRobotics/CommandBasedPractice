@@ -131,9 +131,18 @@ public class Spintake {
         }
     }
 
-
-
-
+        public double getMotorSpintakeCurrent() {
+            return motorIntake.getCurrent(CurrentUnit.AMPS);
+        }
+        public double getMotorTransferCurrent() {
+        return motorTransfer.getCurrent(CurrentUnit.AMPS);
+        }
+        public double getMotorSpintakePower() {
+        return motorIntake.getPower();
+        }
+        public double getMotorTransferPower() {
+        return motorTransfer.getPower();
+        }
 
 
 }

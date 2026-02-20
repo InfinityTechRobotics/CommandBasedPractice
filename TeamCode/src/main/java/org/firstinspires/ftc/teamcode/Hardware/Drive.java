@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.Hardware;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+
 public class Drive {
 
     public DcMotorEx frontLeftMotor;
@@ -77,6 +79,32 @@ public class Drive {
             square = square * -1;
         }
         return square;
+    }
+
+    public double getMotorFLCurrent () {
+        return frontLeftMotor.getCurrent(CurrentUnit.AMPS);
+    }
+    public double getMotorBLCurrent () {
+        return backLeftMotor.getCurrent(CurrentUnit.AMPS);
+    }
+    public double getMotorFRCurrent () {
+        return frontRightMotor.getCurrent(CurrentUnit.AMPS);
+    }
+    public double getMotorBRCurrent () {
+        return backRightMotor.getCurrent(CurrentUnit.AMPS);
+    }
+
+    public double getMotorFLPower () {
+        return frontLeftMotor.getPower();
+    }
+    public double getMotorBLPower () {
+        return backLeftMotor.getPower();
+    }
+    public double getMotorFRPower () {
+        return frontRightMotor.getPower();
+    }
+    public double getMotorBRPower () {
+        return backRightMotor.getPower();
     }
 }
 

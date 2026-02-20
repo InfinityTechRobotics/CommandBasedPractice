@@ -16,7 +16,9 @@ public class Shooter {
     double SERVO_PADDLE_DOWN_POS = 0.25;
 
     double SERVO_TURRET_CENTER_POS = 0.56;
-    double SERVO_TURRET_PROPORTIONAL_TERM = 0.0008;
+    double SERVO_TURRET_PROPORTIONAL_TERM = 0.0016;
+
+    double TURRET_ADJUSTMENT_THRESHOLD = 1.0;
 
 
     public void init(HardwareMap hardwareMap) {
@@ -54,9 +56,14 @@ public class Shooter {
         servoTurret.setPosition(SERVO_TURRET_CENTER_POS);
     }
 
-    public double newTurretPosition (double currentPos, double error) {
-        return currentPos + error * SERVO_TURRET_PROPORTIONAL_TERM;
+    public double newTurretPositionCalc(double currentPos, double error) {
+        if (Math.abs(error) > TURRET_ADJUSTMENT_THRESHOLD) {
+            return (currentPos + error * SERVO_TURRET_PROPORTIONAL_TERM);
+        } else {
+            return currentPos;
+        }
     }
+
     public void servoTurretSetPosition(double newTurretPos) {
         servoTurret.setPosition(newTurretPos);
     }

@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+
 public class Flywheel {
 
     public DcMotorEx motorFlywheel;
@@ -81,6 +83,13 @@ public class Flywheel {
             RPMIndicatorRight.setPosition(0.5);
         }
 
+    }
+
+    public double getMotorFlywheelCurrent () {
+        return motorFlywheel.getCurrent(CurrentUnit.AMPS);
+    }
+    public double getMotorFlywheelPower () {
+        return motorFlywheel.getPower();
     }
 
 }

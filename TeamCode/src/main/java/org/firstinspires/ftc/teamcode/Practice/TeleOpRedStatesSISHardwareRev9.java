@@ -6,7 +6,6 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -22,10 +21,9 @@ import org.firstinspires.ftc.teamcode.Hardware.Spintake;
 
 import java.util.List;
 
-@Disabled
 //@Configurable
 @TeleOp
-public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
+public class TeleOpRedStatesSISHardwareRev9 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
@@ -67,10 +65,6 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
     double powerFactor = DRIVE_POWER_FACTOR;
 
     double prevX, prevY, prevRX;
-
-    public boolean lastRightBump, lastLeftBump;
-    public boolean lastDpadUp, lastDpadDown;
-    public boolean lastDpadLeft, lastDpadRight;
 
     boolean autoRPM = true;
     boolean fieldCentric = true;
@@ -246,11 +240,7 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
 
         if (turretTracking) {
             currentPos = shooter.servoTurretGetPosition();
-            if (Math.abs(error) > 1.0) {
-                newPos = currentPos + error * 0.0016; // 0.0004
-            } else {
-                newPos = currentPos;
-            }
+            newPos = shooter.newTurretPositionCalc(currentPos, error);
             shooter.servoTurretSetPosition(newPos);
         } else {
             shooter.centerServoTurret();
@@ -289,30 +279,26 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
         flywheel.setFlywheelVel(targetRPM);
 
         // Control Direction of Intake and Transfer Motors
-        if (gamepad2.dpad_up && !lastDpadUp) {
+        if (gamepad2.dpadUpWasPressed()) {
             spintake.forwardSpintakes();
             spintake.turnIntakeOff();
             spintake.turnTransferOff();
             intakeOn = false;
             transferOn = false;
         }
-        lastDpadUp = gamepad2.dpad_up;
 
-        if (gamepad2.dpad_down && !lastDpadDown) {
+        if (gamepad2.dpadDownWasPressed()) {
             spintake.reverseSpintakes();
             spintake.turnIntakeOff();
             spintake.turnTransferOff();
             intakeOn = false;
             transferOn = false;
         }
-        lastDpadDown = gamepad2.dpad_down;
 
         // Toggle intake when right_bumper is pressed
-        if (gamepad2.right_bumper && !lastRightBump) {
+        if (gamepad2.rightBumperWasPressed()) {
             intakeOn = !intakeOn;
         }
-
-        lastRightBump = gamepad2.right_bumper;
 
         if (intakeOn != prevIntake) {
             if (intakeOn) {
@@ -325,11 +311,9 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
         prevIntake = intakeOn;
 
         // Toggle transfer when left_bumper is pressed
-        if (gamepad2.left_bumper && !lastLeftBump) {
+        if (gamepad2.leftBumperWasPressed()) {
             transferOn = !transferOn;
         }
-
-        lastLeftBump = gamepad2.left_bumper;
 
         if (transferOn != prevTransfer) {
             if (transferOn) {
@@ -413,8 +397,6 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
         }
 
         // Panels Telemetry Data
-        //telemetry.addData("Limelight", "ID: %d, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
-
         panelsTelemetry.addData("Timer", timer.seconds());
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
         panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);

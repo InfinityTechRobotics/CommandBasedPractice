@@ -127,7 +127,7 @@ public class TeleOpSpinfinityTest extends OpMode {
             currentPos = shooter.servoTurretGetPosition();
 
             if (Math.abs(error) > 1.0) {
-                newPos = shooter.newTurretPosition(currentPos, error);
+                newPos = shooter.newTurretPositionCalc(currentPos, error);
             } else {
                 newPos = currentPos;
             }
