@@ -75,7 +75,6 @@ public class Shooter {
         return servoTurret.getPosition();
     }
 
-
     public double newTurretPositionClamped (double currentPos, double error) {
         double value = currentPos + error * SERVO_TURRET_PROPORTIONAL_TERM;
 
@@ -83,9 +82,16 @@ public class Shooter {
 
     }
 
+    public double newTurretPositionClampedCalc(double currentPos, double error) {
+        if (Math.abs(error) > TURRET_ADJUSTMENT_THRESHOLD) {
+            double value = currentPos + error * SERVO_TURRET_PROPORTIONAL_TERM;
+            return clamp(value, SERVO_MIN_POS, SERVO_MAX_POS);
+        } else {
+            return currentPos;
+        }
+    }
+
     public double clamp (double value, double min, double max) {
-
        return Math.max(min, Math.min(max, value));
-
     }
 }
