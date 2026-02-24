@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Practice;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -21,9 +22,9 @@ import org.firstinspires.ftc.teamcode.Hardware.Spintake;
 
 import java.util.List;
 
-//@Configurable
+@Configurable
 @TeleOp
-public class TeleOpRedStatesSISHardwareRev10 extends OpMode {
+public class TeleOpRedWorldsTestmk2 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
@@ -48,9 +49,21 @@ public class TeleOpRedStatesSISHardwareRev10 extends OpMode {
 
     double LONG_DIST_ANGLE_CORRECTION = 4; // Red = 4; Blue = -4;
 
+    // Turret variables
     double error, currentPos, newPos;
 
+    double prevError;
+    double turretTimer;
+
     double bearing;
+
+    double aprilTagTimer;
+
+    public static double TURRET_TRACKING_TIMER_THRESHOLD = 1.0;
+
+    public static double SERVO_TURRET_PROPORTIONAL_TERM = 0.0016;
+
+    public static double SERVO_TURRET_DERIVATIVE_TERM = 0.0;
 
     double botHeading;
 
@@ -72,6 +85,8 @@ public class TeleOpRedStatesSISHardwareRev10 extends OpMode {
     public boolean intakeOn, transferOn;
 
     public boolean prevIntake, prevTransfer;
+
+    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 0.25;
 
     boolean paddleOn;
     boolean stopOn;
@@ -137,6 +152,8 @@ public class TeleOpRedStatesSISHardwareRev10 extends OpMode {
     public void start() {
         timer.reset();
         prevTime = 0.;
+        turretTimer = timer.seconds();
+        aprilTagTimer = timer.seconds();
     }
 
     public void loop() {
@@ -150,7 +167,7 @@ public class TeleOpRedStatesSISHardwareRev10 extends OpMode {
                 counter += 1;
             }
             if (activeDetecting) {
-                if (laserTimer.seconds() > 0.25) {
+                if (laserTimer.seconds() > SPINTAKE_AUTO_SHUTOFF_THRESHOLD) {
                     intakeOn = false;
                     transferOn = false;
                     laserTimer.reset();
@@ -214,6 +231,7 @@ public class TeleOpRedStatesSISHardwareRev10 extends OpMode {
                     bearing = fr.getTargetXDegrees();
                     a2 = fr.getTargetYDegrees();
                     targetFound = true;
+                    aprilTagTimer = timer.seconds();
                     break;
                 }
             }
@@ -233,18 +251,26 @@ public class TeleOpRedStatesSISHardwareRev10 extends OpMode {
             distanceToGoalInches = 54.;
         }
 
+        turretTimer = timer.seconds() - turretTimer;
+
         // Toggle turret auto tracking when B is pressed on gamepad 1
         if (gamepad1.bWasPressed()) {
             turretTracking = !turretTracking;
         }
 
         if (turretTracking) {
-            currentPos = shooter.servoTurretGetPosition();
-            newPos = shooter.newTurretPositionClamped(currentPos, error);
-            shooter.servoTurretSetPosition(newPos);
+            if ((timer.seconds() - aprilTagTimer < TURRET_TRACKING_TIMER_THRESHOLD)) {
+                currentPos = shooter.servoTurretGetPosition();
+                newPos = shooter.newTurretPDCalc(currentPos, error, prevError, turretTimer, SERVO_TURRET_PROPORTIONAL_TERM, SERVO_TURRET_DERIVATIVE_TERM);
+                shooter.servoTurretSetPosition(newPos);
+            } else {
+                shooter.centerServoTurret();
+            }
         } else {
             shooter.centerServoTurret();
         }
+
+        prevError = error;
 
         // Turn Auto RPM Calculation On or Off
         if (gamepad2.left_stick_button) {
@@ -411,13 +437,14 @@ public class TeleOpRedStatesSISHardwareRev10 extends OpMode {
         panelsTelemetry.addData("Auto Turret", turretTracking);
         panelsTelemetry.addData("Auto RPM", autoRPM);
         panelsTelemetry.addData("Intake On", intakeOn);
+        panelsTelemetry.addData("Intake Current", spintake.getIntakeMotorCurrent());
+        panelsTelemetry.addData("Transfer Current", spintake.getTransferMotorCurrent());
+        panelsTelemetry.addData("Flywheel Current", flywheel.getMotorFlywheelCurrent());
 //        panelsTelemetry.addData("Transfer On", transferOn);
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());
         panelsTelemetry.update(telemetry);
-//        panelsTelemetry.addData("Intake Current", intakeCurrent);
-//        panelsTelemetry.addData("Transfer Current", transferCurrent);
-//        panelsTelemetry.addData("Flywheel Current", flywheelCurrent);
+
 //        panelsTelemetry.addData("FL Current", frontLeftMotor.getCurrent(CurrentUnit.AMPS));
 //        panelsTelemetry.addData("FR Current", frontRightMotor.getCurrent(CurrentUnit.AMPS));
 //        panelsTelemetry.addData("RL Current", backLeftMotor.getCurrent(CurrentUnit.AMPS));

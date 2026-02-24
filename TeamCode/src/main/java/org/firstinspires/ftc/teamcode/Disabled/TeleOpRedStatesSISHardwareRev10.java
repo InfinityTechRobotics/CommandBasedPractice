@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -6,6 +6,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -21,9 +22,10 @@ import org.firstinspires.ftc.teamcode.Hardware.Spintake;
 
 import java.util.List;
 
+@Disabled
 //@Configurable
 @TeleOp
-public class TeleOpRedStatesSISHardwareRev9 extends OpMode {
+public class TeleOpRedStatesSISHardwareRev10 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
@@ -240,7 +242,7 @@ public class TeleOpRedStatesSISHardwareRev9 extends OpMode {
 
         if (turretTracking) {
             currentPos = shooter.servoTurretGetPosition();
-            newPos = shooter.newTurretPositionCalc(currentPos, error);
+            newPos = shooter.newTurretPositionClampedCalc(currentPos, error);
             shooter.servoTurretSetPosition(newPos);
         } else {
             shooter.centerServoTurret();
