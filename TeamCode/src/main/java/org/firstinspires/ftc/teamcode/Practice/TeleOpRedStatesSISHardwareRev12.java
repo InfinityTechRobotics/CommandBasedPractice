@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.Practice;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -23,9 +25,9 @@ import org.firstinspires.ftc.teamcode.Hardware.Spintake;
 import java.util.List;
 
 @Disabled
-//@Configurable
+@Configurable
 @TeleOp
-public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
+public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
@@ -50,9 +52,17 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
 
     double LONG_DIST_ANGLE_CORRECTION = 4; // Red = 4; Blue = -4;
 
+    // Turret variables
     double error, currentPos, newPos;
 
+    double prevError;
+    double turretTimer;
+
     double bearing;
+
+    public static double SERVO_TURRET_PROPORTIONAL_TERM = 0.0016;
+
+    public static double SERVO_TURRET_DERIVATIVE_TERM = 0.0;
 
     double botHeading;
 
@@ -67,10 +77,6 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
     double powerFactor = DRIVE_POWER_FACTOR;
 
     double prevX, prevY, prevRX;
-
-    public boolean lastRightBump, lastLeftBump;
-    public boolean lastDpadUp, lastDpadDown;
-    public boolean lastDpadLeft, lastDpadRight;
 
     boolean autoRPM = true;
     boolean fieldCentric = true;
@@ -105,6 +111,14 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
 
     int i = 0;
 
+
+    double shootingTime = 0.;
+    private Timer pathTimer, opmodeTimer;
+
+    private Timer shootTimer;
+
+    private int pathState;
+
     public void init() {
 
         drive.init(hardwareMap);
@@ -138,11 +152,17 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
+        pathTimer = new Timer();
+        opmodeTimer = new Timer();
+        opmodeTimer.resetTimer();
+
+        shootTimer = new Timer();
     }
 
     public void start() {
         timer.reset();
         prevTime = 0.;
+        turretTimer = timer.seconds();
     }
 
     public void loop() {
@@ -239,6 +259,8 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
             distanceToGoalInches = 54.;
         }
 
+        turretTimer = timer.seconds() - turretTimer;
+
         // Toggle turret auto tracking when B is pressed on gamepad 1
         if (gamepad1.bWasPressed()) {
             turretTracking = !turretTracking;
@@ -246,15 +268,13 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
 
         if (turretTracking) {
             currentPos = shooter.servoTurretGetPosition();
-            if (Math.abs(error) > 1.0) {
-                newPos = currentPos + error * 0.0016; // 0.0004
-            } else {
-                newPos = currentPos;
-            }
+            newPos = shooter.newTurretPDCalc(currentPos, error, prevError, turretTimer, SERVO_TURRET_PROPORTIONAL_TERM, SERVO_TURRET_DERIVATIVE_TERM);
             shooter.servoTurretSetPosition(newPos);
         } else {
             shooter.centerServoTurret();
         }
+
+        prevError = error;
 
         // Turn Auto RPM Calculation On or Off
         if (gamepad2.left_stick_button) {
@@ -289,30 +309,26 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
         flywheel.setFlywheelVel(targetRPM);
 
         // Control Direction of Intake and Transfer Motors
-        if (gamepad2.dpad_up && !lastDpadUp) {
+        if (gamepad2.dpadUpWasPressed()) {
             spintake.forwardSpintakes();
             spintake.turnIntakeOff();
             spintake.turnTransferOff();
             intakeOn = false;
             transferOn = false;
         }
-        lastDpadUp = gamepad2.dpad_up;
 
-        if (gamepad2.dpad_down && !lastDpadDown) {
+        if (gamepad2.dpadDownWasPressed()) {
             spintake.reverseSpintakes();
             spintake.turnIntakeOff();
             spintake.turnTransferOff();
             intakeOn = false;
             transferOn = false;
         }
-        lastDpadDown = gamepad2.dpad_down;
 
         // Toggle intake when right_bumper is pressed
-        if (gamepad2.right_bumper && !lastRightBump) {
+        if (gamepad2.rightBumperWasPressed()) {
             intakeOn = !intakeOn;
         }
-
-        lastRightBump = gamepad2.right_bumper;
 
         if (intakeOn != prevIntake) {
             if (intakeOn) {
@@ -325,11 +341,9 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
         prevIntake = intakeOn;
 
         // Toggle transfer when left_bumper is pressed
-        if (gamepad2.left_bumper && !lastLeftBump) {
+        if (gamepad2.leftBumperWasPressed()) {
             transferOn = !transferOn;
         }
-
-        lastLeftBump = gamepad2.left_bumper;
 
         if (transferOn != prevTransfer) {
             if (transferOn) {
@@ -344,7 +358,11 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
         prevTransfer = transferOn;
         
         // Control Paddle Servo
-        paddleOn = (gamepad2.right_trigger > 0.25);
+        //paddleOn = (gamepad2.right_trigger > 0.25);
+
+        if (gamepad2.right_trigger > 0.25) {
+            setPathState(10);
+        }
 
         if (counter != prevCount) {
             spintake.setArtifactIndicator(counter);
@@ -364,13 +382,17 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
         prevPaddle = paddleOn;
 
         // Control Servo Stop and turn intake and transfer on
+//        if (gamepad2.left_trigger > 0.25) {
+//            stopOn = true;
+//            intakeOn = true;
+//            transferOn = true;
+//        }
+//        else {
+//            stopOn = false;
+//        }
+
         if (gamepad2.left_trigger > 0.25) {
-            stopOn = true;
-            intakeOn = true;
-            transferOn = true;
-        }
-        else {
-            stopOn = false;
+            setPathState(10006);
         }
 
         if (stopOn != prevStop) {
@@ -413,8 +435,6 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
         }
 
         // Panels Telemetry Data
-        //telemetry.addData("Limelight", "ID: %d, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
-
         panelsTelemetry.addData("Timer", timer.seconds());
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
         panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
@@ -449,4 +469,48 @@ public class TeleOpRedStatesSISHardwareRev8 extends OpMode {
         limelight.stop();
     }
 
+    public void setPathState (int pState){
+
+        pathState = pState;
+        pathTimer.resetTimer();
+
+    }
+
+    public void autonomousPathUpdate () {
+        switch (pathState) {
+            case 10:
+                shooter.closeServoStop();
+                shooter.downServoPaddle();
+                setPathState(1001);
+                break;
+            case 1001:
+                spintake.turnIntakeOn();
+                spintake.turnTransferOn();
+                setPathState(10001);
+                break;
+            case 10001:
+                if (pathTimer.getElapsedTimeSeconds() > 0.25) { // changed from 0.5 to 0.25
+                    shootTimer.resetTimer();
+                    shooter.openServoStop();
+                    setPathState(10006);
+                }
+                break;
+            case 10006:
+                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
+                    shooter.shootServoPaddle();
+                    setPathState(10007);
+                }
+                break;
+            case 10007:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    spintake.turnIntakeOff();
+                    shootingTime = shootTimer.getElapsedTimeSeconds();
+                    shooter.downServoPaddle();
+                    shooter.closeServoStop();
+                    spintake.turnIntakeOff();
+                    setPathState(10008);
+                }
+                break;
+        }
+    }
 }

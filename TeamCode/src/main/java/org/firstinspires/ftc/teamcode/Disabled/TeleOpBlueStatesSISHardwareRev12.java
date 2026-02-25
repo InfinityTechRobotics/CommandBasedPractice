@@ -1,17 +1,17 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
-import android.os.Environment;
-
+import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -22,16 +22,12 @@ import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
 import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 import org.firstinspires.ftc.teamcode.Hardware.Spintake;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
-//@Configurable
+@Disabled
+@Configurable
 @TeleOp
-public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
+public class TeleOpBlueStatesSISHardwareRev12 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
@@ -52,13 +48,21 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
 
     double laserTime;
 
-    private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
+    private static final int DESIRED_TAG_ID = 20; // Red = 24; Blue = 20;
 
     double LONG_DIST_ANGLE_CORRECTION = 4; // Red = 4; Blue = -4;
 
+    // Turret variables
     double error, currentPos, newPos;
 
+    double prevError;
+    double turretTimer;
+
     double bearing;
+
+    public static double SERVO_TURRET_PROPORTIONAL_TERM = 0.0016;
+
+    public static double SERVO_TURRET_DERIVATIVE_TERM = 0.0;
 
     double botHeading;
 
@@ -107,15 +111,13 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
 
     int i = 0;
 
-    double intakeCurrent, transferCurrent, flywheelCurrent, totalCurrent;
 
-    private FileWriter logWriter;
+    double shootingTime = 0.;
+    private Timer pathTimer, opmodeTimer;
 
-    VoltageSensor battery;
+    private Timer shootTimer;
 
-    LynxModule myRevHub;
-
-    double servoBusCurrent;
+    private int pathState;
 
     public void init() {
 
@@ -150,26 +152,17 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-        battery = hardwareMap.get(VoltageSensor.class, "Control Hub");
-        myRevHub = hardwareMap.get(LynxModule.class, "Control Hub");
+        pathTimer = new Timer();
+        opmodeTimer = new Timer();
+        opmodeTimer.resetTimer();
 
-        String formattedTime = new SimpleDateFormat("yyyyMMddHHmm", Locale.getDefault()).format(new Date());
-        telemetry.addData("Formatted Time", formattedTime);
-
-        try {
-//            logWriter = new FileWriter("/sdcard/FIRST/java/src/Datalogs/DataRPMModulus.txt", true);
-            String logFilePath = String.format("%s/FIRST/DataLogs/DataCurrent%s.csv", Environment.getExternalStorageDirectory().getPath(),formattedTime);
-            logWriter = new FileWriter(logFilePath, true);
-            logWriter.write("Timer, Battery Voltage, FL Motor Power, FR Motor Power, RL Motor Power, RR Motor Power, Intake Motor Power, Transfer Motor Power, Flywheel Motor Power, Flywheel Motor Velocity, FL Motor Current, FR Motor Current, RL Motor Current, RR Motor Current, Intake Motor Current, Transfer Motor Current, Flywheel Motor Current, Servo Bus Current, Total Control Hub Current\n");  // CSV header
-        } catch (IOException e) {
-            telemetry.addData("Error", "Failed to open log file: " + e.getMessage());
-        }
-
+        shootTimer = new Timer();
     }
 
     public void start() {
         timer.reset();
         prevTime = 0.;
+        turretTimer = timer.seconds();
     }
 
     public void loop() {
@@ -266,6 +259,8 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
             distanceToGoalInches = 54.;
         }
 
+        turretTimer = timer.seconds() - turretTimer;
+
         // Toggle turret auto tracking when B is pressed on gamepad 1
         if (gamepad1.bWasPressed()) {
             turretTracking = !turretTracking;
@@ -273,11 +268,13 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
 
         if (turretTracking) {
             currentPos = shooter.servoTurretGetPosition();
-            newPos = shooter.newTurretPositionCalc(currentPos, error);
+            newPos = shooter.newTurretPDCalc(currentPos, error, prevError, turretTimer, SERVO_TURRET_PROPORTIONAL_TERM, SERVO_TURRET_DERIVATIVE_TERM);
             shooter.servoTurretSetPosition(newPos);
         } else {
             shooter.centerServoTurret();
         }
+
+        prevError = error;
 
         // Turn Auto RPM Calculation On or Off
         if (gamepad2.left_stick_button) {
@@ -361,7 +358,11 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
         prevTransfer = transferOn;
         
         // Control Paddle Servo
-        paddleOn = (gamepad2.right_trigger > 0.25);
+        //paddleOn = (gamepad2.right_trigger > 0.25);
+
+        if (gamepad2.right_trigger > 0.25) {
+            setPathState(10);
+        }
 
         if (counter != prevCount) {
             spintake.setArtifactIndicator(counter);
@@ -381,13 +382,17 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
         prevPaddle = paddleOn;
 
         // Control Servo Stop and turn intake and transfer on
+//        if (gamepad2.left_trigger > 0.25) {
+//            stopOn = true;
+//            intakeOn = true;
+//            transferOn = true;
+//        }
+//        else {
+//            stopOn = false;
+//        }
+
         if (gamepad2.left_trigger > 0.25) {
-            stopOn = true;
-            intakeOn = true;
-            transferOn = true;
-        }
-        else {
-            stopOn = false;
+            setPathState(10006);
         }
 
         if (stopOn != prevStop) {
@@ -415,19 +420,6 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
         // indicates when we have 3 artifacts
 
 
-        if (i % 1 == 0) {
-
-            try {
-//                logWriter.write("Timer, Battery Voltage, FL Motor Power, FR Motor Power, RL Motor Power, RR Motor Power, Intake Motor Power, Transfer Motor Power, Flywheel Motor Power, Flywheel Motor Velocity, FL Motor Current, FR Motor Current, RL Motor Current, RR Motor Current, Intake Motor Current, Transfer Motor Current, Flywheel Motor Current, Servo Bus Current, Total Control Hub Current\n");  // CSV header
-
-                logWriter.write(timer.time() + "," + battery.getVoltage() + "," + drive.getMotorFLCurrent() + "," + drive.getMotorFRCurrent() + "," + drive.getMotorBLCurrent() + "," + drive.getMotorBRCurrent() + "," + spintake.getIntakeMotorCurrent() + "," + spintake.getTransferMotorCurrent() + "," + flywheel.getMotorFlywheelCurrent() + "," + flywheelRPM + "," + drive.getMotorFLPower() + "," + drive.getMotorFRPower() + "," + drive.getMotorBLPower() + "," + drive.getMotorBRPower() + "," + spintake.getIntakeMotorPower() + "," + spintake.getTransferMotorPower() + "," + flywheel.getMotorFlywheelPower() + "," + servoBusCurrent + "," + totalCurrent + "\n");
-                logWriter.flush();  // Ensure data is written immediately
-            } catch (IOException e) {
-                telemetry.addData("Error", "Failed to write log: " + e.getMessage());
-            }
-
-        }
-
         i += 1;
 
         if (i % 100 == 0) {
@@ -442,7 +434,6 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
             prevTime1000 = currentTime;
         }
 
-        totalCurrent = intakeCurrent + transferCurrent + flywheelCurrent;
         // Panels Telemetry Data
         panelsTelemetry.addData("Timer", timer.seconds());
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
@@ -462,14 +453,14 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());
         panelsTelemetry.update(telemetry);
-        panelsTelemetry.addData("Intake Current", intakeCurrent);
-        panelsTelemetry.addData("Transfer Current", transferCurrent);
-        panelsTelemetry.addData("Flywheel Current", flywheelCurrent);
+//        panelsTelemetry.addData("Intake Current", intakeCurrent);
+//        panelsTelemetry.addData("Transfer Current", transferCurrent);
+//        panelsTelemetry.addData("Flywheel Current", flywheelCurrent);
 //        panelsTelemetry.addData("FL Current", frontLeftMotor.getCurrent(CurrentUnit.AMPS));
 //        panelsTelemetry.addData("FR Current", frontRightMotor.getCurrent(CurrentUnit.AMPS));
 //        panelsTelemetry.addData("RL Current", backLeftMotor.getCurrent(CurrentUnit.AMPS));
 //        panelsTelemetry.addData("RR Current", backRightMotor.getCurrent(CurrentUnit.AMPS));
-        panelsTelemetry.addData("Total Current", totalCurrent);
+//        panelsTelemetry.addData("Total Current", totalCurrent);
 //        panelsTelemetry.addData("Voltage", battery.getVoltage());
 
     }
@@ -478,4 +469,48 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
         limelight.stop();
     }
 
+    public void setPathState (int pState){
+
+        pathState = pState;
+        pathTimer.resetTimer();
+
+    }
+
+    public void autonomousPathUpdate () {
+        switch (pathState) {
+            case 10:
+                shooter.closeServoStop();
+                shooter.downServoPaddle();
+                setPathState(1001);
+                break;
+            case 1001:
+                spintake.turnIntakeOn();
+                spintake.turnTransferOn();
+                setPathState(10001);
+                break;
+            case 10001:
+                if (pathTimer.getElapsedTimeSeconds() > 0.25) { // changed from 0.5 to 0.25
+                    shootTimer.resetTimer();
+                    shooter.openServoStop();
+                    setPathState(10006);
+                }
+                break;
+            case 10006:
+                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
+                    shooter.shootServoPaddle();
+                    setPathState(10007);
+                }
+                break;
+            case 10007:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    spintake.turnIntakeOff();
+                    shootingTime = shootTimer.getElapsedTimeSeconds();
+                    shooter.downServoPaddle();
+                    shooter.closeServoStop();
+                    spintake.turnIntakeOff();
+                    setPathState(10008);
+                }
+                break;
+        }
+    }
 }

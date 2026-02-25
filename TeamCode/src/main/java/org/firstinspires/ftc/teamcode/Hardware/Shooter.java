@@ -18,10 +18,14 @@ public class Shooter {
     double SERVO_TURRET_CENTER_POS = 0.56;
     double SERVO_TURRET_PROPORTIONAL_TERM = 0.0016;
 
+    double SERVO_TURRET_DERIVATIVE_TERM = 0.0;
+
     double TURRET_ADJUSTMENT_THRESHOLD = 1.0;
 
     double SERVO_MIN_POS = 0;
     double SERVO_MAX_POS = 1;
+
+
 
 
     public void init(HardwareMap hardwareMap) {
@@ -75,13 +79,6 @@ public class Shooter {
         return servoTurret.getPosition();
     }
 
-    public double newTurretPositionClamped (double currentPos, double error) {
-        double value = currentPos + error * SERVO_TURRET_PROPORTIONAL_TERM;
-
-        return clamp(value, SERVO_MIN_POS, SERVO_MAX_POS);
-
-    }
-
     public double newTurretPositionClampedCalc(double currentPos, double error) {
         if (Math.abs(error) > TURRET_ADJUSTMENT_THRESHOLD) {
             double value = currentPos + error * SERVO_TURRET_PROPORTIONAL_TERM;
@@ -94,4 +91,18 @@ public class Shooter {
     public double clamp (double value, double min, double max) {
        return Math.max(min, Math.min(max, value));
     }
+
+    public double newTurretPDCalc(double currentPos, double error, double prevError, double turretTimer, double kP, double kD) {
+        if (Math.abs(error) > TURRET_ADJUSTMENT_THRESHOLD) {
+//            double proportional = error * SERVO_TURRET_PROPORTIONAL_TERM;
+//            double derivative = ((error - prevError) / turretTimer) * SERVO_TURRET_DERIVATIVE_TERM;
+            double proportional = error * kP;
+            double derivative = ((error - prevError) / turretTimer) * kD;
+            double value = currentPos + proportional + derivative;
+            return clamp(value, SERVO_MIN_POS, SERVO_MAX_POS);
+        } else {
+            return currentPos;
+        }
+    }
+
 }

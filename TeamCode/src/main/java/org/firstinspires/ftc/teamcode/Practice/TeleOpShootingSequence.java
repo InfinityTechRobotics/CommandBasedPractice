@@ -7,6 +7,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.teamcode.Hardware.Spintake;
 
 import java.util.List;
 
+@Disabled
 //@Configurable
 @TeleOp
 public class TeleOpShootingSequence extends OpMode {

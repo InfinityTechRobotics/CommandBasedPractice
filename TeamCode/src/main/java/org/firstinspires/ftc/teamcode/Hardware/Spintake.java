@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Hardware;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -7,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
+@Configurable
 public class Spintake {
 
     public DcMotorEx motorIntake, motorTransfer;
@@ -14,10 +16,14 @@ public class Spintake {
     public DigitalChannel ledTransferGreen;
     public DigitalChannel ledTransferRed;
 
-    double INTAKE_MAX_POWER = 0.8;
-    double INTAKE_NO_POWER = 0.;
-    double TRANSFER_MAX_POWER = 0.8;
-    double TRANSFER_NO_POWER = 0.;
+    double INTAKE_MAX_POWER = 0.6; // 0.8
+    public static double INTAKE_NO_POWER = 0.2;
+    double TRANSFER_MAX_POWER = 0.6; // 0.8
+    public static double TRANSFER_NO_POWER = 0.;
+
+    public static double INTAKE_LOW_POWER = 0.2;
+
+    public static double TRANSFER_LOW_POWER = 0.2;
 
 //    public static double INTAKE_CURRENT_ALERT = 6.;
 //
@@ -70,6 +76,13 @@ public class Spintake {
 
     public void turnTransferOff () {
         motorTransfer.setPower(TRANSFER_NO_POWER);
+    }
+
+    public void intakeLowPower () {
+        motorIntake.setPower(INTAKE_LOW_POWER);
+    }
+    public void transferLowPower () {
+        motorTransfer.setPower(TRANSFER_LOW_POWER);
     }
 
     public void reverseSpintakes () {
@@ -131,16 +144,16 @@ public class Spintake {
         }
     }
 
-        public double getMotorSpintakeCurrent() {
+        public double getIntakeMotorCurrent() {
             return motorIntake.getCurrent(CurrentUnit.AMPS);
         }
-        public double getMotorTransferCurrent() {
-        return motorTransfer.getCurrent(CurrentUnit.AMPS);
+        public double getTransferMotorCurrent() {
+            return motorTransfer.getCurrent(CurrentUnit.AMPS);
         }
-        public double getMotorSpintakePower() {
+        public double getIntakeMotorPower() {
         return motorIntake.getPower();
         }
-        public double getMotorTransferPower() {
+        public double getTransferMotorPower() {
         return motorTransfer.getPower();
         }
 
