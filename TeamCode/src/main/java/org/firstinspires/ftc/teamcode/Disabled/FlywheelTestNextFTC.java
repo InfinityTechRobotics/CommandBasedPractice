@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import dev.nextftc.control.ControlSystem;
 import dev.nextftc.control.KineticState;
 
-@Configurable
+//@Configurable
 @Disabled
 @TeleOp
 public class FlywheelTestNextFTC extends OpMode {

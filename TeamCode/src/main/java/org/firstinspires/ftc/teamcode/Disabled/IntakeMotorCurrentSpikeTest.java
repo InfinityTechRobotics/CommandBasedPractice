@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Disabled
-@Configurable
+//@Configurable
 @TeleOp
 public class IntakeMotorCurrentSpikeTest extends OpMode {
 

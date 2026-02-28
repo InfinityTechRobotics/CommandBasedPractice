@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-@Configurable
+//@Configurable
 public class Spintake {
 
     public DcMotorEx motorIntake, motorTransfer;
@@ -16,9 +16,9 @@ public class Spintake {
     public DigitalChannel ledTransferGreen;
     public DigitalChannel ledTransferRed;
 
-    double INTAKE_MAX_POWER = 0.6; // 0.8
+    double INTAKE_MAX_POWER = 0.8;
     public static double INTAKE_NO_POWER = 0.2;
-    double TRANSFER_MAX_POWER = 0.6; // 0.8
+    double TRANSFER_MAX_POWER = 0.8; // 0.8
     public static double TRANSFER_NO_POWER = 0.;
 
     public static double INTAKE_LOW_POWER = 0.2;

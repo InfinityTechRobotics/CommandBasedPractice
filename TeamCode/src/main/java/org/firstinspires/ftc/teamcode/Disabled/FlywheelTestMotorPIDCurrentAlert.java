@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 
-@Configurable
+//@Configurable
 @Disabled
 @TeleOp
 public class FlywheelTestMotorPIDCurrentAlert extends OpMode {

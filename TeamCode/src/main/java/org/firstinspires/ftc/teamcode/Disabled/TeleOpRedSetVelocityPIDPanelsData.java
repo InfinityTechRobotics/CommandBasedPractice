@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Disabled
-@Configurable
+//@Configurable
 @TeleOp
 public class TeleOpRedSetVelocityPIDPanelsData extends OpMode {
 

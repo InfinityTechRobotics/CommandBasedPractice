@@ -24,7 +24,7 @@ import java.util.List;
 
 @Configurable
 @TeleOp
-public class TeleOpRedWorldsTestmk2 extends OpMode {
+public class TeleOpRedWorldsTestmk3 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
@@ -437,9 +437,8 @@ public class TeleOpRedWorldsTestmk2 extends OpMode {
         panelsTelemetry.addData("Auto Turret", turretTracking);
         panelsTelemetry.addData("Auto RPM", autoRPM);
         panelsTelemetry.addData("Intake On", intakeOn);
-        panelsTelemetry.addData("Intake Current", spintake.getIntakeMotorCurrent());
-        panelsTelemetry.addData("Transfer Current", spintake.getTransferMotorCurrent());
-        panelsTelemetry.addData("Flywheel Current", flywheel.getMotorFlywheelCurrent());
+        panelsTelemetry.addData("Turret Target Pos", newPos);
+        panelsTelemetry.addData("Turret Current Pos", currentPos);
 //        panelsTelemetry.addData("Transfer On", transferOn);
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());

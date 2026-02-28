@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
 import java.util.List;
 
 @Disabled
-@Configurable
+//@Configurable
 @TeleOp
 public class TeleOpRedAnnArborTest extends OpMode {
 

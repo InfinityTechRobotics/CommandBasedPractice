@@ -8,7 +8,6 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -24,10 +23,9 @@ import org.firstinspires.ftc.teamcode.Hardware.Spintake;
 
 import java.util.List;
 
-@Disabled
 @Configurable
 @TeleOp
-public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
+public class TeleOpRedWorldsTestmk4 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
@@ -60,9 +58,13 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
 
     double bearing;
 
-    public static double SERVO_TURRET_PROPORTIONAL_TERM = 0.0016;
+    double aprilTagTimer;
 
-    public static double SERVO_TURRET_DERIVATIVE_TERM = 0.0;
+    public static double TURRET_TRACKING_TIMER_THRESHOLD = 1.0;
+
+    public static double SERVO_TURRET_PROPORTIONAL_TERM = 0.0016; //0.0016
+
+    public static double SERVO_TURRET_DERIVATIVE_TERM = 0.; //0.0
 
     double botHeading;
 
@@ -84,6 +86,8 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
     public boolean intakeOn, transferOn;
 
     public boolean prevIntake, prevTransfer;
+
+    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1; //0.25
 
     boolean paddleOn;
     boolean stopOn;
@@ -110,7 +114,6 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
     double prevTime1000, elapsedTime1000;
 
     int i = 0;
-
 
     double shootingTime = 0.;
     private Timer pathTimer, opmodeTimer;
@@ -157,15 +160,19 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
         opmodeTimer.resetTimer();
 
         shootTimer = new Timer();
+
     }
 
     public void start() {
         timer.reset();
         prevTime = 0.;
         turretTimer = timer.seconds();
+        aprilTagTimer = timer.seconds();
     }
 
     public void loop() {
+
+        autonomousPathUpdate();
 
         // Laser Artifact Detection (Detected = TRUE --> counter +1)
         stateHigh = laserInput.getState();
@@ -176,7 +183,7 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
                 counter += 1;
             }
             if (activeDetecting) {
-                if (laserTimer.seconds() > 0.25) {
+                if (laserTimer.seconds() > SPINTAKE_AUTO_SHUTOFF_THRESHOLD) {
                     intakeOn = false;
                     transferOn = false;
                     laserTimer.reset();
@@ -240,6 +247,7 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
                     bearing = fr.getTargetXDegrees();
                     a2 = fr.getTargetYDegrees();
                     targetFound = true;
+                    aprilTagTimer = timer.seconds();
                     break;
                 }
             }
@@ -267,9 +275,13 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
         }
 
         if (turretTracking) {
-            currentPos = shooter.servoTurretGetPosition();
-            newPos = shooter.newTurretPDCalc(currentPos, error, prevError, turretTimer, SERVO_TURRET_PROPORTIONAL_TERM, SERVO_TURRET_DERIVATIVE_TERM);
-            shooter.servoTurretSetPosition(newPos);
+            if ((timer.seconds() - aprilTagTimer < TURRET_TRACKING_TIMER_THRESHOLD)) {
+                currentPos = shooter.servoTurretGetPosition();
+                newPos = shooter.newTurretPDCalc(currentPos, error, prevError, turretTimer, SERVO_TURRET_PROPORTIONAL_TERM, SERVO_TURRET_DERIVATIVE_TERM);
+                shooter.servoTurretSetPosition(newPos);
+            } else {
+                shooter.centerServoTurret();
+            }
         } else {
             shooter.centerServoTurret();
         }
@@ -358,10 +370,12 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
         prevTransfer = transferOn;
         
         // Control Paddle Servo
-        //paddleOn = (gamepad2.right_trigger > 0.25);
+//        paddleOn = (gamepad2.right_trigger > 0.25);
 
+        //start shooting sequence
         if (gamepad2.right_trigger > 0.25) {
             setPathState(10);
+            counter = 0;
         }
 
         if (counter != prevCount) {
@@ -391,8 +405,10 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
 //            stopOn = false;
 //        }
 
+        //start sequence for shooting paddle
         if (gamepad2.left_trigger > 0.25) {
-            setPathState(10006);
+            setPathState(10100);
+            counter = 0;
         }
 
         if (stopOn != prevStop) {
@@ -420,6 +436,8 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
         // indicates when we have 3 artifacts
 
 
+
+
         i += 1;
 
         if (i % 100 == 0) {
@@ -438,6 +456,8 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
         panelsTelemetry.addData("Timer", timer.seconds());
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
         panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
+        panelsTelemetry.addData("Shooting Sequence State", pathState);
+        panelsTelemetry.addData("Artifact Counter", counter);
         panelsTelemetry.addData("Laser Detection Time", laserTime);
         panelsTelemetry.addData("Object Detected", stateHigh);
         panelsTelemetry.addData("Distance To AprilTag", distanceToGoalInches);
@@ -449,13 +469,13 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
         panelsTelemetry.addData("Auto Turret", turretTracking);
         panelsTelemetry.addData("Auto RPM", autoRPM);
         panelsTelemetry.addData("Intake On", intakeOn);
+        panelsTelemetry.addData("Turret Target Pos", newPos);
+        panelsTelemetry.addData("Turret Current Pos", currentPos);
 //        panelsTelemetry.addData("Transfer On", transferOn);
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());
         panelsTelemetry.update(telemetry);
-//        panelsTelemetry.addData("Intake Current", intakeCurrent);
-//        panelsTelemetry.addData("Transfer Current", transferCurrent);
-//        panelsTelemetry.addData("Flywheel Current", flywheelCurrent);
+
 //        panelsTelemetry.addData("FL Current", frontLeftMotor.getCurrent(CurrentUnit.AMPS));
 //        panelsTelemetry.addData("FR Current", frontRightMotor.getCurrent(CurrentUnit.AMPS));
 //        panelsTelemetry.addData("RL Current", backLeftMotor.getCurrent(CurrentUnit.AMPS));
@@ -489,7 +509,7 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
                 setPathState(10001);
                 break;
             case 10001:
-                if (pathTimer.getElapsedTimeSeconds() > 0.25) { // changed from 0.5 to 0.25
+                if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
                     shootTimer.resetTimer();
                     shooter.openServoStop();
                     setPathState(10006);
@@ -508,7 +528,24 @@ public class TeleOpRedStatesSISHardwareRev12 extends OpMode {
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
                     spintake.turnIntakeOff();
-                    setPathState(10008);
+                    setPathState(999);
+                }
+                break;
+            case 10100:
+                shooter.openServoStop();
+                if (pathTimer.getElapsedTimeSeconds() > 0.05) {
+                    setPathState(10101);
+                }
+                break;
+            case 10101:
+                shooter.shootServoPaddle();
+                setPathState(10102);
+                break;
+            case 10102:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    shooter.downServoPaddle();
+                    shooter.closeServoStop();
+                    setPathState(999);
                 }
                 break;
         }

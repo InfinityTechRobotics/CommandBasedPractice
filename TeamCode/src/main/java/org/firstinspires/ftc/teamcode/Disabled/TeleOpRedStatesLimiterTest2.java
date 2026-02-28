@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Disabled
-@Configurable
+//@Configurable
 @TeleOp
 public class TeleOpRedStatesLimiterTest2 extends OpMode {
 

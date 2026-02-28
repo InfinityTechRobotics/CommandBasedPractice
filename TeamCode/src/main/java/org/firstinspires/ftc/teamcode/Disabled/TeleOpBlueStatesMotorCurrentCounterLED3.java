@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 import java.util.List;
 
 @Disabled
-@Configurable
+//@Configurable
 @TeleOp
 public class TeleOpBlueStatesMotorCurrentCounterLED3 extends OpMode {
 
