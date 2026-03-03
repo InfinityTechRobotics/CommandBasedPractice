@@ -87,7 +87,7 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
 
     public boolean prevIntake, prevTransfer;
 
-    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1; //0.25
+    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1.5; //0.25
 
     boolean paddleOn;
     boolean stopOn;
@@ -527,7 +527,6 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
                     shootingTime = shootTimer.getElapsedTimeSeconds();
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
-                    spintake.turnIntakeOff();
                     setPathState(999);
                 }
                 break;
