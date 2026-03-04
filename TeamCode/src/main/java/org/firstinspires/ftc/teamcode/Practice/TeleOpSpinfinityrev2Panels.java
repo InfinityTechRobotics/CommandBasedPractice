@@ -1,13 +1,21 @@
 package org.firstinspires.ftc.teamcode.Practice;
 
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.Hardware.Drive;
+import org.firstinspires.ftc.teamcode.Hardware.Flywheel;
+import org.firstinspires.ftc.teamcode.Hardware.Shooter;
+import org.firstinspires.ftc.teamcode.Hardware.Spintake;
+
 @TeleOp
-public class TeleOpSpinfinityrev2 extends OpMode {
+public class TeleOpSpinfinityrev2Panels extends OpMode {
 
     public static double NEW_P = 100.;   // 10.
     public static double NEW_I = 1.;    // 3.
@@ -30,7 +38,7 @@ public class TeleOpSpinfinityrev2 extends OpMode {
     public DcMotorEx motorTurret;
 
 
-    public boolean intakeOn, transferOn;
+    public boolean intakeOn;
 
     double CPR = 28.;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
     double targetRPM = 0.;
@@ -47,6 +55,8 @@ public class TeleOpSpinfinityrev2 extends OpMode {
 
     double SERVO_PADDLE_SHOOT_POS = 0.85;
     double SERVO_PADDLE_DOWN_POS = 0.5;
+
+    TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     public void init() {
 
@@ -125,19 +135,17 @@ public class TeleOpSpinfinityrev2 extends OpMode {
         TPS = targetRPM / 60. * CPR;
         motorFlywheel.setVelocity(TPS);
 
-        // Control Direction of Intake and Transfer Motors
+        // Control Direction of Intake
         if (gamepad1.dpadUpWasPressed()) {
             motorIntake.setPower(0.);
             motorIntake.setDirection(DcMotorEx.Direction.REVERSE);
             intakeOn = false;
-            transferOn = false;
         }
 
         if (gamepad1.dpadDownWasPressed()) {
             motorIntake.setPower(0.);
             motorIntake.setDirection(DcMotorEx.Direction.FORWARD);
             intakeOn = false;
-            transferOn = false;
         }
 
         // Toggle intake when right_bumper is pressed
@@ -164,13 +172,20 @@ public class TeleOpSpinfinityrev2 extends OpMode {
         }
 
         // Telemetry Data
-        telemetry.addData("Drive Power Factor", powerFactor);
-        telemetry.addData("Intake On", intakeOn);
-        telemetry.addData("Transfer On", transferOn);
-        telemetry.addData("Target RPM", targetRPM);
-        telemetry.addData("Flywheel RPM", flywheelRPM);
+        panelsTelemetry.addData("Drive Power Factor", powerFactor);
+        panelsTelemetry.addData("Intake On", intakeOn);
+        panelsTelemetry.addData("Target RPM", targetRPM);
+        panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
 
-        telemetry.update();
+        panelsTelemetry.addData("Intake Current", motorIntake.getCurrent(CurrentUnit.AMPS));
+        panelsTelemetry.addData("Flywheel Current", motorFlywheel.getCurrent(CurrentUnit.AMPS));
+        panelsTelemetry.addData("Turret Current", motorTurret.getCurrent(CurrentUnit.AMPS));
+        panelsTelemetry.addData("FL Current", frontLeftMotor.getCurrent(CurrentUnit.AMPS));
+        panelsTelemetry.addData("FR Current", frontRightMotor.getCurrent(CurrentUnit.AMPS));
+        panelsTelemetry.addData("RL Current", backLeftMotor.getCurrent(CurrentUnit.AMPS));
+        panelsTelemetry.addData("RR Current", backRightMotor.getCurrent(CurrentUnit.AMPS));
+
+        panelsTelemetry.update(telemetry);
 
     }
 

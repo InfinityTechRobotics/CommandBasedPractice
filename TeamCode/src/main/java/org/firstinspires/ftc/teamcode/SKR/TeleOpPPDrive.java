@@ -62,7 +62,7 @@ public class TeleOpPPDrive extends OpMode {
                     -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x,
                     -gamepad1.right_stick_x,
-                    false // Robot Centric
+                    false // Field Centric
             );
                 //This is how it looks with slowMode on
             else follower.setTeleOpDrive(

@@ -461,15 +461,15 @@ public class TeleOpRedStatesSISHardwareRev9DataLogger extends OpMode {
 //        panelsTelemetry.addData("Transfer On", transferOn);
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());
-        panelsTelemetry.update(telemetry);
         panelsTelemetry.addData("Intake Current", intakeCurrent);
         panelsTelemetry.addData("Transfer Current", transferCurrent);
         panelsTelemetry.addData("Flywheel Current", flywheelCurrent);
-//        panelsTelemetry.addData("FL Current", frontLeftMotor.getCurrent(CurrentUnit.AMPS));
-//        panelsTelemetry.addData("FR Current", frontRightMotor.getCurrent(CurrentUnit.AMPS));
-//        panelsTelemetry.addData("RL Current", backLeftMotor.getCurrent(CurrentUnit.AMPS));
-//        panelsTelemetry.addData("RR Current", backRightMotor.getCurrent(CurrentUnit.AMPS));
+        panelsTelemetry.addData("FL Current", drive.getMotorFLCurrent());
+        panelsTelemetry.addData("FR Current", drive.getMotorFRCurrent());
+        panelsTelemetry.addData("RL Current", drive.getMotorBLCurrent());
+        panelsTelemetry.addData("RR Current", drive.getMotorBRCurrent());
         panelsTelemetry.addData("Total Current", totalCurrent);
+        panelsTelemetry.update(telemetry);
 //        panelsTelemetry.addData("Voltage", battery.getVoltage());
 
     }

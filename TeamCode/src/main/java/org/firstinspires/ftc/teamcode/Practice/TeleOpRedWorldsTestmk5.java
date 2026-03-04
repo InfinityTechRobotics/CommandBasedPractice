@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.Practice;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -20,12 +22,13 @@ import org.firstinspires.ftc.teamcode.Hardware.Flywheel;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
 import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 import org.firstinspires.ftc.teamcode.Hardware.Spintake;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
 
 @Configurable
 @TeleOp
-public class TeleOpRedWorldsTestmk4 extends OpMode {
+public class TeleOpRedWorldsTestmk5 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
@@ -81,13 +84,13 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
     double prevX, prevY, prevRX;
 
     boolean autoRPM = true;
-    boolean fieldCentric = true;
+    boolean robotCentric = true;
 
     public boolean intakeOn, transferOn;
 
     public boolean prevIntake, prevTransfer;
 
-    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1.5; //0.25
+    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1; //0.25
 
     boolean paddleOn;
     boolean stopOn;
@@ -121,6 +124,12 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
     private Timer shootTimer;
 
     private int pathState;
+
+    private Follower follower;
+    public static Pose startingPose; // Start Pose of our robot.
+
+    private boolean slowMode = false;
+    private double slowModeMultiplier = 0.95;
 
     public void init() {
 
@@ -161,6 +170,11 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
 
         shootTimer = new Timer();
 
+        startingPose = new Pose(80, 8, Math.toRadians(90));
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
+        follower.update();
+
     }
 
     public void start() {
@@ -168,11 +182,15 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
         prevTime = 0.;
         turretTimer = timer.seconds();
         aprilTagTimer = timer.seconds();
+
+        follower.startTeleopDrive();
     }
 
     public void loop() {
 
         autonomousPathUpdate();
+
+        follower.update();
 
         // Laser Artifact Detection (Detected = TRUE --> counter +1)
         stateHigh = laserInput.getState();
@@ -198,9 +216,13 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
         activeDetecting = stateHigh;
 
         // Driver Controls
-        double y = drive.squareInputWithSign(-gamepad1.left_stick_y);
-        double x = drive.squareInputWithSign(gamepad1.left_stick_x * 1.1);
-        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
+//        double y = drive.squareInputWithSign(-gamepad1.left_stick_y);
+//        double x = drive.squareInputWithSign(gamepad1.left_stick_x * 1.1);
+//        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
+
+        if (gamepad1.aWasPressed()) {
+            follower.setHeading(Math.toRadians(0));
+        }
 
         if (gamepad1.left_bumper) {
             powerFactor = DRIVE_POWER_FACTOR_LOW;
@@ -210,30 +232,40 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
             powerFactor = DRIVE_POWER_FACTOR;
         }
 
+        if (gamepad1.yWasPressed()) {
+            robotCentric = !robotCentric;
+        }
+
+        //Make the last parameter false for field-centric
+        //In case the drivers want to use a "slowMode" you can scale the vectors
+        //This is the normal version to use in the TeleOp
+        follower.setTeleOpDrive(
+                -gamepad1.left_stick_y * powerFactor,
+                -gamepad1.left_stick_x * powerFactor,
+                -gamepad1.right_stick_x * powerFactor,
+                robotCentric // Field Centric
+        );
+
         if (gamepad1.a) {
             pinpoint.pinpointReset();
         }
 
-        if (gamepad1.yWasPressed()) {
-            fieldCentric = !fieldCentric;
-        }
-
         pose2D = pinpoint.getPinpointPose();
 
-        if (fieldCentric) {
+        if (robotCentric) {
             botHeading = pose2D.getHeading(AngleUnit.RADIANS);
         }
         else {
             botHeading = 0;
         }
 
-        if (x != prevX || y != prevY || rx != prevRX) {
-            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
-        }
-
-        prevX = x;
-        prevY = y;
-        prevRX = rx;
+//        if (x != prevX || y != prevY || rx != prevRX) {
+//            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
+//        }
+//
+//        prevX = x;
+//        prevY = y;
+//        prevRX = rx;
 
         LLResult result = limelight.getLatestResult();
         targetFound = false;
@@ -435,9 +467,6 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
 
         // indicates when we have 3 artifacts
 
-
-
-
         i += 1;
 
         if (i % 100 == 0) {
@@ -464,7 +493,7 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
         panelsTelemetry.addData("Bearing Error", error);
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
-        panelsTelemetry.addData("Field Centric", fieldCentric);
+        panelsTelemetry.addData("Robot Centric", robotCentric);
         panelsTelemetry.addData("Drive Power Factor", powerFactor);
         panelsTelemetry.addData("Auto Turret", turretTracking);
         panelsTelemetry.addData("Auto RPM", autoRPM);
@@ -527,6 +556,7 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
                     shootingTime = shootTimer.getElapsedTimeSeconds();
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
+                    spintake.turnIntakeOff();
                     setPathState(999);
                 }
                 break;

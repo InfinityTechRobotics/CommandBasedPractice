@@ -3,6 +3,12 @@ package org.firstinspires.ftc.teamcode.Practice;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.HeadingInterpolator;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -20,12 +26,14 @@ import org.firstinspires.ftc.teamcode.Hardware.Flywheel;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
 import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 import org.firstinspires.ftc.teamcode.Hardware.Spintake;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 @Configurable
 @TeleOp
-public class TeleOpRedWorldsTestmk4 extends OpMode {
+public class TeleOpRedWorldsTestmk6 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
@@ -81,13 +89,13 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
     double prevX, prevY, prevRX;
 
     boolean autoRPM = true;
-    boolean fieldCentric = true;
+    boolean robotCentric = false;
 
     public boolean intakeOn, transferOn;
 
     public boolean prevIntake, prevTransfer;
 
-    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1.5; //0.25
+    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1; //0.25
 
     boolean paddleOn;
     boolean stopOn;
@@ -121,6 +129,16 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
     private Timer shootTimer;
 
     private int pathState;
+
+    private Follower follower;
+    public static Pose startingPose; // Start Pose of our robot.
+
+    private boolean slowMode = false;
+    private double slowModeMultiplier = 0.95;
+
+    private Supplier<PathChain> pathChain;
+
+    private boolean automatedDrive;
 
     public void init() {
 
@@ -161,6 +179,15 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
 
         shootTimer = new Timer();
 
+        startingPose = new Pose(80, 8, Math.toRadians(90));
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
+        follower.update();
+
+        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(90, 102))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37.5), 0.8))
+                .build();
     }
 
     public void start() {
@@ -168,11 +195,15 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
         prevTime = 0.;
         turretTimer = timer.seconds();
         aprilTagTimer = timer.seconds();
+
+        follower.startTeleopDrive();
     }
 
     public void loop() {
 
         autonomousPathUpdate();
+
+        follower.update();
 
         // Laser Artifact Detection (Detected = TRUE --> counter +1)
         stateHigh = laserInput.getState();
@@ -198,9 +229,13 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
         activeDetecting = stateHigh;
 
         // Driver Controls
-        double y = drive.squareInputWithSign(-gamepad1.left_stick_y);
-        double x = drive.squareInputWithSign(gamepad1.left_stick_x * 1.1);
-        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
+//        double y = drive.squareInputWithSign(-gamepad1.left_stick_y);
+//        double x = drive.squareInputWithSign(gamepad1.left_stick_x * 1.1);
+//        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
+
+        if (gamepad1.aWasPressed()) {
+            follower.setHeading(Math.toRadians(0));
+        }
 
         if (gamepad1.left_bumper) {
             powerFactor = DRIVE_POWER_FACTOR_LOW;
@@ -210,30 +245,54 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
             powerFactor = DRIVE_POWER_FACTOR;
         }
 
+        if (gamepad1.yWasPressed()) {
+            robotCentric = !robotCentric;
+        }
+
+
+        if (!automatedDrive) {
+            //Make the last parameter false for field-centric
+            //In case the drivers want to use a "slowMode" you can scale the vectors
+            //This is the normal version to use in the TeleOp
+            follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y * powerFactor,
+                    -gamepad1.left_stick_x * powerFactor,
+                    -gamepad1.right_stick_x * powerFactor,
+                    robotCentric // Field Centric
+            );
+        }
+
+        //Automated PathFollowing
+        if (gamepad1.rightBumperWasPressed()) {
+            follower.followPath(pathChain.get());
+            automatedDrive = true;
+        }
+        //Stop automated following if the follower is done
+        if (automatedDrive && (gamepad1.leftBumperWasPressed() || !follower.isBusy())) {
+            follower.startTeleopDrive();
+            automatedDrive = false;
+        }
+
         if (gamepad1.a) {
             pinpoint.pinpointReset();
         }
 
-        if (gamepad1.yWasPressed()) {
-            fieldCentric = !fieldCentric;
-        }
-
         pose2D = pinpoint.getPinpointPose();
 
-        if (fieldCentric) {
+        if (robotCentric) {
             botHeading = pose2D.getHeading(AngleUnit.RADIANS);
         }
         else {
             botHeading = 0;
         }
 
-        if (x != prevX || y != prevY || rx != prevRX) {
-            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
-        }
-
-        prevX = x;
-        prevY = y;
-        prevRX = rx;
+//        if (x != prevX || y != prevY || rx != prevRX) {
+//            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
+//        }
+//
+//        prevX = x;
+//        prevY = y;
+//        prevRX = rx;
 
         LLResult result = limelight.getLatestResult();
         targetFound = false;
@@ -368,7 +427,7 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
         }
 
         prevTransfer = transferOn;
-        
+
         // Control Paddle Servo
 //        paddleOn = (gamepad2.right_trigger > 0.25);
 
@@ -435,9 +494,6 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
 
         // indicates when we have 3 artifacts
 
-
-
-
         i += 1;
 
         if (i % 100 == 0) {
@@ -452,6 +508,7 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
             prevTime1000 = currentTime;
         }
 
+
         // Panels Telemetry Data
         panelsTelemetry.addData("Timer", timer.seconds());
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
@@ -464,7 +521,7 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
         panelsTelemetry.addData("Bearing Error", error);
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
-        panelsTelemetry.addData("Field Centric", fieldCentric);
+        panelsTelemetry.addData("Robot Centric", robotCentric);
         panelsTelemetry.addData("Drive Power Factor", powerFactor);
         panelsTelemetry.addData("Auto Turret", turretTracking);
         panelsTelemetry.addData("Auto RPM", autoRPM);
@@ -527,6 +584,7 @@ public class TeleOpRedWorldsTestmk4 extends OpMode {
                     shootingTime = shootTimer.getElapsedTimeSeconds();
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
+                    spintake.turnIntakeOff();
                     setPathState(999);
                 }
                 break;
