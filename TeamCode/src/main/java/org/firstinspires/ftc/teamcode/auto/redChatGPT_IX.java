@@ -16,13 +16,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
     @Autonomous
-        public class redGoalPickUpremoved_X extends OpMode {
+        public class redChatGPT_IX extends OpMode {
 
         Shooter shooter = new Shooter();
 
         private int obeliskResult = 0;
 
-        double START_DELAY_TIME = 2;
+        double START_DELAY_TIME = 2.0;
 
         private Follower follower;
         private Timer pathTimer, opmodeTimer, shootTimer;
@@ -46,7 +46,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose pickupPose21 = new Pose(129, 41, Math.toRadians(0)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
 
-        private final Pose prePickupPose22 = new Pose(92, 66, Math.toRadians(0)); // Preparing to intake second set of artifacts.
+        private final Pose prePickupPose22 = new Pose(92, 63, Math.toRadians(0)); // Preparing to intake second set of artifacts.
 
         private final Pose pickupPose22 = new Pose(132, 63, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
 
@@ -60,7 +60,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose gatePickup = new Pose(128, 61.5, Math.toRadians(20));
 
-        private final Pose downGate = new Pose(132, 52.5, Math.toRadians(50));
+        private final Pose downGate = new Pose(133, 52.5, Math.toRadians(40));
 
         private final Pose controlPointDriveToGate = new Pose(90, 54);
 
@@ -93,6 +93,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
         int shootingSequenceFlag = 1;
 
         PIDFCoefficients pidfModified;
+
+        int telemtryUpdate = 0;
 
 
         private void buildPaths() {
@@ -238,7 +240,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     setPathState(11);
                     break;
                 case 11:
-                    if (pathTimer.getElapsedTimeSeconds() > START_DELAY_TIME) {
+                    if (flywheelRPM >= 2390) {
                         setPathState(1000);
                     }
                     break;
@@ -337,9 +339,11 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     }
                     break;
                 case 211: // drives toward goal to score first set of artifacts (21)
-                    if (!follower.isBusy()) {
+                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
+                        if (!follower.isBusy()) {
                             follower.followPath(driveToGoal21);
                             setPathState(214);
+                        }
                     }
                     break;
                 case 214: // case for shooting
@@ -382,9 +386,11 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     }
                     break;
                 case 230: // beginning of actions for spike mark 23, gets ready to pickup
-                    if (!follower.isBusy()) {
+                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
+                        if (!follower.isBusy()) {
                             motorIntake.setPower(intakeOn);
                             setPathState(231);
+                        }
                     }
                     break;
                 case 231:
@@ -489,7 +495,18 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             telemetry.addData("Flywheel RPM", flywheelRPM);
             telemetry.addData("Shooting Sequence", shootingSequenceFlag);
             telemetry.addData("Intake Status", motorIntake.getPower());
-            telemetry.update();
+
+            if (telemtryUpdate == 49){
+                telemtryUpdate = 0;
+            } else {
+                telemtryUpdate +=1;
+            }
+
+
+            if (telemtryUpdate == 0){
+                telemetry.update();
+            }
+
 
         }
 

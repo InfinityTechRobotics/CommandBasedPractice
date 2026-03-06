@@ -15,7 +15,7 @@ public class servoTest extends OpMode {
     @Override
     public void init() { // runs once
 
-        servo = hardwareMap.get(Servo.class, "servoWebcam");
+        servo = hardwareMap.get(Servo.class, "servoShooter");
 
         servo.setPosition(servoPosition);
 

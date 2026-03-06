@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private int obeliskResult = 0;
 
-        double START_DELAY_TIME = 0;
+        double START_DELAY_TIME = 2;
 
         private Follower follower;
         private Timer pathTimer, opmodeTimer, shootTimer;
@@ -40,7 +40,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose motifDetection = new Pose(85, 110, Math.toRadians(90));
 
-        private final Pose preScorePose = new Pose(81.5, 74.5, Math.toRadians(45));
+        private final Pose preScorePose = new Pose(80, 75, Math.toRadians(45));
 
         private final Pose endScorePose = new Pose(113.5, 108.5, Math.toRadians(45));
 
@@ -66,7 +66,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose downGate = new Pose(132, 52.5, Math.toRadians(50));
 
-        private final Pose controlPointDriveToGate = new Pose(90, 54);
+        private final Pose controlPointDriveToGate = new Pose(84, 54);
 
         private final Pose controlPointDriveToAwayFromGate = new Pose(85, 43);
 
@@ -76,7 +76,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose finalShootPose = new Pose (90, 110, Math.toRadians(30));
 
-        private PathChain driveToGoal, driveToPrePickup23, driveThroughScoringTriangle, driveToPickup23, driveToGoal23, driveToPrePickup22, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPrePickup21, driveToPickup21, driveToGoal21, driveToEnd, driveToGate, driveGateToGoal;
+        private PathChain driveToGoal, driveToPrePickup23, driveThroughLaunchZone, driveToPickup23, driveToGoal23, driveToPrePickup22, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPrePickup21, driveToPickup21, driveToGoal21, driveToEnd, driveToGate, driveGateToGoal;
 
         DcMotorEx motorIntake, motorTransfer;
         DcMotorEx motorFlywheel;
@@ -102,8 +102,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
         private void buildPaths() {
 
             driveToGoal = follower.pathBuilder()
-                    .addPath(new BezierLine(startPose, preScorePose))
-                    .setLinearHeadingInterpolation(startPose.getHeading(), preScorePose.getHeading())
+                    .addPath(new BezierLine(startPose, scorePose))
+                    .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
@@ -135,8 +135,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 //                    .build();
 
             driveToPickup22 = follower.pathBuilder()
-                    .addPath(new BezierLine(endScorePose, prePickupPose22))
-                    .setLinearHeadingInterpolation(endScorePose.getHeading(), prePickupPose22.getHeading())
+                    .addPath(new BezierLine(scorePose, prePickupPose22))
+                    .setLinearHeadingInterpolation(scorePose.getHeading(), prePickupPose22.getHeading())
                     .addPath(new BezierLine(prePickupPose22, pickupPose22))
                     .setLinearHeadingInterpolation(prePickupPose22.getHeading(), pickupPose22.getHeading())
                     .setTimeoutConstraint(0)
@@ -215,14 +215,11 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     .setTimeoutConstraint(0)
                     .build();
 
-            driveThroughScoringTriangle = follower.pathBuilder()
+            driveThroughLaunchZone = follower.pathBuilder()
                     .addPath(new BezierLine(preScorePose, endScorePose))
                     .setLinearHeadingInterpolation(preScorePose.getHeading(), endScorePose.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
-
-
-
         }
 
         public void autonomousPathUpdate() {
@@ -255,11 +252,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     setPathState(1001);
                     break;
                 case 1001:
-                    if (!follower.isBusy()) {
                         motorIntake.setPower(intakeOn);
                         motorTransfer.setPower(transferOn);
                         setPathState(10001);
-                    }
                     break;
                 case 10001:
                     if (pathTimer.getElapsedTimeSeconds() > 0.25) { // changed from 0.5 to 0.25
@@ -344,7 +339,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     break;
                 case 214: // case for shooting
                     if (!follower.isBusy()) {
-                        follower.followPath(driveThroughScoringTriangle);
+                        follower.followPath(driveThroughLaunchZone);
                         setPathState(1000);
                     }
                     break;
@@ -379,14 +374,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     break;
                 case 224: // case for shooting
                     if (!follower.isBusy()) {
-                        follower.followPath(driveToPickup22);
+                        follower.followPath(driveThroughLaunchZone);
                         setPathState(1000);
                     }
                     break;
                 case 230: // beginning of actions for spike mark 23, gets ready to pickup
                     if (pathTimer.getElapsedTimeSeconds() > 0.5) {
                         if (!follower.isBusy()) {
-
                             motorIntake.setPower(intakeOn);
                             setPathState(231);
                         }
