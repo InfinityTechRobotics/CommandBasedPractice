@@ -15,8 +15,12 @@ public class servoTestLift extends OpMode {
     double servoPositionA = 0;
     double servoPositionB = 0;
 
-    double servoPositionR = 0;
-    double servoPositionE = 1;
+    double servoPositionRA = 0.9;
+    double servoPositionEA = 0.6;
+    double servoPositionRB = 0.55;
+    double servoPositionEB = 0.9;
+    //0.9 extendB
+    //0.55 retractedB
 
     @Override
     public void init() { // runs once
@@ -31,13 +35,13 @@ public class servoTestLift extends OpMode {
 
         if(gamepad1.aWasPressed()) {
 
-            servoA.setPosition(servoPositionR);
-            servoB.setPosition(servoPositionR);
+            servoA.setPosition(servoPositionRA);
+            servoB.setPosition(servoPositionRB);
 
         } else if (gamepad1.yWasPressed()) {
 
-            servoA.setPosition(servoPositionE);
-            servoB.setPosition(servoPositionE);
+            servoA.setPosition(servoPositionEA);
+            servoB.setPosition(servoPositionEB);
 
         }
 
