@@ -17,6 +17,10 @@ public class TeleOpSpinfinityrev2TurretOnly extends OpMode {
 
     public int targetPos = 0;
 
+    public double max = 500;
+
+    public double min = -500;
+
     TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     public void init() {
@@ -44,8 +48,8 @@ public class TeleOpSpinfinityrev2TurretOnly extends OpMode {
 
         motorTurret.setPower(0.5);
 
-        panelsTelemetry.addData("Target Position", targetPos);
-        panelsTelemetry.addData("Motor Position", motorTurret.getCurrentPosition());
+        panelsTelemetry.addData("Turret Target Position", targetPos);
+        panelsTelemetry.addData("Motor Turret Position", motorTurret.getCurrentPosition());
         panelsTelemetry.addData("Turret Current", motorTurret.getCurrent(CurrentUnit.AMPS));
         panelsTelemetry.update(telemetry);
     }

@@ -295,8 +295,6 @@ public class TeleOpRedStates extends OpMode {
         }
 
         if (targetFound) {
-
-
             angleToGoalDegrees = a1 + a2;
             angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
 

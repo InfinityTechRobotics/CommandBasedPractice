@@ -528,6 +528,11 @@ public class TeleOpRedWorldsTestmk6 extends OpMode {
         panelsTelemetry.addData("Intake On", intakeOn);
         panelsTelemetry.addData("Turret Target Pos", newPos);
         panelsTelemetry.addData("Turret Current Pos", currentPos);
+        panelsTelemetry.debug("Position", follower.getPose());
+        panelsTelemetry.debug("Velocity", follower.getVelocity());
+        panelsTelemetry.debug("Automated Drive", automatedDrive);
+        panelsTelemetry.debug("Slow Mode", slowMode);
+        panelsTelemetry.debug("Slow Mode Multiplier", slowModeMultiplier);
 //        panelsTelemetry.addData("Transfer On", transferOn);
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());
