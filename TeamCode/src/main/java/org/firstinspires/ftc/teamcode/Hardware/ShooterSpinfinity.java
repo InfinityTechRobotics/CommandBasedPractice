@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Hardware;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -7,32 +9,36 @@ public class ShooterSpinfinity {
 
     public Servo servoStop;
     public Servo servoPaddleLeft;
-    public Servo servoTurret;
+    public DcMotorEx motorTurret;
 
-    double SERVO_STOP_OPEN_POS = 0.15;
-    double SERVO_STOP_CLOSE_POS = 0.38;
+    double SERVO_STOP_OPEN_POS = 0.63;
+    double SERVO_STOP_CLOSE_POS = 0.37;
 
-    double SERVO_PADDLE_SHOOT_POS = 0.7;
-    double SERVO_PADDLE_DOWN_POS = 0.25;
+    double SERVO_PADDLE_SHOOT_POS = 0.85;
+    double SERVO_PADDLE_DOWN_POS = 0.5;
 
-    double SERVO_TURRET_CENTER_POS = 0.56;
-    double SERVO_TURRET_PROPORTIONAL_TERM = 0.0016;
+    int MOTOR_TURRET_CENTER_POS = 0;
+    double MOTOR_TURRET_PROPORTIONAL_TERM = 5;
 
-    double SERVO_TURRET_DERIVATIVE_TERM = 0.0;
+    double MOTOR_TURRET_DERIVATIVE_TERM = 0.0;
 
     double TURRET_ADJUSTMENT_THRESHOLD = 1.0;
 
-    double SERVO_MIN_POS = 0;
-    double SERVO_MAX_POS = 1;
-
-
+    int MOTOR_TURRET_MIN_POS = -500;
+    int MOTOR_TURRET_MAX_POS = 500;
 
 
     public void init(HardwareMap hardwareMap) {
         servoStop = hardwareMap.get(Servo.class, "servoStop");
         servoPaddleLeft = hardwareMap.servo.get("servoPaddleLeft");
 
-        servoTurret = hardwareMap.get(Servo.class, "servoWebcam");
+        motorTurret = hardwareMap.get(DcMotorEx.class, "motorTurret");
+        motorTurret.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+        motorTurret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorTurret.setTargetPosition(0);
+        motorTurret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorTurret.setPower(0.5);
     }
 
     public void openServoStop () {
@@ -59,50 +65,52 @@ public class ShooterSpinfinity {
         return servoPaddleLeft.getPosition();
     }
 
-    public void centerServoTurret () {
-        servoTurret.setPosition(SERVO_TURRET_CENTER_POS);
+    public void centerMotorTurret () {
+        motorTurret.setTargetPosition(MOTOR_TURRET_CENTER_POS);
     }
 
     public double newTurretPositionCalc(double currentPos, double error) {
         if (Math.abs(error) > TURRET_ADJUSTMENT_THRESHOLD) {
-            return (currentPos + error * SERVO_TURRET_PROPORTIONAL_TERM);
+            return (currentPos + error * MOTOR_TURRET_PROPORTIONAL_TERM);
         } else {
             return currentPos;
         }
     }
 
-    public void servoTurretSetPosition(double newTurretPos) {
-        servoTurret.setPosition(newTurretPos);
+    public void motorTurretSetPosition(int newPos) {
+        motorTurret.setTargetPosition(newPos);
     }
 
-    public double servoTurretGetPosition() {
-        return servoTurret.getPosition();
+    public int motorTurretGetPosition() {
+        return motorTurret.getCurrentPosition();
     }
 
     public double newTurretPositionClampedCalc(double currentPos, double error) {
         if (Math.abs(error) > TURRET_ADJUSTMENT_THRESHOLD) {
-            double value = currentPos + error * SERVO_TURRET_PROPORTIONAL_TERM;
-            return clamp(value, SERVO_MIN_POS, SERVO_MAX_POS);
+            int value = (int) (currentPos + error * MOTOR_TURRET_PROPORTIONAL_TERM);
+            return clamp(value, MOTOR_TURRET_MIN_POS, MOTOR_TURRET_MAX_POS);
         } else {
             return currentPos;
         }
     }
 
-    public double clamp (double value, double min, double max) {
+    public int clamp (int value, int min, int max) {
        return Math.max(min, Math.min(max, value));
     }
 
-    public double newTurretPDCalc(double currentPos, double error, double prevError, double turretTimer, double kP, double kD) {
+    public int newTurretPDCalc(double currentPos, double error, double prevError, double turretTimer, double kP, double kD) {
         if (Math.abs(error) > TURRET_ADJUSTMENT_THRESHOLD) {
 //            double proportional = error * SERVO_TURRET_PROPORTIONAL_TERM;
 //            double derivative = ((error - prevError) / turretTimer) * SERVO_TURRET_DERIVATIVE_TERM;
             double proportional = error * kP;
             double derivative = ((error - prevError) / turretTimer) * kD;
-            double value = currentPos + proportional + derivative;
-            return clamp(value, SERVO_MIN_POS, SERVO_MAX_POS);
+            int value = (int) (currentPos + proportional + derivative);
+            return clamp(value, MOTOR_TURRET_MIN_POS, MOTOR_TURRET_MAX_POS);
         } else {
-            return currentPos;
+            return (int) currentPos;
         }
     }
+
+
 
 }
