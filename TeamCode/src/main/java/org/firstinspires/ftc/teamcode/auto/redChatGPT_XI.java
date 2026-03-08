@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
     @Autonomous
-        public class redChatGPT_IX extends OpMode {
+        public class redChatGPT_XI extends OpMode {
 
         Shooter shooter = new Shooter();
 
@@ -48,7 +48,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose prePickupPose22 = new Pose(92, 63, Math.toRadians(0)); // Preparing to intake second set of artifacts.
 
-        private final Pose pickupPose22 = new Pose(132, 63, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
+        private final Pose pickupPose22 = new Pose(130, 63, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
 
         private final Pose prePickupPose23 = new Pose(92, 88.75, Math.toRadians(0)); // Preparing to intake first set of artifacts.
 
@@ -240,7 +240,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     setPathState(11);
                     break;
                 case 11:
-                    if (flywheelRPM >= 2390) {
+                    if (!follower.isBusy()) {
                         setPathState(1000);
                     }
                     break;
@@ -339,12 +339,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     }
                     break;
                 case 211: // drives toward goal to score first set of artifacts (21)
-                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
                         if (!follower.isBusy()) {
                             follower.followPath(driveToGoal21);
                             setPathState(214);
                         }
-                    }
                     break;
                 case 214: // case for shooting
                     if (!follower.isBusy()) {
@@ -358,27 +356,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                         setPathState(221);
                     }
                     break;
-//                case 221: // timer case
-//                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
-//                        if (!follower.isBusy()) {
-//                            motorIntake.setPower(intakeOn);
-//                            setPathState(222);
-//                        }
-//                    }
-//           break;
-//                case 222: // picks up second set of artifacts (22)
-//                    if (!follower.isBusy()) {
-//                        follower.followPath((driveToPickup22));
-//                        setPathState(223);
-//                    }
-//                    break;
                 case 221: // drives toward goal to score second set of artifacts (22)
-                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
                         if (!follower.isBusy()) {
                             follower.followPath(driveToGoal22);
                             setPathState(224);
                         }
-                    }
+
                     break;
                 case 224: // case for shooting
                     if (!follower.isBusy()) {
@@ -399,20 +382,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                         setPathState(234);
                     }
                     break;
-//                case 2322:
-//                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
-//                        if (!follower.isBusy()) {
-//                            follower.followPath(driveToGate);
-//                            setPathState(233);
-//                        }
-//                    }
-//                    break;
-//                case 233: // timer case
-//                    if (pathTimer.getElapsedTimeSeconds() > 2) {
-//                        follower.followPath(driveGateToGoal);
-//                        setPathState(234);
-//                    }
-//                    break;
                 case 234:
                     if (!follower.isBusy()) {
                         follower.followPath(driveToGoal23);
@@ -498,14 +467,11 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
             if (telemtryUpdate == 49){
                 telemtryUpdate = 0;
+                telemetry.update();
             } else {
                 telemtryUpdate +=1;
             }
 
-
-            if (telemtryUpdate == 0){
-                telemetry.update();
-            }
 
 
         }
