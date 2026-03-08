@@ -1,13 +1,21 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.SKR;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.ftc.FTCCoordinates;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.PedroCoordinates;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.HeadingInterpolator;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
+import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -15,18 +23,20 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.Hardware.Drive;
 import org.firstinspires.ftc.teamcode.Hardware.Flywheel;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
 import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 import org.firstinspires.ftc.teamcode.Hardware.Spintake;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
+import java.util.function.Supplier;
 
-@Disabled
-//@Configurable
+@Configurable
 @TeleOp
-public class TeleOpRedWorldsTestmk3 extends OpMode {
+public class TeleOpRedWorldsTestmk6MegaTag extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
@@ -63,9 +73,9 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
 
     public static double TURRET_TRACKING_TIMER_THRESHOLD = 1.0;
 
-    public static double SERVO_TURRET_PROPORTIONAL_TERM = 0.0016;
+    public static double SERVO_TURRET_PROPORTIONAL_TERM = 0.0008; //0.0016
 
-    public static double SERVO_TURRET_DERIVATIVE_TERM = 0.0;
+    public static double SERVO_TURRET_DERIVATIVE_TERM = 0.; //0.0
 
     double botHeading;
 
@@ -82,13 +92,13 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
     double prevX, prevY, prevRX;
 
     boolean autoRPM = true;
-    boolean fieldCentric = true;
+    boolean robotCentric = false;
 
     public boolean intakeOn, transferOn;
 
     public boolean prevIntake, prevTransfer;
 
-    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 0.25;
+    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1; //0.25
 
     boolean paddleOn;
     boolean stopOn;
@@ -116,6 +126,23 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
 
     int i = 0;
 
+    double shootingTime = 0.;
+    private Timer pathTimer, opmodeTimer;
+
+    private Timer shootTimer;
+
+    private int pathState;
+
+    private Follower follower;
+    public static Pose startingPose; // Start Pose of our robot.
+
+    private boolean slowMode = false;
+    private double slowModeMultiplier = 0.95;
+
+    private Supplier<PathChain> pathChain;
+
+    private boolean automatedDrive;
+
     public void init() {
 
         drive.init(hardwareMap);
@@ -130,7 +157,7 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
 
         laserInput.setMode(DigitalChannel.Mode.INPUT);
 
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(1);
 
         limelight.start();
 
@@ -149,6 +176,21 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
+        pathTimer = new Timer();
+        opmodeTimer = new Timer();
+        opmodeTimer.resetTimer();
+
+        shootTimer = new Timer();
+
+        startingPose = new Pose(80, 8, Math.toRadians(90));
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
+        follower.update();
+
+        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(90, 102))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37.5), 0.8))
+                .build();
     }
 
     public void start() {
@@ -156,9 +198,15 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
         prevTime = 0.;
         turretTimer = timer.seconds();
         aprilTagTimer = timer.seconds();
+
+        follower.startTeleopDrive();
     }
 
     public void loop() {
+
+        autonomousPathUpdate();
+
+        follower.update();
 
         // Laser Artifact Detection (Detected = TRUE --> counter +1)
         stateHigh = laserInput.getState();
@@ -184,9 +232,13 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
         activeDetecting = stateHigh;
 
         // Driver Controls
-        double y = drive.squareInputWithSign(-gamepad1.left_stick_y);
-        double x = drive.squareInputWithSign(gamepad1.left_stick_x * 1.1);
-        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
+//        double y = drive.squareInputWithSign(-gamepad1.left_stick_y);
+//        double x = drive.squareInputWithSign(gamepad1.left_stick_x * 1.1);
+//        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
+
+        if (gamepad1.aWasPressed()) {
+            follower.setHeading(Math.toRadians(0));
+        }
 
         if (gamepad1.left_bumper) {
             powerFactor = DRIVE_POWER_FACTOR_LOW;
@@ -196,30 +248,54 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
             powerFactor = DRIVE_POWER_FACTOR;
         }
 
+        if (gamepad1.yWasPressed()) {
+            robotCentric = !robotCentric;
+        }
+
+
+        if (!automatedDrive) {
+            //Make the last parameter false for field-centric
+            //In case the drivers want to use a "slowMode" you can scale the vectors
+            //This is the normal version to use in the TeleOp
+            follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y * powerFactor,
+                    -gamepad1.left_stick_x * powerFactor,
+                    -gamepad1.right_stick_x * powerFactor,
+                    robotCentric // Field Centric
+            );
+        }
+
+        //Automated PathFollowing
+        if (gamepad1.rightBumperWasPressed()) {
+            follower.followPath(pathChain.get());
+            automatedDrive = true;
+        }
+        //Stop automated following if the follower is done
+        if (automatedDrive && (gamepad1.leftBumperWasPressed() || !follower.isBusy())) {
+            follower.startTeleopDrive();
+            automatedDrive = false;
+        }
+
         if (gamepad1.a) {
             pinpoint.pinpointReset();
         }
 
-        if (gamepad1.yWasPressed()) {
-            fieldCentric = !fieldCentric;
-        }
-
         pose2D = pinpoint.getPinpointPose();
 
-        if (fieldCentric) {
+        if (robotCentric) {
             botHeading = pose2D.getHeading(AngleUnit.RADIANS);
         }
         else {
             botHeading = 0;
         }
 
-        if (x != prevX || y != prevY || rx != prevRX) {
-            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
-        }
-
-        prevX = x;
-        prevY = y;
-        prevRX = rx;
+//        if (x != prevX || y != prevY || rx != prevRX) {
+//            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
+//        }
+//
+//        prevX = x;
+//        prevY = y;
+//        prevRX = rx;
 
         LLResult result = limelight.getLatestResult();
         targetFound = false;
@@ -240,6 +316,34 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
         } else {
             telemetry.addData("Limelight", "No data available");
         }
+
+        // MegaTag Robot Position Determination
+        if (result != null && result.isValid()) {
+            Pose3D botpose = result.getBotpose();
+            if (botpose != null) {
+                double xpos = botpose.getPosition().x;
+                double ypos = botpose.getPosition().y;
+                double headingpos = botpose.getOrientation().getYaw();
+                telemetry.addData("MT1 Location", "(" + xpos + ", " + ypos + ", " + headingpos + ")");
+
+                //follower.setPose(new Pose(xpos, ypos, headingpos, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE));
+                Pose convertedPos = new Pose(xpos, ypos, headingpos, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
+                telemetry.addData("Converted Location", "(" + convertedPos.getX() + ", " + convertedPos.getY() + ", " + convertedPos.getHeading() + ")");
+            }
+        }
+
+//        // MegaTag2 Robot Position Determination
+//        // First, tell Limelight which way your robot is facing
+//        double robotYaw = imu.getAngularOrientation().firstAngle;
+//        limelight.updateRobotOrientation(robotYaw);
+//        if (result != null && result.isValid()) {
+//            Pose3D botpose_mt2 = result.getBotpose_MT2();
+//            if (botpose_mt2 != null) {
+//                double x = botpose_mt2.getPosition().x;
+//                double y = botpose_mt2.getPosition().y;
+//                telemetry.addData("MT2 Location:", "(" + x + ", " + y + ")");
+//            }
+//        }
 
         if (targetFound) {
             distanceToGoalInches = flywheel.distanceToGoalCalc(a2);
@@ -354,9 +458,15 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
         }
 
         prevTransfer = transferOn;
-        
+
         // Control Paddle Servo
-        paddleOn = (gamepad2.right_trigger > 0.25);
+//        paddleOn = (gamepad2.right_trigger > 0.25);
+
+        //start shooting sequence
+        if (gamepad2.right_trigger > 0.25) {
+            setPathState(10);
+            counter = 0;
+        }
 
         if (counter != prevCount) {
             spintake.setArtifactIndicator(counter);
@@ -376,13 +486,19 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
         prevPaddle = paddleOn;
 
         // Control Servo Stop and turn intake and transfer on
+//        if (gamepad2.left_trigger > 0.25) {
+//            stopOn = true;
+//            intakeOn = true;
+//            transferOn = true;
+//        }
+//        else {
+//            stopOn = false;
+//        }
+
+        //start sequence for shooting paddle
         if (gamepad2.left_trigger > 0.25) {
-            stopOn = true;
-            intakeOn = true;
-            transferOn = true;
-        }
-        else {
-            stopOn = false;
+            setPathState(10100);
+            counter = 0;
         }
 
         if (stopOn != prevStop) {
@@ -409,7 +525,6 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
 
         // indicates when we have 3 artifacts
 
-
         i += 1;
 
         if (i % 100 == 0) {
@@ -424,23 +539,31 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
             prevTime1000 = currentTime;
         }
 
+
         // Panels Telemetry Data
         panelsTelemetry.addData("Timer", timer.seconds());
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
         panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
+        panelsTelemetry.addData("Shooting Sequence State", pathState);
+        panelsTelemetry.addData("Artifact Counter", counter);
         panelsTelemetry.addData("Laser Detection Time", laserTime);
         panelsTelemetry.addData("Object Detected", stateHigh);
         panelsTelemetry.addData("Distance To AprilTag", distanceToGoalInches);
         panelsTelemetry.addData("Bearing Error", error);
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
-        panelsTelemetry.addData("Field Centric", fieldCentric);
+        panelsTelemetry.addData("Robot Centric", robotCentric);
         panelsTelemetry.addData("Drive Power Factor", powerFactor);
         panelsTelemetry.addData("Auto Turret", turretTracking);
         panelsTelemetry.addData("Auto RPM", autoRPM);
         panelsTelemetry.addData("Intake On", intakeOn);
         panelsTelemetry.addData("Turret Target Pos", newPos);
         panelsTelemetry.addData("Turret Current Pos", currentPos);
+        panelsTelemetry.debug("Position", follower.getPose());
+        panelsTelemetry.debug("Velocity", follower.getVelocity());
+        panelsTelemetry.debug("Automated Drive", automatedDrive);
+        panelsTelemetry.debug("Slow Mode", slowMode);
+        panelsTelemetry.debug("Slow Mode Multiplier", slowModeMultiplier);
 //        panelsTelemetry.addData("Transfer On", transferOn);
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());
@@ -457,6 +580,75 @@ public class TeleOpRedWorldsTestmk3 extends OpMode {
 
     public void stop() {
         limelight.stop();
+    }
+
+    public void setPathState (int pState){
+
+        pathState = pState;
+        pathTimer.resetTimer();
+
+    }
+
+    public void autonomousPathUpdate () {
+        switch (pathState) {
+            case 10:
+                shooter.closeServoStop();
+                shooter.downServoPaddle();
+                setPathState(1001);
+                break;
+            case 1001:
+                spintake.turnIntakeOn();
+                spintake.turnTransferOn();
+                setPathState(10001);
+                break;
+            case 10001:
+                if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
+                    shootTimer.resetTimer();
+                    shooter.openServoStop();
+                    setPathState(10006);
+                }
+                break;
+            case 10006:
+                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
+                    shooter.shootServoPaddle();
+                    setPathState(10007);
+                }
+                break;
+            case 10007:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    spintake.turnIntakeOff();
+                    shootingTime = shootTimer.getElapsedTimeSeconds();
+                    shooter.downServoPaddle();
+                    shooter.closeServoStop();
+                    spintake.turnIntakeOff();
+                    setPathState(999);
+                }
+                break;
+            case 10100:
+                shooter.openServoStop();
+                if (pathTimer.getElapsedTimeSeconds() > 0.05) {
+                    setPathState(10101);
+                }
+                break;
+            case 10101:
+                shooter.shootServoPaddle();
+                setPathState(10102);
+                break;
+            case 10102:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    shooter.downServoPaddle();
+                    shooter.closeServoStop();
+                    setPathState(999);
+                }
+                break;
+        }
+    }
+
+    private Pose getRobotPoseFromCamera() {
+        //Fill this out to get the robot Pose from the camera's output (apply any filters if you need to using follower.getPose() for fusion)
+        //Pedro Pathing has built-in KalmanFilter and LowPassFilter classes you can use for this
+        //Use this to convert standard FTC coordinates to standard Pedro Pathing coordinates
+        return new Pose(0, 0, 0, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
     }
 
 }
