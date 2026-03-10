@@ -153,10 +153,6 @@ public class TeleOpSpinfinityMk0 extends OpMode {
 
         laserInput.setMode(DigitalChannel.Mode.INPUT);
 
-        limelight.pipelineSwitch(0);
-
-        limelight.start();
-
         shooter.centerMotorTurret();
         currentPos = shooter.motorTurretGetPosition();
 
@@ -527,11 +523,9 @@ public class TeleOpSpinfinityMk0 extends OpMode {
                 break;
             case 10007:
                 if (pathTimer.getElapsedTimeSeconds() > 0.2) {
-                    spintake.turnIntakeOff();
                     shootingTime = shootTimer.getElapsedTimeSeconds();
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
-                    spintake.turnIntakeOff();
                     setPathState(999);
                 }
                 break;
