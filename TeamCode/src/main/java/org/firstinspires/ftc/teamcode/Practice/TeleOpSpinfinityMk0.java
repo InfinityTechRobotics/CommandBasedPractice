@@ -21,12 +21,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.Hardware.Drive;
-import org.firstinspires.ftc.teamcode.Hardware.Flywheel;
+import org.firstinspires.ftc.teamcode.Hardware.FlywheelSpinfinity;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
-import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinity;
-import org.firstinspires.ftc.teamcode.Hardware.Spintake;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -39,7 +36,7 @@ public class TeleOpSpinfinityMk0 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinity shooter = new ShooterSpinfinity();
-    Flywheel flywheel = new Flywheel();
+    FlywheelSpinfinity flywheel = new FlywheelSpinfinity();
     SpintakeSpinfinity spintake = new SpintakeSpinfinity();
 //    Drive drive = new Drive();
 
@@ -152,6 +149,10 @@ public class TeleOpSpinfinityMk0 extends OpMode {
         laserInput = hardwareMap.get(DigitalChannel.class, "laserDigitalInput");
 
         laserInput.setMode(DigitalChannel.Mode.INPUT);
+
+        limelight.pipelineSwitch(1);
+
+        limelight.start();
 
         shooter.centerMotorTurret();
         currentPos = shooter.motorTurretGetPosition();

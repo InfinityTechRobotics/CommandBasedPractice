@@ -15,31 +15,33 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+//This is the one we're using 3/8/26
+
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(13.05)
             .forwardZeroPowerAcceleration(-34.9424)
             .lateralZeroPowerAcceleration(-75.19009)
             .translationalPIDFCoefficients(new PIDFCoefficients(
-                    0.08,
+                    0.125,
                     0.0,
                     0.01,
-                    0.03
+                    0.04
             ))
             .headingPIDFCoefficients(new PIDFCoefficients(
-                    0.8,
+                    0.15,
                     0.0,
-                    0.02,
+                    0.125,
                     0.03
             ))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0.01,
+                    0.2,
                     0.0,
-                    0.0005,
-                    0.6,
-                    0.05
+                    0.0001,
+                    0.,
+                    0.07
             ))
-            .centripetalScaling(0.0005);
+            .centripetalScaling(0.0003);
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1.0)
