@@ -21,12 +21,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.Hardware.Drive;
-import org.firstinspires.ftc.teamcode.Hardware.Flywheel;
+import org.firstinspires.ftc.teamcode.Hardware.FlywheelSpinfinity;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
-import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinity;
-import org.firstinspires.ftc.teamcode.Hardware.Spintake;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -39,7 +36,7 @@ public class TeleOpSpinfinityMk0 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinity shooter = new ShooterSpinfinity();
-    Flywheel flywheel = new Flywheel();
+    FlywheelSpinfinity flywheel = new FlywheelSpinfinity();
     SpintakeSpinfinity spintake = new SpintakeSpinfinity();
 //    Drive drive = new Drive();
 
@@ -153,7 +150,7 @@ public class TeleOpSpinfinityMk0 extends OpMode {
 
         laserInput.setMode(DigitalChannel.Mode.INPUT);
 
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(1);
 
         limelight.start();
 
@@ -527,11 +524,9 @@ public class TeleOpSpinfinityMk0 extends OpMode {
                 break;
             case 10007:
                 if (pathTimer.getElapsedTimeSeconds() > 0.2) {
-                    spintake.turnIntakeOff();
                     shootingTime = shootTimer.getElapsedTimeSeconds();
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
-                    spintake.turnIntakeOff();
                     setPathState(999);
                 }
                 break;
