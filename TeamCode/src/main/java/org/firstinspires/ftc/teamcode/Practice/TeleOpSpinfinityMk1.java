@@ -24,6 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Hardware.FlywheelSpinfinity;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
 import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinity;
+import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityv2;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -35,7 +36,7 @@ import java.util.function.Supplier;
 public class TeleOpSpinfinityMk1 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
-    ShooterSpinfinity shooter = new ShooterSpinfinity();
+    ShooterSpinfinityv2 shooter = new ShooterSpinfinityv2();
     FlywheelSpinfinity flywheel = new FlywheelSpinfinity();
     SpintakeSpinfinity spintake = new SpintakeSpinfinity();
 //    Drive drive = new Drive();
@@ -175,7 +176,7 @@ public class TeleOpSpinfinityMk1 extends OpMode {
 
         shootTimer = new Timer();
 
-        startingPose = new Pose(80, 8, Math.toRadians(90));
+        startingPose = new Pose(72, 24, Math.toRadians(0));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
@@ -280,12 +281,12 @@ public class TeleOpSpinfinityMk1 extends OpMode {
 
         pose2D = pinpoint.getPinpointPose();
 
-        if (robotCentric) {
-            botHeading = pose2D.getHeading(AngleUnit.RADIANS);
-        }
-        else {
-            botHeading = 0;
-        }
+//        if (robotCentric) {
+//            botHeading = pose2D.getHeading(AngleUnit.RADIANS);
+//        }
+//        else {
+//            botHeading = 0;
+//        }
 
 //        if (x != prevX || y != prevY || rx != prevRX) {
 //            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
@@ -298,6 +299,8 @@ public class TeleOpSpinfinityMk1 extends OpMode {
         //
         double robotXPos = follower.getPose().getX();
         double robotYPos = follower.getPose().getY();
+        botHeading = pose2D.getHeading(AngleUnit.RADIANS);
+        double robotToGoalAngle = shooter.newTurretPoseCalc(robotXPos, robotYPos, botHeading);
 
         LLResult result = limelight.getLatestResult();
         targetFound = false;
@@ -454,6 +457,7 @@ public class TeleOpSpinfinityMk1 extends OpMode {
 
 
         // Panels Telemetry Data
+        panelsTelemetry.addData("Angle To Goal", robotToGoalAngle);
         panelsTelemetry.addData("Timer", timer.seconds());
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
         panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);

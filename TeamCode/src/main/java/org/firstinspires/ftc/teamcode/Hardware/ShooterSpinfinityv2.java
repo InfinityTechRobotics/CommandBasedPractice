@@ -27,9 +27,9 @@ public class ShooterSpinfinityv2 {
     int MOTOR_TURRET_MIN_POS = -500;
     int MOTOR_TURRET_MAX_POS = 500;
 
-    double RED_GOAL_X_POS = 130;
+    double RED_GOAL_X_POS = 130.35;
 
-    double RED_GOAL_Y_POS = 130;
+    double RED_GOAL_Y_POS = 127.65;
 
 
     public void init(HardwareMap hardwareMap) {
@@ -115,11 +115,19 @@ public class ShooterSpinfinityv2 {
         }
     }
 
-//    public int newTurretPoseCalc (double robotXPos, double robotYPos, double robotHeading) {
-//
-//        // return clamp(value, MOTOR_TURRET_MIN_POS, MOTOR_TURRET_MAX_POS);
-//
-//    }
+    public double newTurretPoseCalc (double robotXPos, double robotYPos, double robotHeading) {
+
+        double deltaY = RED_GOAL_Y_POS - robotYPos;
+
+        double deltaX = RED_GOAL_X_POS - robotXPos;
+
+        double robotToGoalAngle = Math.atan2(deltaY, deltaX);
+
+        return Math.toDegrees(robotToGoalAngle);
+
+//         return clamp(value, MOTOR_TURRET_MIN_POS, MOTOR_TURRET_MAX_POS);
+
+    }
 
 
 }
