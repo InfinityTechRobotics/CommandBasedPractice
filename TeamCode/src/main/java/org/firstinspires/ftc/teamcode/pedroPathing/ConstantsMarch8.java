@@ -12,40 +12,37 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-//This is the one we're using 3/8/26
-
-public class Constants {
+public class ConstantsMarch8 {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(13.05)
-            .forwardZeroPowerAcceleration(-36.4161)
-            .lateralZeroPowerAcceleration(-82.1192)
+            .forwardZeroPowerAcceleration(-34.9424)
+            .lateralZeroPowerAcceleration(-75.19009)
             .translationalPIDFCoefficients(new PIDFCoefficients(
-                    0.08,
+                    0.125,
                     0.0,
                     0.01,
-                    0.03
+                    0.04
             ))
             .headingPIDFCoefficients(new PIDFCoefficients(
-                    0.8,
+                    0.15,
                     0.0,
-                    0.02,
+                    0.125,
                     0.03
             ))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0.01,
+                    0.2,
                     0.0,
-                    0.0005,
-                    0.6,
-                    0.05
+                    0.0001,
+                    0.,
+                    0.07
             ))
-            .centripetalScaling(0.0005);
+            .centripetalScaling(0.0003);
 
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .maxPower(0.98)
+            .maxPower(1.0)
             .rightFrontMotorName("motorFrontRight")
             .rightRearMotorName("motorRearRight")
             .leftRearMotorName("motorRearLeft")
@@ -54,8 +51,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(67.5188)
-            .yVelocity(48.4023);
+            .xVelocity(75.3298)
+            .yVelocity(61.01995);
 
 
 
@@ -84,3 +81,5 @@ public class Constants {
 
 
 }
+
+
