@@ -22,9 +22,9 @@ public class FlywheelSpinfinity {
 
     double CPR = 28.;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
 
-    double h1 = 13.3;  // Height of camera lens from ground. 14.25
+    double h1 = 12.75;  // Height of camera lens from ground. 14.25
     double h2 = 29.5; // Height of AprilTag
-    double a1 = 11.5; // Angle of camera relative to ground.
+    double a1 = 8.5; // Angle of camera relative to ground.
     // double a2 = 0.; // Limelight angle measurement between camera and AprilTag.
     double x1 = -1.0;    // Distance between camera and ramp
 
@@ -57,7 +57,7 @@ public class FlywheelSpinfinity {
     }
 
     public double targetRPMCalc (double distanceToGoalInches) {
-        return (11.7 * distanceToGoalInches + 1743);
+        return (10.4 * distanceToGoalInches + 1840 + 75);
     }
 
     // Calculate and set flywheel motor velocity

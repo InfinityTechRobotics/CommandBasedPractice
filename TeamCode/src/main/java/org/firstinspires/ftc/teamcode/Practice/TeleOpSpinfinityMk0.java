@@ -371,9 +371,9 @@ public class TeleOpSpinfinityMk0 extends OpMode {
             } else if (gamepad2.b) {
                 targetRPM = 2400.;
             } else if (gamepad2.aWasPressed()) {
-                targetRPM -= 50.;
+                targetRPM -= 25.;
             } else if (gamepad2.yWasPressed()) {
-                targetRPM += 50.;
+                targetRPM += 25.;
             }
         }
 
@@ -471,8 +471,6 @@ public class TeleOpSpinfinityMk0 extends OpMode {
         panelsTelemetry.debug("Position", follower.getPose());
         panelsTelemetry.debug("Velocity", follower.getVelocity());
         panelsTelemetry.debug("Automated Drive", automatedDrive);
-        panelsTelemetry.debug("Slow Mode", slowMode);
-        panelsTelemetry.debug("Slow Mode Multiplier", slowModeMultiplier);
 //        panelsTelemetry.addData("Transfer On", transferOn);
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());
