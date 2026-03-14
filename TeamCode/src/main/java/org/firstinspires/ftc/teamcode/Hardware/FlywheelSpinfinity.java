@@ -57,7 +57,7 @@ public class FlywheelSpinfinity {
     }
 
     public double targetRPMCalc (double distanceToGoalInches) {
-        return (10.4 * distanceToGoalInches + 1840 + 100);
+        return (10.4 * distanceToGoalInches + 1840 + 75);
     }
 
     // Calculate and set flywheel motor velocity

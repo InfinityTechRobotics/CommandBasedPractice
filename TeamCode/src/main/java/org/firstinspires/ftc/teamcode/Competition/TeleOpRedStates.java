@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Competition;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -19,6 +20,7 @@ import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 import java.util.List;
 
 //@Configurable
+@Disabled
 @TeleOp
 public class TeleOpRedStates extends OpMode {
 

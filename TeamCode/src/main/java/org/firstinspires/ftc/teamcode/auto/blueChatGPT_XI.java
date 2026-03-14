@@ -46,25 +46,25 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose pickupPose21 = new Pose(15, 41, Math.toRadians(180)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
 
-        private final Pose prePickupPose22 = new Pose(52, 63, Math.toRadians(180)); // Preparing to intake second set of artifacts.
+        private final Pose prePickupPose22 = new Pose(52, 65, Math.toRadians(180)); // Preparing to intake second set of artifacts.
 
-        private final Pose pickupPose22 = new Pose(14, 63, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
+        private final Pose pickupPose22 = new Pose(14, 64, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
 
         private final Pose prePickupPose23 = new Pose(52, 88.75, Math.toRadians(180)); // Preparing to intake first set of artifacts.
 
-        private final Pose pickupPose23 = new Pose(20, 88.75, Math.toRadians(1800)); // Highest (First Set) of Artifacts from the Spike Mark(PPG).
+        private final Pose pickupPose23 = new Pose(20, 88.75, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark(PPG).
 
         private final Pose preGateHit = new Pose(26, 80, Math.toRadians(90));
 
         private final Pose gateHit = new Pose( 22, 73.5, Math.toRadians(90));
 
-        private final Pose gatePickup = new Pose(16, 61.5, Math.toRadians(160));
+        private final Pose gatePickup = new Pose(16, 65, Math.toRadians(160));
 
         private final Pose downGate = new Pose(11, 52.5, Math.toRadians(140));
 
         private final Pose controlPointDriveToGate = new Pose(54, 54);
 
-        private final Pose controlPointDriveToAwayFromGate = new Pose(59, 43);
+        private final Pose controlPointDriveToAwayFromGate = new Pose(59, 48);
 
         private final Pose controlPoint22 = new Pose(64, 60); // 67! ;) - you should get what this means by now - read the name aigin - idk i cant spel
 
