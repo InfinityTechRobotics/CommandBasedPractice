@@ -40,7 +40,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose motifDetection = new Pose(59, 110, Math.toRadians(90));
 
-        private final Pose scorePose = new Pose(48, 96, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+        private final Pose scorePose = new Pose(48, 96, Math.toRadians(132.5)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
 
         private final Pose prePickupPose21 = new Pose(52, 41, Math.toRadians(180)); // Preparing to intake third set of artifacts.
 
@@ -48,7 +48,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose prePickupPose22 = new Pose(52, 65, Math.toRadians(180)); // Preparing to intake second set of artifacts.
 
-        private final Pose pickupPose22 = new Pose(14, 64, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
+        private final Pose pickupPose22 = new Pose(15, 64, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
 
         private final Pose prePickupPose23 = new Pose(52, 88.75, Math.toRadians(180)); // Preparing to intake first set of artifacts.
 
@@ -58,19 +58,19 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose gateHit = new Pose( 22, 73.5, Math.toRadians(90));
 
-        private final Pose gatePickup = new Pose(16, 65, Math.toRadians(160));
+        private final Pose gatePickup = new Pose(16, 62.5, Math.toRadians(150));
 
-        private final Pose downGate = new Pose(11, 52.5, Math.toRadians(140));
+        private final Pose downGate = new Pose(11, 53.5, Math.toRadians(145));
 
         private final Pose controlPointDriveToGate = new Pose(54, 54);
 
-        private final Pose controlPointDriveToAwayFromGate = new Pose(59, 48);
+        private final Pose controlPointDriveToAwayFromGate = new Pose(59, 52);
 
         private final Pose controlPoint22 = new Pose(64, 60); // 67! ;) - you should get what this means by now - read the name aigin - idk i cant spel
 
         private  final Pose endPose = new Pose(54, 67, Math.toRadians(180));//its the end - if you took the time to read this, you get it - otherwise vid the auton eyelid is dissapointed :(
 
-        private final Pose finalShootPose = new Pose (54, 110, Math.toRadians(150));
+        private final Pose finalShootPose = new Pose (54, 110, Math.toRadians(147.5));
 
         private PathChain driveToGoal, driveToPrePickup23, driveToPickup23, driveToGoal23, driveToPrePickup22, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPrePickup21, driveToPickup21, driveToGoal21, driveToEnd, driveToGate, driveGateToGoal;
 
