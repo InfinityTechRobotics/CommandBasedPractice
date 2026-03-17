@@ -123,7 +123,9 @@ public class ShooterSpinfinityv2 {
 
         double robotToGoalAngle = Math.atan2(deltaY, deltaX);
 
-        return Math.toDegrees(robotToGoalAngle);
+        double robotToGoalRelativeAngle = robotToGoalAngle - robotHeading;
+
+        return Math.toDegrees(robotToGoalRelativeAngle);
 
 //         return clamp(value, MOTOR_TURRET_MIN_POS, MOTOR_TURRET_MAX_POS);
 

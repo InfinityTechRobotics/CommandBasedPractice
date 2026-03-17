@@ -32,7 +32,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Disabled
 @Configurable
 @TeleOp
 public class TeleOpSpinfinityMk1 extends OpMode {
@@ -139,6 +138,8 @@ public class TeleOpSpinfinityMk1 extends OpMode {
 
     private boolean automatedDrive;
 
+    double robotHeading;
+
     public void init() {
 
 //        drive.init(hardwareMap);
@@ -207,6 +208,8 @@ public class TeleOpSpinfinityMk1 extends OpMode {
     public void loop() {
 
         autonomousPathUpdate();
+
+        robotHeading = follower.getHeading();
 
         follower.update();
 
@@ -479,6 +482,7 @@ public class TeleOpSpinfinityMk1 extends OpMode {
         panelsTelemetry.addData("Turret Target Pos", newPos);
         panelsTelemetry.addData("Turret Current Pos", currentPos);
         panelsTelemetry.debug("Position", follower.getPose());
+        panelsTelemetry.debug("Robot Heading", follower.getHeading());
         panelsTelemetry.debug("Velocity", follower.getVelocity());
         panelsTelemetry.debug("Automated Drive", automatedDrive);
         panelsTelemetry.debug("Slow Mode", slowMode);
