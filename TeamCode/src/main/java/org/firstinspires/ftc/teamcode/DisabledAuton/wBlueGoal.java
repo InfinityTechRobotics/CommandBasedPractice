@@ -1,4 +1,4 @@
-    package org.firstinspires.ftc.teamcode.auto;
+    package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -7,6 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -14,9 +15,9 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+    @Disabled
     @Autonomous
-        public class wRedGoal extends OpMode {
+        public class wBlueGoal extends OpMode {
 
         Shooter shooter = new Shooter();
 
@@ -33,36 +34,37 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
         public static double NEW_D = 20.;    // 0.
         public static double NEW_F = 3.5;    // 0.
 
-        private final Pose startPose = new Pose(116, 129, Math.toRadians(36)); // Start Pose of our robot.
-    //    private final Pose viewPose = new Pose(80, 120, Math.toRadians(90)); // Pose to read the Obelisk.
+        private final Pose startPose = new Pose(28, 129, Math.toRadians(144)); // Start Pose of our robot.
+//    private final Pose viewPose = new Pose(80, 120, Math.toRadians(90)); // Pose to read the Obelisk.
 
-        private final Pose motifDetection = new Pose(85, 110, Math.toRadians(90));
+//        private final Pose motifDetection = new Pose(59, 110, Math.toRadians(90));
 
-        private final Pose scorePose = new Pose(90, 102, Math.toRadians(37.5)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+//        private final Pose scorePose = new Pose(52, 101, Math.toRadians(138)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+        private final Pose scorePose = new Pose(52, 101, Math.toRadians(142.5)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
 
-        private final Pose prePickupPose21 = new Pose(92, 41, Math.toRadians(0)); // Preparing to intake third set of artifacts.
+        private final Pose prePickupPose21 = new Pose(50, 39.5, Math.toRadians(180)); // Preparing to intake third set of artifacts.
 
-        private final Pose pickupPose21 = new Pose(129, 41, Math.toRadians(0)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
+        private final Pose pickupPose21 = new Pose(22, 39.5, Math.toRadians(180)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
 
-        private final Pose prePickupPose22 = new Pose(92, 63, Math.toRadians(0)); // Preparing to intake second set of artifacts.
+        private final Pose prePickupPose22 = new Pose(50, 60.5, Math.toRadians(180)); // Preparing to intake second set of artifacts.
 
-        private final Pose pickupPose22 = new Pose(129, 63, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
+        private final Pose pickupPose22 = new Pose(22, 60.5, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
 
-        private final Pose prePickupPose23 = new Pose(92, 88.75, Math.toRadians(0)); // Preparing to intake first set of artifacts.
+        private final Pose prePickupPose23 = new Pose(50, 88, Math.toRadians(180)); // Preparing to intake first set of artifacts.
 
-        private final Pose pickupPose23 = new Pose(125, 88.75, Math.toRadians(0)); // Highest (First Set) of Artifacts from the Spike Mark(PPG).
+        private final Pose pickupPose23 = new Pose(26, 88, Math.toRadians(180));// Highest (First Set) of Artifacts from the Spike Mark(PPG).
 
-        private final Pose preGateHit = new Pose(118, 80, Math.toRadians(90));
+        private final Pose preGateHit = new Pose(30, 78, Math.toRadians(90));
 
-        private final Pose gateHit = new Pose( 122, 73.5, Math.toRadians(90));
+        private final Pose gateHit = new Pose( 16, 78, Math.toRadians(90));
 
-        private final Pose controlPoint1 = new Pose(90, 0); // Control point - you get the idea - read the name
+        private final Pose controlPoint1 = new Pose(54, 0); // Control point - you get the idea - read the name
 
-        private final Pose controlPoint2 = new Pose(80, 60); // 67! ;) - you should get what this means by now - read the name aigin - idk i cant spel
+        private final Pose controlPoint2 = new Pose(80, 63.5); // 67! ;) - you should get what this means by now - read the name aigin - idk i cant spel
 
-        private  final Pose endPose = new Pose(90, 67, Math.toRadians(0));//its the end - if you took the time to read this, you get it - otherwise vid the auton eyelid is dissapointed :(
+        private  final Pose endPose = new Pose(54, 70, Math.toRadians(180));//its the end - if you took the time to read this, you get it - otherwise vid is disappointed :(
 
-        private final Pose finalShootPose = new Pose (90, 110, Math.toRadians(30));
+        private final Pose finalShootPose = new Pose (52, 113, Math.toRadians(150));
 
         private PathChain driveToGoal, driveToPrePickup23, driveToPickup23, driveToGoal23, driveToPrePickup22, driveToPickup22, driveToGoal22, driveToPrePickup21, driveToPickup21, driveToGoal21, driveToEnd, driveToGate, driveGateToGoal;
 
@@ -374,6 +376,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     break;
                 case 2322:
                     if (pathTimer.getElapsedTimeSeconds() > 0.5) {
+    //                    motorIntake.setPower(intakeOff);
                         if (!follower.isBusy()) {
                             follower.followPath(driveToGate);
                             setPathState(233);
