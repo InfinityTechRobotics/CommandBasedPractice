@@ -126,9 +126,16 @@ public class ShooterSpinfinityv2 {
         double robotToGoalRelativeAngle = robotToGoalAngle - robotHeading;
 
         return Math.toDegrees(robotToGoalRelativeAngle);
+//        return Math.toDegrees(robotToGoalAngle);
+
 
 //         return clamp(value, MOTOR_TURRET_MIN_POS, MOTOR_TURRET_MAX_POS);
 
+    }
+
+    public int turretPosEncoderCalc (double robotToGoalRelativeAngle) {
+        int turretEncoderPosCalc = (int) ((535.0 / 90.0) * robotToGoalRelativeAngle);
+        return clamp(turretEncoderPosCalc, MOTOR_TURRET_MIN_POS, MOTOR_TURRET_MAX_POS);
     }
 
 

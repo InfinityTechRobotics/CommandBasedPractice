@@ -79,6 +79,8 @@ public class TeleOpSpinfinityMk1 extends OpMode {
 
     double botHeading;
 
+    double robotToGoalRelativeAngle;
+
     boolean targetFound = false;
 
     boolean turretTracking = true;
@@ -306,6 +308,7 @@ public class TeleOpSpinfinityMk1 extends OpMode {
         double robotYPos = follower.getPose().getY();
         botHeading = pose2D.getHeading(AngleUnit.RADIANS);
         double robotToGoalAngle = shooter.newTurretPoseCalc(robotXPos, robotYPos, botHeading);
+        int newPosePos = shooter.turretPosEncoderCalc(robotToGoalRelativeAngle);
 
         LLResult result = limelight.getLatestResult();
         targetFound = false;
@@ -346,13 +349,15 @@ public class TeleOpSpinfinityMk1 extends OpMode {
             turretTracking = !turretTracking;
         }
 
+        // Rotate turret based on limelight reading or pose
         if (turretTracking) {
             if ((timer.seconds() - aprilTagTimer < TURRET_TRACKING_TIMER_THRESHOLD)) {
                 currentPos = shooter.motorTurretGetPosition();
                 newPos = shooter.newTurretPDCalc(currentPos, error, prevError, turretTimer, MOTOR_TURRET_PROPORTIONAL_TERM, MOTOR_TURRET_DERIVATIVE_TERM);
                 shooter.motorTurretSetPosition(newPos);
             } else {
-                shooter.centerMotorTurret();
+                shooter.motorTurretSetPosition(newPosePos);
+//                shooter.centerMotorTurret();
             }
         } else {
             shooter.centerMotorTurret();
