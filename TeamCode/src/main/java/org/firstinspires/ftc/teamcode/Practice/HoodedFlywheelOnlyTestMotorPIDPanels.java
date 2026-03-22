@@ -6,19 +6,28 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Hardware.Flywheel;
+
 //@Configurable
-@Disabled
+
 @TeleOp
 public class HoodedFlywheelOnlyTestMotorPIDPanels extends OpMode {
 
-    public DcMotorEx motorFlywheel;
+    private Servo servo;
+    public DcMotorEx motorFlywheel1;
+    public DcMotorEx motorFlywheel2;
+
+    double servoPosition = 0.5;
 
     double CPR = 28.;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
     double targetRPM = 0.;
     double flywheelRPM = 0.;
+    double motorFlywheel2RPM = 0.0;
     double TPS;
 
     TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -36,14 +45,21 @@ public class HoodedFlywheelOnlyTestMotorPIDPanels extends OpMode {
     @Override
     public void init() {
 
-        motorFlywheel = hardwareMap.get(DcMotorEx.class, "motorFlywheel");
-        motorFlywheel.setDirection(DcMotorEx.Direction.FORWARD);
-        motorFlywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        motorFlywheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        motorFlywheel1 = hardwareMap.get(DcMotorEx.class, "motor1");
+        motorFlywheel1.setDirection(DcMotorEx.Direction.REVERSE);
+        motorFlywheel1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        motorFlywheel1.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+
+        motorFlywheel2 = hardwareMap.get(DcMotorEx.class, "motor2");
+        motorFlywheel2.setDirection(DcMotorEx.Direction.FORWARD);
+        motorFlywheel2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        motorFlywheel2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+
+        servo = hardwareMap.get(Servo.class, "servoHood");
 
         // Set Flywheel Motor PIDF coefficients
         PIDFCoefficients pidfNew = new PIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
-        motorFlywheel.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
+        motorFlywheel1.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
 
         // stuff for panels
         panelsTelemetry.debug("Init was ran!");
@@ -60,21 +76,35 @@ public class HoodedFlywheelOnlyTestMotorPIDPanels extends OpMode {
     public void loop() {
 
         // Flywheel Speed Setting
-        if (gamepad2.xWasPressed()) {
+        if (gamepad1.xWasPressed()) {
             targetRPM = 0.;
-        } else if (gamepad2.bWasPressed()) {
+        } else if (gamepad1.bWasPressed()) {
             targetRPM = 2400.;
-        } else if (gamepad2.aWasPressed()) {
+        } else if (gamepad1.aWasPressed()) {
             targetRPM -= 50.;
-        } else if (gamepad2.yWasPressed()) {
+        } else if (gamepad1.yWasPressed()) {
             targetRPM += 50.;
+        }
+
+        if (gamepad1.dpadLeftWasPressed()) {
+            servoPosition -= 0.01;
+        } else if (gamepad1.dpadRightWasPressed()) {
+            servoPosition += 0.01 ;
+        } else if (gamepad1.dpadUpWasPressed()) {
+            servoPosition += 0.1;
+        } else if (gamepad1.dpadDownWasPressed()) {
+            servoPosition -= 0.1;
         }
 
         // Calculate and set flywheel motor velocity
         TPS = targetRPM / 60. * CPR;
-        motorFlywheel.setVelocity(TPS);
+        motorFlywheel1.setVelocity(TPS);
+        motorFlywheel2.setVelocity(TPS);
 
-        flywheelRPM = motorFlywheel.getVelocity() / CPR * 60;
+        flywheelRPM = motorFlywheel1.getVelocity() / CPR * 60;
+        motorFlywheel2RPM = motorFlywheel2.getVelocity() / CPR * 60;
+
+        servo.setPosition(servoPosition);
 
         i += 1;
 
@@ -88,7 +118,11 @@ public class HoodedFlywheelOnlyTestMotorPIDPanels extends OpMode {
         panelsTelemetry.addData("Timer", timer.seconds());
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
         panelsTelemetry.addData("Target RPM", targetRPM);
-        panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
+        panelsTelemetry.addData("Flywheel1 RPM", flywheelRPM);
+        panelsTelemetry.addData("Flywheel2 RPM", motorFlywheel2RPM);
+        panelsTelemetry.addData("TPS", TPS);
+        panelsTelemetry.addData("Servo Position", servoPosition);
+
 //        panelsTelemetry.addData("Intake Current", intakeCurrent);
 //        panelsTelemetry.addData("Transfer Current", transferCurrent);
 //        panelsTelemetry.addData("Flywheel Current", flywheelCurrent);
@@ -108,4 +142,7 @@ public class HoodedFlywheelOnlyTestMotorPIDPanels extends OpMode {
 
     }
 
+
 }
+
+
