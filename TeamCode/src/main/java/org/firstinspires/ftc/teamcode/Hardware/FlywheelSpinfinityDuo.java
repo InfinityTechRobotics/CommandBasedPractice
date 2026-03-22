@@ -14,10 +14,10 @@ public class FlywheelSpinfinityDuo {
 
     public Servo RPMIndicatorLeft, RPMIndicatorRight;
 
-    public static double NEW_P = 150.;   // 10.
-    public static double NEW_I = 2.5;    // 3.
-    public static double NEW_D = 50.;    // 0.
-    public static double NEW_F = 2.5;    // 0.
+    public static double NEW_P = 150.;   // 150.
+    public static double NEW_I = 5;    // 2.5
+    public static double NEW_D = 40.;    // 50.
+    public static double NEW_F = 1.25;    // 2.5
 
     PIDFCoefficients pidfModified;
 
@@ -58,7 +58,8 @@ public class FlywheelSpinfinityDuo {
     }
 
     public double targetRPMCalc (double distanceToGoalInches) {
-        return (10.4 * distanceToGoalInches + 1840 + 75);
+//        return (10.4 * distanceToGoalInches + 1840 + 75);
+        return (10 * distanceToGoalInches + 1914 + 75);
     }
 
     // Calculate and set flywheel motor velocity
