@@ -14,8 +14,8 @@ public class ShooterSpinfinityDuo {
     double SERVO_STOP_OPEN_POS = 0.44; //0.63
     double SERVO_STOP_CLOSE_POS = 0.88; //0.37
 
-    double SERVO_PADDLE_SHOOT_POS = 0; //0.85
-    double SERVO_PADDLE_DOWN_POS = 0.35; //0.5
+    double SERVO_PADDLE_SHOOT_POS = 0.35; //0.85
+    double SERVO_PADDLE_DOWN_POS = 0.9; //0.5
 
     int MOTOR_TURRET_CENTER_POS = 0;
     double MOTOR_TURRET_PROPORTIONAL_TERM = 5;
