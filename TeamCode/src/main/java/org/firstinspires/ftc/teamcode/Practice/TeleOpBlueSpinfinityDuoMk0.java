@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 
 @Configurable
 @TeleOp
-public class TeleOpSpinfinityDuoMk0 extends OpMode {
+public class TeleOpBlueSpinfinityDuoMk0 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -53,9 +53,9 @@ public class TeleOpSpinfinityDuoMk0 extends OpMode {
 
     double laserTime;
 
-    private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
+    private static final int DESIRED_TAG_ID = 20; // Red = 24; Blue = 20;
 
-    double LONG_DIST_ANGLE_CORRECTION = 4; // Red = 4; Blue = -4;
+    double LONG_DIST_ANGLE_CORRECTION = -4; // Red = 4; Blue = -4;
 
     // Turret variables
     double error;
@@ -285,7 +285,7 @@ public class TeleOpSpinfinityDuoMk0 extends OpMode {
 //            pinpoint.pinpointReset();
 //        }
 //
-        pose2D = pinpoint.getPinpointPose();
+//        pose2D = pinpoint.getPinpointPose();
 
 //        if (robotCentric) {
 //            botHeading = pose2D.getHeading(AngleUnit.RADIANS);
@@ -293,6 +293,7 @@ public class TeleOpSpinfinityDuoMk0 extends OpMode {
 //        else {
 //            botHeading = 0;
 //        }
+
 //        if (x != prevX || y != prevY || rx != prevRX) {
 //            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
 //        }

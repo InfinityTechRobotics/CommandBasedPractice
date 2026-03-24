@@ -10,12 +10,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class FlywheelSpinfinityDuo {
 
-    public DcMotorEx motorFlywheel;
+    public DcMotorEx motorFlywheel1;
+    public DcMotorEx motorFlywheel2;
 
     public Servo RPMIndicatorLeft, RPMIndicatorRight;
 
     public static double NEW_P = 150.;   // 150.
-    public static double NEW_I = 5;    // 2.5
+    public static double NEW_I = 5.;    // 2.5
     public static double NEW_D = 40.;    // 50.
     public static double NEW_F = 1.25;    // 2.5
 
@@ -32,17 +33,22 @@ public class FlywheelSpinfinityDuo {
 
     public void init (HardwareMap hardwareMap) {
 
-        motorFlywheel = hardwareMap.get(DcMotorEx.class, "motorFlywheel");
+        motorFlywheel1 = hardwareMap.get(DcMotorEx.class, "motorFlywheel");
+        motorFlywheel2 = hardwareMap.get(DcMotorEx.class, "motorFlywheel2");
 
-        motorFlywheel.setDirection(DcMotorEx.Direction.REVERSE);
+        motorFlywheel1.setDirection(DcMotorEx.Direction.REVERSE);
+        motorFlywheel2.setDirection(DcMotorEx.Direction.FORWARD);
 
-        motorFlywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        motorFlywheel1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        motorFlywheel2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        motorFlywheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        motorFlywheel1.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        motorFlywheel2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         // Set Flywheel Motor PIDF coefficients
         PIDFCoefficients pidfNew = new PIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
-        motorFlywheel.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
+        motorFlywheel1.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
+        motorFlywheel2.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
 
         //pidfModified = motorFlywheel.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
@@ -58,18 +64,21 @@ public class FlywheelSpinfinityDuo {
     }
 
     public double targetRPMCalc (double distanceToGoalInches) {
-//        return (10.4 * distanceToGoalInches + 1840 + 75);
         return (10 * distanceToGoalInches + 1914 + 75);
     }
 
     // Calculate and set flywheel motor velocity
     public void setFlywheelVel (double targetRPM) {
-        motorFlywheel.setVelocity(targetRPM / 60. * CPR);
+        motorFlywheel1.setVelocity(targetRPM / 60. * CPR);
+        motorFlywheel2.setVelocity(targetRPM / 60. * CPR);
     }
 
     // Calculate current flywheel motor RPM
     public double getFlywheelVel () {
-        return (motorFlywheel.getVelocity() / CPR * 60);
+        return (motorFlywheel1.getVelocity() / CPR * 60);
+    }
+    public double getFlywheelVel2 () {
+        return (motorFlywheel2.getVelocity() / CPR * 60);
     }
 
     public void setFlywheelRGB (double flywheelRPM, double targetRPM) {
@@ -88,10 +97,10 @@ public class FlywheelSpinfinityDuo {
     }
 
     public double getMotorFlywheelCurrent () {
-        return motorFlywheel.getCurrent(CurrentUnit.AMPS);
+        return motorFlywheel1.getCurrent(CurrentUnit.AMPS);
     }
     public double getMotorFlywheelPower () {
-        return motorFlywheel.getPower();
+        return motorFlywheel1.getPower();
     }
 
 }
