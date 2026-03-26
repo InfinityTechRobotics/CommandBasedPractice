@@ -13,6 +13,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Hardware.Flywheel;
 
+
+@Disabled
 //@Configurable
 
 @TeleOp

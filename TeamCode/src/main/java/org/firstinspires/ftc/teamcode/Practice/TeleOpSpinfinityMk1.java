@@ -32,7 +32,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Configurable
+@Disabled
+//@Configurable
 @TeleOp
 public class TeleOpSpinfinityMk1 extends OpMode {
 

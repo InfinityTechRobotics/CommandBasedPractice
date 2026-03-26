@@ -458,14 +458,14 @@ public class TeleOpSpinfinityDuoMk1 extends OpMode {
 
 
         // Panels Telemetry Data
-        panelsTelemetry.addData("Angle To Goal", robotToGoalRelativeAngle);
-//        panelsTelemetry.addData("Timer", timer.seconds());
+        //        panelsTelemetry.addData("Timer", timer.seconds());
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
         panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
 //        panelsTelemetry.addData("Shooting Sequence State", pathState);
 //        panelsTelemetry.addData("Artifact Counter", counter);
 //        panelsTelemetry.addData("Laser Detection Time", laserTime);
 //        panelsTelemetry.addData("Object Detected", stateHigh);
+        panelsTelemetry.addData("Angle To Goal", robotToGoalRelativeAngle);
         panelsTelemetry.addData("Distance To AprilTag", distanceToGoalInches);
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
