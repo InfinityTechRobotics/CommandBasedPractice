@@ -24,25 +24,25 @@ public class Constants {
             .forwardZeroPowerAcceleration(-36.4161)
             .lateralZeroPowerAcceleration(-82.1192)
             .translationalPIDFCoefficients(new PIDFCoefficients(
+                    0.08,
                     0.0,
-                    0.0,
-                    0.0,
-                    0.0
+                    0.01,
+                    0.03
             ))
             .headingPIDFCoefficients(new PIDFCoefficients(
-                    0.,
+                    0.8,
                     0.0,
-                    0.0,
-                    0.0
+                    0.02,
+                    0.03
             ))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(
+                    0.01,
                     0.0,
-                    0.0,
-                    0.000,
-                    0.,
-                    0.0
+                    0.0005,
+                    0.6,
+                    0.05
             ))
-            .centripetalScaling(0.000);
+            .centripetalScaling(0.0005);
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(0.98)
@@ -54,8 +54,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(0)
-            .yVelocity(0);
+            .xVelocity(67.5188)
+            .yVelocity(48.4023);
 
 
 
@@ -65,8 +65,8 @@ public class Constants {
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
-            .forwardPodY(0)
-            .strafePodX(0);
+            .forwardPodY(-6.29921)
+            .strafePodX(-1.81102);
 
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
@@ -79,6 +79,8 @@ public class Constants {
                 .build();
 
     }
+
+
 
 
 

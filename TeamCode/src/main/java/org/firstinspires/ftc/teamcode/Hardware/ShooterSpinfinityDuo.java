@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -24,8 +25,8 @@ public class ShooterSpinfinityDuo {
 
     double TURRET_ADJUSTMENT_THRESHOLD = 1.0;
 
-    int MOTOR_TURRET_MIN_POS = -400;
-    int MOTOR_TURRET_MAX_POS = 400;
+    int MOTOR_TURRET_MIN_POS = -550;
+    int MOTOR_TURRET_MAX_POS = 550;
 
     double RED_GOAL_X_POS = 130.35;
 
@@ -39,9 +40,10 @@ public class ShooterSpinfinityDuo {
         motorTurret = hardwareMap.get(DcMotorEx.class, "motorTurret");
         motorTurret.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-        motorTurret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorTurret.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motorTurret.setTargetPosition(0);
-        motorTurret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorTurret.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        motorTurret.setDirection(DcMotorEx.Direction.FORWARD);
         motorTurret.setPower(0.5);
     }
 

@@ -13,13 +13,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinity;
+import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
     @Autonomous
         public class redChatGPT_XISpinfinityDuo extends OpMode {
 
-        ShooterSpinfinity shooter = new ShooterSpinfinity();
+        ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
 
         private int obeliskResult = 0;
 
