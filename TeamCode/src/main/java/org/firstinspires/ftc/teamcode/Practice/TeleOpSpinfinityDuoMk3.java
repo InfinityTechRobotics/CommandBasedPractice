@@ -403,8 +403,8 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
         }
 
         // Calculate and set flywheel motor velocity
-//        flywheel.setFlywheelVel(targetRPM);
         flywheel.setFlywheelVel(targetRPM);
+//        flywheel.setFlywheelVel(0);
 
         // Control Direction of Intake and Transfer Motors
         if (gamepad2.dpadUpWasPressed()) {
@@ -490,6 +490,7 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
 //        panelsTelemetry.addData("Laser Detection Time", laserTime);
 //        panelsTelemetry.addData("Object Detected", stateHigh);
         panelsTelemetry.addData("Angle To Goal", robotToGoalRelativeAngle);
+        panelsTelemetry.addData("A2 Angle", a2);
         panelsTelemetry.addData("Distance To AprilTag", distanceToGoalInches);
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
