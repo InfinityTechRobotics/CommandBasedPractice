@@ -14,6 +14,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -29,9 +30,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 import java.util.function.Supplier;
 
+@Disabled
 @Configurable
 @TeleOp
-public class TeleOpSpinfinityDuoMk4 extends OpMode {
+public class TeleOpSpinfinityDuoMk5 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -54,7 +56,7 @@ public class TeleOpSpinfinityDuoMk4 extends OpMode {
 
     private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
 
-    double LONG_DIST_ANGLE_CORRECTION = 2; // Red = 4; Blue = -4;
+    double LONG_DIST_ANGLE_CORRECTION = 4; // Red = 4; Blue = -4;
 
     // Turret variables
     double error;

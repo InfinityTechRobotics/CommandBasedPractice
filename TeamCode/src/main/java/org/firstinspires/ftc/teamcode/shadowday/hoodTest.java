@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Disabled
 @TeleOp
 
 public class hoodTest extends OpMode {
@@ -17,7 +16,7 @@ public class hoodTest extends OpMode {
     @Override
     public void init() { // runs once
 
-        servo = hardwareMap.get(Servo.class, "servoShooter");
+        servo = hardwareMap.get(Servo.class, "servoHood");
 
         servo.setPosition(servoPosition);
 
@@ -41,6 +40,8 @@ public class hoodTest extends OpMode {
 
         servo.setPosition(servoPosition);
 
+
+        telemetry.addData("Control Hood Servo: X = -0.01; B = +0.01; A = -0.1; Y = +0.1",null);
         telemetry.addData("servo pos is:", servoPosition);
         telemetry.update();
 
