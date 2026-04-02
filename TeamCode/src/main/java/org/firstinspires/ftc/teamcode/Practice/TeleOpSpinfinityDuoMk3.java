@@ -30,7 +30,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Configurable
+//@Configurable
 @TeleOp
 public class TeleOpSpinfinityDuoMk3 extends OpMode {
 
@@ -552,7 +552,7 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
                 }
                 break;
             case 10006:
-                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.45) {
                     shooter.shootServoPaddle();
                     setPathState(10007);
                 }

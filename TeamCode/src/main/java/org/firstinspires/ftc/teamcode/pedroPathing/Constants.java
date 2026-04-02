@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.PredictiveBrakingCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -21,31 +22,36 @@ public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(13.05)
-            .forwardZeroPowerAcceleration(-36.4161)
-            .lateralZeroPowerAcceleration(-82.1192)
-            .translationalPIDFCoefficients(new PIDFCoefficients(
-                    0.08,
-                    0.0,
-                    0.01,
-                    0.03
-            ))
             .headingPIDFCoefficients(new PIDFCoefficients(
-                    0.8,
+                    1.0,
                     0.0,
                     0.02,
                     0.03
             ))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0.01,
-                    0.0,
-                    0.0005,
-                    0.6,
-                    0.05
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(
+                    0.2,
+                    0.16006,
+                    0.00089544
             ))
-            .centripetalScaling(0.0005);
+            .centripetalScaling(0.0);
+//            .forwardZeroPowerAcceleration(-36.4161)
+//            .lateralZeroPowerAcceleration(-82.1192)
+//            .translationalPIDFCoefficients(new PIDFCoefficients(
+//                    0.08,
+//                    0.0,
+//                    0.01,
+//                    0.03
+//            ))
+//            .drivePIDFCoefficients(new FilteredPIDFCoefficients(
+//                    0.01,
+//                    0.0,
+//                    0.0005,
+//                    0.6,
+//                    0.05
+//            ))
 
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .maxPower(0.98)
+            .maxPower(1.)
             .rightFrontMotorName("motorFrontRight")
             .rightRearMotorName("motorRearRight")
             .leftRearMotorName("motorRearLeft")
@@ -54,8 +60,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(67.5188)
-            .yVelocity(48.4023);
+            .xVelocity(77.14901)
+            .yVelocity(63.10691);
 
 
 
@@ -65,11 +71,11 @@ public class Constants {
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
-            .forwardPodY(-6.29921)
-            .strafePodX(-1.81102);
+            .forwardPodY(-4.49571)
+            .strafePodX(-2.87255);
 
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
+    public static PathConstraints pathConstraints = new PathConstraints(0.97, 100, 1, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)

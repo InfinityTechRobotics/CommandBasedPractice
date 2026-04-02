@@ -14,29 +14,24 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.teamcode.Hardware.FlywheelSpinfinity;
 import org.firstinspires.ftc.teamcode.Hardware.FlywheelSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
 import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
-import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityv2;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
 import java.util.function.Supplier;
-@Disabled
 
-//@Configurable
+@Configurable
 @TeleOp
-public class TeleOpSpinfinityDuoMk2MegaTag extends OpMode {
+public class TeleOpSpinfinityDuoMk4 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -73,7 +68,7 @@ public class TeleOpSpinfinityDuoMk2MegaTag extends OpMode {
 
     double aprilTagTimer;
 
-    public static double TURRET_TRACKING_TIMER_THRESHOLD = 1.0;
+    public static double TURRET_TRACKING_TIMER_THRESHOLD = .25;
 
     public static double MOTOR_TURRET_PROPORTIONAL_TERM = 5;
 
@@ -104,7 +99,7 @@ public class TeleOpSpinfinityDuoMk2MegaTag extends OpMode {
 
     public boolean prevIntake;
 
-    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1; //0.25
+    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 0.4; //0.25
 
     boolean activeDetecting = false;
     boolean stateHigh;
@@ -318,23 +313,22 @@ public class TeleOpSpinfinityDuoMk2MegaTag extends OpMode {
         }
 
         // MegaTag Robot Position Determination
-        if (result != null && result.isValid()) {
-            Pose3D botpose = result.getBotpose();
-            if (botpose != null) {
-                double xpos = botpose.getPosition().x;
-                double ypos = botpose.getPosition().y;
-                double headingpos = botpose.getOrientation().getYaw();
-                telemetry.addData("MT1 Location", "(" + xpos + ", " + ypos + ", " + headingpos + ")");
-
-                //follower.setPose(new Pose(xpos, ypos, headingpos, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE));
-                //Pose convertedPos = new Pose(xpos, ypos, headingpos, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
-                //telemetry.addData("Converted Location", "(" + convertedPos.getX() + ", " + convertedPos.getY() + ", " + convertedPos.getHeading() + ")");
-                MT1XPos = 72 + (ypos * 39.37);
-                MT1YPos = 72 - (xpos * 39.37);
-                MT1botHeading = headingpos - 90;
-
-            }
-        }
+//        if (result != null && result.isValid()) {
+//            Pose3D botpose = result.getBotpose();
+//            if (botpose != null) {
+//                double xpos = botpose.getPosition().x;
+//                double ypos = botpose.getPosition().y;
+//                double headingpos = botpose.getOrientation().getYaw();
+//                telemetry.addData("MT1 Location", "(" + xpos + ", " + ypos + ", " + headingpos + ")");
+//
+//                //follower.setPose(new Pose(xpos, ypos, headingpos, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE));
+//                //Pose convertedPos = new Pose(xpos, ypos, headingpos, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
+//                //telemetry.addData("Converted Location", "(" + convertedPos.getX() + ", " + convertedPos.getY() + ", " + convertedPos.getHeading() + ")");
+//                MT1XPos = 72 + (ypos * 39.37);
+//                MT1YPos = 72 - (xpos * 39.37);
+//                MT1botHeading = headingpos - 90;
+//            }
+//        }
 
         if (targetFound) {
             distanceToGoalInches = flywheel.distanceToGoalCalc(a2);
@@ -388,12 +382,12 @@ public class TeleOpSpinfinityDuoMk2MegaTag extends OpMode {
         // Calculate Flywheel Target RPM
         if (autoRPM) {
             // dynamically set flywheel speed based off Limelight distance measurement
-            if (distanceToGoalInches < 80. || distanceToGoalInches > 100) {
-                targetRPM = flywheel.targetRPMCalc(distanceToGoalInches);
-            }
-            else {
-                targetRPM = 2400;
-            }
+//            if (distanceToGoalInches < 80. || distanceToGoalInches > 100) {
+              targetRPM = flywheel.targetRPMCalc(distanceToGoalInches);
+//            }
+//            else {
+//                targetRPM = 2400;
+//            }
         } else {
             // manually set RPM distance
             if (gamepad2.x) {
@@ -408,8 +402,8 @@ public class TeleOpSpinfinityDuoMk2MegaTag extends OpMode {
         }
 
         // Calculate and set flywheel motor velocity
-//        flywheel.setFlywheelVel(targetRPM);
         flywheel.setFlywheelVel(targetRPM);
+//        flywheel.setFlywheelVel(0);
 
         // Control Direction of Intake and Transfer Motors
         if (gamepad2.dpadUpWasPressed()) {
@@ -495,6 +489,7 @@ public class TeleOpSpinfinityDuoMk2MegaTag extends OpMode {
 //        panelsTelemetry.addData("Laser Detection Time", laserTime);
 //        panelsTelemetry.addData("Object Detected", stateHigh);
         panelsTelemetry.addData("Angle To Goal", robotToGoalRelativeAngle);
+        panelsTelemetry.addData("A2 Angle", a2);
         panelsTelemetry.addData("Distance To AprilTag", distanceToGoalInches);
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
@@ -556,7 +551,7 @@ public class TeleOpSpinfinityDuoMk2MegaTag extends OpMode {
                 }
                 break;
             case 10006:
-                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.45) {
                     shooter.shootServoPaddle();
                     setPathState(10007);
                 }

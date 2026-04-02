@@ -16,7 +16,7 @@ public class SpintakeSpinfinity {
     public DcMotorEx motorIntake;
 
     double INTAKE_MAX_POWER = 0.9;
-    public static double INTAKE_NO_POWER = 0.;
+    public static double INTAKE_NO_POWER = 0.2;
 
     public static double INTAKE_LOW_POWER = 0.2;
 
