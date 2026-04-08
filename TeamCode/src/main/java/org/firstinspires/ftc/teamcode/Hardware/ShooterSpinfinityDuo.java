@@ -12,7 +12,7 @@ public class ShooterSpinfinityDuo {
     public Servo servoPaddleLeft;
     public DcMotorEx motorTurret;
 
-    public Servo servoHood;
+//    public Servo servoHood;
 
     double SERVO_STOP_OPEN_POS = 0.44; //0.63
     double SERVO_STOP_CLOSE_POS = 0.88; //0.37
@@ -44,7 +44,7 @@ public class ShooterSpinfinityDuo {
         servoStop = hardwareMap.get(Servo.class, "servoStop");
         servoPaddleLeft = hardwareMap.servo.get("servoPaddleLeft");
 
-        servoHood = hardwareMap.get(Servo.class, "servoHood");
+//        servoHood = hardwareMap.get(Servo.class, "servoHood");
 
         motorTurret = hardwareMap.get(DcMotorEx.class, "motorTurret");
         motorTurret.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
