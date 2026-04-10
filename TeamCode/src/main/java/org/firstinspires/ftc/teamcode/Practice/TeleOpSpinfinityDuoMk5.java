@@ -201,6 +201,13 @@ public class TeleOpSpinfinityDuoMk5 extends OpMode {
 
         follower.update();
 
+        if (elapsedTime > 100) {
+            gamepad1.rumble(1, 1,100);
+        }
+        if (elapsedTime > 110) {
+            gamepad1.rumble(1, 1,500);
+        }
+
         // Laser Artifact Detection (Detected = TRUE --> counter +1)
         stateHigh = laserInput.getState();
 
@@ -481,35 +488,35 @@ public class TeleOpSpinfinityDuoMk5 extends OpMode {
 
 
         // Panels Telemetry Data
-        //        panelsTelemetry.addData("Timer", timer.seconds());
-        panelsTelemetry.addData("Pinpoint Robot X Position", robotXPos);
-        panelsTelemetry.addData("Pinpoint Robot Y Position", robotYPos);
-        panelsTelemetry.addData("Pinpoint Robot Heading", Math.toDegrees(botHeading));
-        panelsTelemetry.addData("MegaTag Robot X Position", MT1XPos);
-        panelsTelemetry.addData("MegaTag Robot Y Position", MT1YPos);
-        panelsTelemetry.addData("MegaTag Robot Heading", MT1botHeading);
-        panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
-        panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
-//        panelsTelemetry.addData("Shooting Sequence State", pathState);
-//        panelsTelemetry.addData("Artifact Counter", counter);
-//        panelsTelemetry.addData("Laser Detection Time", laserTime);
-//        panelsTelemetry.addData("Object Detected", stateHigh);
-        panelsTelemetry.addData("Angle To Goal", robotToGoalRelativeAngle);
-        panelsTelemetry.addData("A2 Angle", a2);
+        panelsTelemetry.addData("Auto Turret", turretTracking);
+        panelsTelemetry.addData("Auto RPM", autoRPM);
         panelsTelemetry.addData("Distance To AprilTag", distanceToGoalInches);
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
         panelsTelemetry.addData("Robot Centric", robotCentric);
+        //        panelsTelemetry.addData("Timer", timer.seconds());
+//        panelsTelemetry.addData("Pinpoint Robot X Position", robotXPos);
+//        panelsTelemetry.addData("Pinpoint Robot Y Position", robotYPos);
+//        panelsTelemetry.addData("Pinpoint Robot Heading", Math.toDegrees(botHeading));
+//        panelsTelemetry.addData("MegaTag Robot X Position", MT1XPos);
+//        panelsTelemetry.addData("MegaTag Robot Y Position", MT1YPos);
+//        panelsTelemetry.addData("MegaTag Robot Heading", MT1botHeading);
+//        panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
+//        panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
+////        panelsTelemetry.addData("Shooting Sequence State", pathState);
+////        panelsTelemetry.addData("Artifact Counter", counter);
+////        panelsTelemetry.addData("Laser Detection Time", laserTime);
+////        panelsTelemetry.addData("Object Detected", stateHigh);
+//        panelsTelemetry.addData("Angle To Goal", robotToGoalRelativeAngle);
+//        panelsTelemetry.addData("A2 Angle", a2);
 //        panelsTelemetry.addData("Drive Power Factor", powerFactor);
-        panelsTelemetry.addData("Auto Turret", turretTracking);
-        panelsTelemetry.addData("Auto RPM", autoRPM);
 //        panelsTelemetry.addData("Intake On", intakeOn);
-        panelsTelemetry.addData("Bearing Error", error);
-        panelsTelemetry.addData("Turret Target Pos", newPos);
-        panelsTelemetry.addData("Turret Target Pose Pos", newPosePos);
-        panelsTelemetry.addData("Turret Current Pos", currentPos);
-        panelsTelemetry.debug("Pinpoint Velocity", follower.getVelocity());
-        panelsTelemetry.debug("Automated Drive", automatedDrive);
+//        panelsTelemetry.addData("Bearing Error", error);
+//        panelsTelemetry.addData("Turret Target Pos", newPos);
+//        panelsTelemetry.addData("Turret Target Pose Pos", newPosePos);
+//        panelsTelemetry.addData("Turret Current Pos", currentPos);
+//        panelsTelemetry.debug("Pinpoint Velocity", follower.getVelocity());
+//        panelsTelemetry.debug("Automated Drive", automatedDrive);
 //        panelsTelemetry.debug("Slow Mode", slowMode);
 //        panelsTelemetry.debug("Slow Mode Multiplier", slowModeMultiplier);
 //        panelsTelemetry.addData("Transfer On", transferOn);
