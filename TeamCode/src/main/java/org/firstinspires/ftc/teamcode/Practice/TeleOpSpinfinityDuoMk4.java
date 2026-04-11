@@ -555,7 +555,7 @@ public class TeleOpSpinfinityDuoMk4 extends OpMode {
                 }
                 break;
             case 10006:
-                if (pathTimer.getElapsedTimeSeconds() > 0.45) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
                     shooter.shootServoPaddle();
                     setPathState(10007);
                 }
