@@ -1,7 +1,6 @@
-    package org.firstinspires.ftc.teamcode.auto;
+    package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -17,13 +16,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
     @Disabled
     @Autonomous
-        public class redGoalPickUpShootaFly_X extends OpMode {
+        public class redAlt_C1 extends OpMode {
 
         Shooter shooter = new Shooter();
 
         private int obeliskResult = 0;
 
-        double START_DELAY_TIME = 2;
+        double START_DELAY_TIME = 2.0;
 
         private Follower follower;
         private Timer pathTimer, opmodeTimer, shootTimer;
@@ -34,55 +33,17 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
         public static double NEW_D = 20.0;    // 0.0
         public static double NEW_F = 3.5;    // 0.0
 
-        double shootingTime = 2;
+        double shootingTime = 0.0;
 
-        private final Pose startPose = new Pose(116, 129, Math.toRadians(36)); // Start Pose of our robot.
-    //    private final Pose viewPose = new Pose(80, 120, Math.toRadians(90)); // Pose to read the Obelisk.
-
-        private final Pose motifDetection = new Pose(85, 110, Math.toRadians(90));
-
-        private final Pose preScorePose = new Pose(80, 75, Math.toRadians(45));
-
-        private final Pose endScorePose = new Pose(113.5, 108.5, Math.toRadians(45));
-
-        private final Pose scorePose = new Pose(96, 96, Math.toRadians(45)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-
-        private final Pose prePickupPose21 = new Pose(92, 41, Math.toRadians(0)); // Preparing to intake third set of artifacts.
-
-        private final Pose pickupPose21 = new Pose(129, 41, Math.toRadians(0)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
-
-        private final Pose prePickupPose22 = new Pose(92, 66, Math.toRadians(0)); // Preparing to intake second set of artifacts.
-
-        private final Pose pickupPose22 = new Pose(132, 63, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
-
-        private final Pose prePickupPose23 = new Pose(92, 88.75, Math.toRadians(0)); // Preparing to intake first set of artifacts.
-
-        private final Pose pickupPose23 = new Pose(124, 88.75, Math.toRadians(0)); // Highest (First Set) of Artifacts from the Spike Mark(PPG).
-
-        private final Pose preGateHit = new Pose(118, 80, Math.toRadians(90));
-
-        private final Pose gateHit = new Pose( 122, 73.5, Math.toRadians(90));
-
-        private final Pose gatePickup = new Pose(128, 61.5, Math.toRadians(20));
-
-        private final Pose downGate = new Pose(132, 52.5, Math.toRadians(50));
-
-        private final Pose controlPointDriveToGate = new Pose(84, 54);
-
-        private final Pose controlPointDriveToAwayFromGate = new Pose(85, 43);
-
-        private final Pose controlPoint22 = new Pose(80, 60); // 67! ;) - you should get what this means by now - read the name aigin - idk i cant spel
-
-        private  final Pose endPose = new Pose(90, 67, Math.toRadians(0));//its the end - if you took the time to read this, you get it - otherwise vid the auton eyelid is dissapointed :(
-
-        private final Pose finalShootPose = new Pose (90, 110, Math.toRadians(30));
-
-        private PathChain driveToGoal, driveToPrePickup23, driveThroughLaunchZone, driveToPickup23, driveToGoal23, driveToPrePickup22, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPrePickup21, driveToPickup21, driveToGoal21, driveToEnd, driveToGate, driveGateToGoal;
+        private final Pose startPose = new Pose(80, 8, Math.toRadians(0));
+        private final Pose loadingZone = new Pose(138, 8, Math.toRadians(0));
+        private final Pose reLoadingZone = new Pose(120, 8, Math.toRadians(0));
+        private final Pose shhooting = new Pose(82, 12, Math.toRadians(60));
 
         DcMotorEx motorIntake, motorTransfer;
         DcMotorEx motorFlywheel;
 
-        double targetRPM = 0.;
+        double targetRPM;
         double flywheelRPM = 0.;
         double TPS;
         double CPR = 28.;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
@@ -93,148 +54,65 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
         double intakeOn = 0.8;
         double intakeOff = 0.0;
 
-        double TARGET_AUTON_RPM = 2250.;
+        double TARGET_AUTON_RPM = 3000.;
 
         int shootingSequenceFlag = 1;
 
         PIDFCoefficients pidfModified;
 
+        int telemtryUpdate = 0;
+
+        private PathChain driveToLoadingZone, driveToScorePoseL, driveToScorePoseS, driveAwayToLoadingZone, driveToAwayReLoadingZone;
 
         private void buildPaths() {
 
-            driveToGoal = follower.pathBuilder()
-                    .addPath(new BezierLine(startPose, scorePose))
-                    .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
+            driveToLoadingZone = follower.pathBuilder()
+                    .addPath(new BezierLine(startPose, loadingZone))
+                    .setLinearHeadingInterpolation(startPose.getHeading(), loadingZone.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
-            driveToPickup23 = follower.pathBuilder()
-                    .addPath(new BezierLine(endScorePose, prePickupPose23))
-                    .setLinearHeadingInterpolation(endScorePose.getHeading(), prePickupPose23.getHeading())
-                    .addPath(new BezierLine(prePickupPose23, pickupPose23))
-                    .setLinearHeadingInterpolation(prePickupPose23.getHeading(), pickupPose23.getHeading())
+            driveAwayToLoadingZone = follower.pathBuilder()
+                    .addPath(new BezierLine(loadingZone, reLoadingZone))
+                    .setLinearHeadingInterpolation(loadingZone.getHeading(), reLoadingZone.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
-            driveToGoal23 = follower.pathBuilder()
-                    .addPath(new BezierLine(pickupPose23, preScorePose))
-                    .setLinearHeadingInterpolation(pickupPose23.getHeading(), preScorePose.getHeading())
+            driveToAwayReLoadingZone = follower.pathBuilder()
+                    .addPath(new BezierLine(reLoadingZone, loadingZone))
+                    .setLinearHeadingInterpolation(reLoadingZone.getHeading(), loadingZone.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
-            // The paths for the second set of artifacts(PGP) are below
-//            driveToPrePickup22 = follower.pathBuilder()
-//                    .addPath(new BezierLine(scorePose, prePickupPose22))
-//                    .setLinearHeadingInterpolation(scorePose.getHeading(), prePickupPose22.getHeading())
-//                    .setTimeoutConstraint(0)
-//                    .build();
-//
-//            driveToPickup22 = follower.pathBuilder()
-//                    .addPath(new BezierLine(prePickupPose22, pickupPose22))
-//                    .setLinearHeadingInterpolation(prePickupPose22.getHeading(), pickupPose22.getHeading())
-//                    .setTimeoutConstraint(0)
-//                    .build();
+            driveToScorePoseL = follower.pathBuilder()
+                    .addPath(new BezierLine(loadingZone, shhooting))
+                    .setLinearHeadingInterpolation(loadingZone.getHeading(), shhooting.getHeading())
+                    .setTimeoutConstraint(0)
+                    .build();
 
-            driveToPickup22 = follower.pathBuilder()
-                    .addPath(new BezierLine(scorePose, prePickupPose22))
-                    .setLinearHeadingInterpolation(scorePose.getHeading(), prePickupPose22.getHeading())
-                    .addPath(new BezierLine(prePickupPose22, pickupPose22))
-                    .setLinearHeadingInterpolation(prePickupPose22.getHeading(), pickupPose22.getHeading())
+            driveToScorePoseS = follower.pathBuilder()
+                    .addPath(new BezierLine(startPose, shhooting))
+                    .setLinearHeadingInterpolation(startPose.getHeading(), shhooting.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
 
-            driveToGoal22 = follower.pathBuilder()
-                    .addPath(new BezierCurve(pickupPose22, controlPoint22, preScorePose))
-                    .setLinearHeadingInterpolation(pickupPose22.getHeading(), preScorePose.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
 
-            driveToGatePickup = follower.pathBuilder()
-                    .addPath(new BezierCurve(endScorePose, controlPointDriveToGate, gatePickup))
-                    .setLinearHeadingInterpolation(endScorePose.getHeading(), gatePickup.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
-
-            driveDownFromGate = follower.pathBuilder()
-                    .addPath(new BezierLine(gatePickup, downGate))
-                    .setLinearHeadingInterpolation(gatePickup.getHeading(), downGate.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
-
-            driveToAwayFromGate = follower.pathBuilder()
-                    .addPath(new BezierCurve(downGate, controlPointDriveToAwayFromGate, preScorePose))
-                    .setLinearHeadingInterpolation(downGate.getHeading(), preScorePose.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
-
-                    // The paths for the third set of artifacts(GPP) are below
-//            driveToPrePickup21 = follower.pathBuilder()
-//                    .addPath(new BezierLine(scorePose, prePickupPose21))
-//                    .setLinearHeadingInterpolation(scorePose.getHeading(), prePickupPose21.getHeading())
-//                    .setTimeoutConstraint(0)
-//                    .build();
-//
-//            driveToPickup21 = follower.pathBuilder()
-//                    .addPath(new BezierLine(prePickupPose21, pickupPose21))
-//                    .setLinearHeadingInterpolation(prePickupPose21.getHeading(), pickupPose21.getHeading())
-//                    .setTimeoutConstraint(0)
-//                    .build();
-
-            driveToPickup21 = follower.pathBuilder()
-                    .addPath(new BezierLine(endScorePose, prePickupPose21))
-                    .setLinearHeadingInterpolation(endScorePose.getHeading(), prePickupPose21.getHeading())
-                    .addPath(new BezierLine(prePickupPose21, pickupPose21))
-                    .setLinearHeadingInterpolation(prePickupPose21.getHeading(), pickupPose21.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
-
-            driveToGoal21 = follower.pathBuilder()
-                    .addPath(new BezierLine(pickupPose21, finalShootPose))
-                    .setLinearHeadingInterpolation(pickupPose21.getHeading(), finalShootPose.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
-
-
-            driveToGate = follower.pathBuilder()
-                    .addPath(new BezierLine(pickupPose23, preGateHit))
-                    .setLinearHeadingInterpolation(pickupPose23.getHeading(), preGateHit.getHeading())
-                    .addPath(new BezierLine(preGateHit, gateHit))
-                    .setLinearHeadingInterpolation(preGateHit.getHeading(), gateHit.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
-
-            driveGateToGoal = follower.pathBuilder()
-                    .addPath(new BezierLine(gateHit, preScorePose))
-                    .setLinearHeadingInterpolation(gateHit.getHeading(), preScorePose.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
-
-            driveToEnd = follower.pathBuilder()
-                    .addPath(new BezierLine(endScorePose, endPose))
-                    .setLinearHeadingInterpolation(endScorePose.getHeading(), endPose.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
-
-            driveThroughLaunchZone = follower.pathBuilder()
-                    .addPath(new BezierLine(preScorePose, endScorePose))
-                    .setLinearHeadingInterpolation(preScorePose.getHeading(), endScorePose.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
         }
 
         public void autonomousPathUpdate() {
             switch (pathState) {
                 case 10:
-                    obeliskResult = 23;
                     shooter.closeServoStop();
                     shooter.downServoPaddle();
                     motorIntake.setPower(intakeOn);
-                    follower.followPath(driveToGoal);
-                    setPathState(11);
+                    if (pathTimer.getElapsedTimeSeconds() > 3) {
+                        follower.followPath(driveToScorePoseS);
+                        setPathState(11);
+                    }
                     break;
                 case 11:
-                    if (pathTimer.getElapsedTimeSeconds() > START_DELAY_TIME) {
+                    if (!follower.isBusy()) {
                         setPathState(1000);
                     }
                     break;
@@ -253,9 +131,11 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     setPathState(1001);
                     break;
                 case 1001:
+                    if (!follower.isBusy()) {
                         motorIntake.setPower(intakeOn);
                         motorTransfer.setPower(transferOn);
                         setPathState(10001);
+                    }
                     break;
                 case 10001:
                     if (pathTimer.getElapsedTimeSeconds() > 0.25) { // changed from 0.5 to 0.25
@@ -306,6 +186,11 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     break;
                 case 10008: // updates shooting sequence flag
                     if (pathTimer.getElapsedTimeSeconds() > 0.1) {
+                        setPathState(667);
+                    }
+                    break;
+                case 667:
+                    if(!follower.isBusy()){
                         setPathState(10010);
                     }
                     break;
@@ -313,9 +198,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     if (shootingSequenceFlag == 22) {
                         setPathState(220);
                     } else if (shootingSequenceFlag == 2210) {
-                        setPathState(300);
+                        setPathState(777);
                     } else if (shootingSequenceFlag == 221023) {
-                        setPathState(230);
+                        setPathState(777);
                     } else if (shootingSequenceFlag == 22102321) {
                         setPathState(210);
                     } else if (shootingSequenceFlag == 777) {
@@ -326,56 +211,47 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                 case 210: // beginning of set of actions for spike mark 21, gets ready to pickup
                     motorIntake.setPower(intakeOn);
                     if (!follower.isBusy()) {
-                        follower.followPath(driveToPickup21);
+//                        follower.followPath(driveToPickup21);
                         setPathState(211);
                     }
                     break;
                 case 211: // drives toward goal to score first set of artifacts (21)
-                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
                         if (!follower.isBusy()) {
-                            follower.followPath(driveToGoal21);
+//                            follower.followPath(driveToGoal21);
                             setPathState(214);
                         }
-                    }
                     break;
                 case 214: // case for shooting
                     if (!follower.isBusy()) {
-                        follower.followPath(driveThroughLaunchZone);
                         setPathState(1000);
                     }
                     break;
                 case 220: // beginning of set of actions for spike mark 22, gets ready to pickup
                     motorIntake.setPower(intakeOn);
                     if (!follower.isBusy()) {
-                        follower.followPath(driveToPickup22);
-                        setPathState(221);
+                        follower.followPath(driveToLoadingZone);
+                        setPathState(0221);
                     }
                     break;
-//                case 221: // timer case
-//                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
-//                        if (!follower.isBusy()) {
-//                            motorIntake.setPower(intakeOn);
-//                            setPathState(222);
-//                        }
-//                    }
-//           break;
-//                case 222: // picks up second set of artifacts (22)
-//                    if (!follower.isBusy()) {
-//                        follower.followPath((driveToPickup22));
-//                        setPathState(223);
-//                    }
-//                    break;
-                case 221: // drives toward goal to score second set of artifacts (22)
-                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
-                        if (!follower.isBusy()) {
-                            follower.followPath(driveToGoal22);
-                            setPathState(224);
-                        }
+                case 0221:
+                    if (!follower.isBusy()) {
+                        follower.followPath(driveAwayToLoadingZone);
+                        setPathState(0222);
                     }
+                    break;
+                case 0222:
+                    if (!follower.isBusy()) {
+                        follower.followPath(driveToAwayReLoadingZone);
+                        setPathState(221);
+                    }
+                case 221: // drives toward goal to score second set of artifacts (22)
+                        if (!follower.isBusy()) {
+                            follower.followPath(driveToScorePoseL);
+                            setPathState(11);
+                        }
                     break;
                 case 224: // case for shooting
                     if (!follower.isBusy()) {
-                        follower.followPath(driveThroughLaunchZone);
                         setPathState(1000);
                     }
                     break;
@@ -389,52 +265,37 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     break;
                 case 231:
                     if (!follower.isBusy()) {
-                        follower.followPath(driveToPickup23);
+//                        follower.followPath(driveToPickup23);
                         setPathState(234);
                     }
                     break;
-//                case 2322:
-//                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
-//                        if (!follower.isBusy()) {
-//                            follower.followPath(driveToGate);
-//                            setPathState(233);
-//                        }
-//                    }
-//                    break;
-//                case 233: // timer case
-//                    if (pathTimer.getElapsedTimeSeconds() > 2) {
-//                        follower.followPath(driveGateToGoal);
-//                        setPathState(234);
-//                    }
-//                    break;
                 case 234:
                     if (!follower.isBusy()) {
-                        follower.followPath(driveToGoal23);
+//                        follower.followPath(driveToGoal23);
                         setPathState(235);
                     }
                     break;
                 case 235: // case for shooting
                     if (!follower.isBusy()) {
-                        follower.followPath(driveToPickup22);
                         setPathState(1000);
                     }
                     break;
                 case 300: // case for "gobbling" from the gate
                     if (!follower.isBusy()) {
-                        follower.followPath(driveToGatePickup);
+                        follower.followPath(driveToScorePoseL);
                         motorIntake.setPower(intakeOn);
-                        setPathState(301);
+                        setPathState(11);
                     }
                     break;
                 case 301:
                     if (!follower.isBusy()) {
-                        follower.followPath(driveDownFromGate);
+//                        follower.followPath(driveDownFromGate);
                         setPathState(302);
                     }
                      break;
                 case 302:
                     if (pathTimer.getElapsedTimeSeconds() > 1.5)  {
-                        follower.followPath(driveToAwayFromGate);
+//                        follower.followPath(driveToAwayFromGate);
                         setPathState(303);
                     }
                     break;
@@ -445,7 +306,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     break;
                 case 777:
                     if (!follower.isBusy()) {
-                        follower.followPath(driveToEnd);
+//                        follower.followPath(driveToEnd);
                         TARGET_AUTON_RPM = 0.0;
                         setPathState(999);
                     }
@@ -490,7 +351,15 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             telemetry.addData("Flywheel RPM", flywheelRPM);
             telemetry.addData("Shooting Sequence", shootingSequenceFlag);
             telemetry.addData("Intake Status", motorIntake.getPower());
-            telemetry.update();
+
+            if (telemtryUpdate == 49){
+                telemtryUpdate = 0;
+                telemetry.update();
+            } else {
+                telemtryUpdate +=1;
+            }
+
+
 
         }
 
@@ -532,7 +401,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             shooter.closeServoStop();
             shooter.downServoPaddle();
 
-            shooter.centerServoTurret();
+            shooter.servoTurretSetPosition(0.5);
 
         }
 

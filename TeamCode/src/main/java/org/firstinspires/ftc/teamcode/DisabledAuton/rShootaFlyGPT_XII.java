@@ -1,4 +1,4 @@
-    package org.firstinspires.ftc.teamcode.auto;
+    package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -15,9 +15,10 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-    @Disabled
+@Disabled
+
     @Autonomous
-        public class redChatGPT_XI extends OpMode {
+        public class rShootaFlyGPT_XII extends OpMode {
 
         Shooter shooter = new Shooter();
 
@@ -38,6 +39,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose startPose = new Pose(116, 129, Math.toRadians(36)); // Start Pose of our robot.
     //    private final Pose viewPose = new Pose(80, 120, Math.toRadians(90)); // Pose to read the Obelisk.
+        private final Pose preScorePose = new Pose(80, 75, Math.toRadians(45));
+
+        private final Pose endScorePose = new Pose(113.5, 108.5, Math.toRadians(45));
+
 
         private final Pose motifDetection = new Pose(85, 110, Math.toRadians(90));
 
@@ -73,7 +78,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose finalShootPose = new Pose (90, 110, Math.toRadians(30));
 
-        private PathChain driveToGoal, driveToPrePickup23, driveToPickup23, driveToGoal23, driveToPrePickup22, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPrePickup21, driveToPickup21, driveToGoal21, driveToEnd, driveToGate, driveGateToGoal;
+        private PathChain driveToGoal, driveThroughLaunchZone, driveToPrePickup23, driveToPickup23, driveToGoal23, driveToPrePickup22, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPrePickup21, driveToPickup21, driveToGoal21, driveToEnd, driveToGate, driveGateToGoal;
 
         DcMotorEx motorIntake, motorTransfer;
         DcMotorEx motorFlywheel;
@@ -156,14 +161,14 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
             driveToGoal22 = follower.pathBuilder()
-                    .addPath(new BezierCurve(pickupPose22, controlPoint22, scorePose))
-                    .setLinearHeadingInterpolation(pickupPose22.getHeading(), scorePose.getHeading())
+                    .addPath(new BezierCurve(pickupPose22, controlPoint22, preScorePose))
+                    .setLinearHeadingInterpolation(pickupPose22.getHeading(), preScorePose.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
             driveToGatePickup = follower.pathBuilder()
-                    .addPath(new BezierCurve(scorePose, controlPointDriveToGate, gatePickup))
-                    .setLinearHeadingInterpolation(scorePose.getHeading(), gatePickup.getHeading())
+                    .addPath(new BezierCurve(preScorePose, controlPointDriveToGate, gatePickup))
+                    .setLinearHeadingInterpolation(preScorePose.getHeading(), gatePickup.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
@@ -224,6 +229,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             driveToEnd = follower.pathBuilder()
                     .addPath(new BezierLine(scorePose, endPose))
                     .setLinearHeadingInterpolation(scorePose.getHeading(), endPose.getHeading())
+                    .setTimeoutConstraint(0)
+                    .build();
+
+            driveThroughLaunchZone = follower.pathBuilder()
+                    .addPath(new BezierLine(preScorePose, endScorePose))
+                    .setLinearHeadingInterpolation(preScorePose.getHeading(), endScorePose.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
@@ -360,14 +371,17 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                 case 221: // drives toward goal to score second set of artifacts (22)
                         if (!follower.isBusy()) {
                             follower.followPath(driveToGoal22);
-                            setPathState(224);
+                            setPathState(2240);
                         }
-
                     break;
-                case 224: // case for shooting
-                    if (!follower.isBusy()) {
-                        setPathState(1000);
+                case 2240:
+                    if(!follower.isBusy()) {
+                        follower.followPath(driveThroughLaunchZone);
+                        setPathState(224);
                     }
+                    break;
+                case 224:
+                    setPathState(1000);
                     break;
                 case 230: // beginning of actions for spike mark 23, gets ready to pickup
                     if (pathTimer.getElapsedTimeSeconds() > 0.5) {

@@ -1,6 +1,7 @@
     package org.firstinspires.ftc.teamcode.auto;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -10,14 +11,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.teamcode.Hardware.Shooter;
+import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
     @Autonomous
-        public class redAlt_C1 extends OpMode {
+        public class blueXIII_SpinfinityDuo extends OpMode {
 
-        Shooter shooter = new Shooter();
+        ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
 
         private int obeliskResult = 0;
 
@@ -27,33 +28,66 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
         private Timer pathTimer, opmodeTimer, shootTimer;
         private int pathState;
 
-        public static double NEW_P = 100.0;   // 10.0
-        public static double NEW_I = 1.0;    // 3.0
-        public static double NEW_D = 20.0;    // 0.0
-        public static double NEW_F = 3.5;    // 0.0
+
+        public static double NEW_P = 150.0;   // 10.0
+        public static double NEW_I = 5.0;    // 3.0
+        public static double NEW_D = 40.0;    // 0.0
+        public static double NEW_F = 1.25;    // 0.0
 
         double shootingTime = 0.0;
 
-        private final Pose startPose = new Pose(80, 8, Math.toRadians(0));
-        private final Pose loadingZone = new Pose(138, 8, Math.toRadians(0));
-        private final Pose reLoadingZone = new Pose(120, 8, Math.toRadians(0));
-        private final Pose shhooting = new Pose(82, 12, Math.toRadians(60));
+        private final Pose startPose = new Pose(28, 129, Math.toRadians(144)); // Reflected over x = 72
+// private final Pose viewPose = new Pose(64, 120, Math.toRadians(90)); // Reflected over x = 72
 
-        DcMotorEx motorIntake, motorTransfer;
+        private final Pose motifDetection = new Pose(59, 110, Math.toRadians(90));
+
+        private final Pose scorePose = new Pose(48, 96, Math.toRadians(135)); // Reflected heading: 180 - 45 = 135
+
+        private final Pose prePickupPose21 = new Pose(52, 41, Math.toRadians(180)); // Reflected heading: 180 - 0 = 180
+
+        private final Pose pickupPose21 = new Pose(15, 41, Math.toRadians(180));
+
+        private final Pose prePickupPose22 = new Pose(52, 63, Math.toRadians(180));
+
+        private final Pose pickupPose22 = new Pose(14, 63, Math.toRadians(180));
+
+        private final Pose prePickupPose23 = new Pose(52, 88.75, Math.toRadians(180));
+
+        private final Pose pickupPose23 = new Pose(22, 88.75, Math.toRadians(180));
+
+        private final Pose gatePickup = new Pose(16, 61.5, Math.toRadians(160));
+
+        private final Pose downGate = new Pose(11, 52.5, Math.toRadians(140));
+
+        private final Pose controlPointDriveToGate = new Pose(54, 54);
+
+        private final Pose controlPointDriveToAwayFromGate = new Pose(59, 50);
+
+        private final Pose controlPoint22 = new Pose(64, 60);
+
+        private final Pose endPose = new Pose(54, 67, Math.toRadians(180));
+
+        private final Pose finalShootPose = new Pose(54, 110, Math.toRadians(150));
+
+        private PathChain driveToGoal, driveToPickup23, driveToGoal23, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPickup21, driveToGoal21, driveToEnd;
+
+        DcMotorEx motorIntake;
         DcMotorEx motorFlywheel;
+        DcMotorEx motorFlywheel2;
 
-        double targetRPM;
-        double flywheelRPM = 0.;
+        double targetRPM = 0.0;
+        double flywheelRPM = 0.0;
+        double flywheelRPM2 = 0.0;
         double TPS;
-        double CPR = 28.;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
+        double CPR = 28.0;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
 
         double transferOn = 0.8;
-        double transferOff = 0.;
+        double transferOff = 0.0;
 
         double intakeOn = 0.8;
         double intakeOff = 0.0;
 
-        double TARGET_AUTON_RPM = 3000.;
+        double TARGET_AUTON_RPM = 2325.0; //2475.0
 
         int shootingSequenceFlag = 1;
 
@@ -61,40 +95,122 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         int telemtryUpdate = 0;
 
-        private PathChain driveToLoadingZone, driveToScorePoseL, driveToScorePoseS, driveAwayToLoadingZone, driveToAwayReLoadingZone;
 
         private void buildPaths() {
 
-            driveToLoadingZone = follower.pathBuilder()
-                    .addPath(new BezierLine(startPose, loadingZone))
-                    .setLinearHeadingInterpolation(startPose.getHeading(), loadingZone.getHeading())
+            driveToGoal = follower.pathBuilder()
+                    .addPath(new BezierLine(startPose, scorePose))
+                    .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
-            driveAwayToLoadingZone = follower.pathBuilder()
-                    .addPath(new BezierLine(loadingZone, reLoadingZone))
-                    .setLinearHeadingInterpolation(loadingZone.getHeading(), reLoadingZone.getHeading())
+            // The paths for the first set of artifacts(PPG) are below
+//            driveToPrePickup23 = follower.pathBuilder()
+//                    .addPath(new BezierLine(scorePose, prePickupPose23))
+//                    .setLinearHeadingInterpolation(scorePose.getHeading(), prePickupPose23.getHeading())
+//                    .setTimeoutConstraint(0)
+//                    .build();
+//
+//            driveToPickup23 = follower.pathBuilder()
+//                    .addPath(new BezierLine(prePickupPose23, pickupPose23))
+//                    .setLinearHeadingInterpolation(prePickupPose23.getHeading(), pickupPose23.getHeading())
+//                    .setTimeoutConstraint(0)
+//                    .build();
+//
+            driveToPickup23 = follower.pathBuilder()
+                    .addPath(new BezierLine(scorePose, prePickupPose23))
+                    .setLinearHeadingInterpolation(scorePose.getHeading(), prePickupPose23.getHeading())
+                    .addPath(new BezierLine(prePickupPose23, pickupPose23))
+                    .setLinearHeadingInterpolation(prePickupPose23.getHeading(), pickupPose23.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
-            driveToAwayReLoadingZone = follower.pathBuilder()
-                    .addPath(new BezierLine(reLoadingZone, loadingZone))
-                    .setLinearHeadingInterpolation(reLoadingZone.getHeading(), loadingZone.getHeading())
+            driveToGoal23 = follower.pathBuilder()
+                    .addPath(new BezierLine(pickupPose23, scorePose))
+                    .setLinearHeadingInterpolation(pickupPose23.getHeading(), scorePose.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
-            driveToScorePoseL = follower.pathBuilder()
-                    .addPath(new BezierLine(loadingZone, shhooting))
-                    .setLinearHeadingInterpolation(loadingZone.getHeading(), shhooting.getHeading())
+            // The paths for the second set of artifacts(PGP) are below
+//            driveToPrePickup22 = follower.pathBuilder()
+//                    .addPath(new BezierLine(scorePose, prePickupPose22))
+//                    .setLinearHeadingInterpolation(scorePose.getHeading(), prePickupPose22.getHeading())
+//                    .setTimeoutConstraint(0)
+//                    .build();
+//
+//            driveToPickup22 = follower.pathBuilder()
+//                    .addPath(new BezierLine(prePickupPose22, pickupPose22))
+//                    .setLinearHeadingInterpolation(prePickupPose22.getHeading(), pickupPose22.getHeading())
+//                    .setTimeoutConstraint(0)
+//                    .build();
+
+            driveToPickup22 = follower.pathBuilder()
+                    .addPath(new BezierLine(scorePose, prePickupPose22))
+                    .setLinearHeadingInterpolation(scorePose.getHeading(), prePickupPose22.getHeading())
+                    .addPath(new BezierLine(prePickupPose22, pickupPose22))
+                    .setLinearHeadingInterpolation(prePickupPose22.getHeading(), pickupPose22.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
-            driveToScorePoseS = follower.pathBuilder()
-                    .addPath(new BezierLine(startPose, shhooting))
-                    .setLinearHeadingInterpolation(startPose.getHeading(), shhooting.getHeading())
+
+            driveToGoal22 = follower.pathBuilder()
+                    .addPath(new BezierCurve(pickupPose22, controlPoint22, scorePose))
+                    .setLinearHeadingInterpolation(pickupPose22.getHeading(), scorePose.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
+            driveToGatePickup = follower.pathBuilder()
+                    .addPath(new BezierCurve(scorePose, controlPointDriveToGate, gatePickup))
+                    .setLinearHeadingInterpolation(scorePose.getHeading(), gatePickup.getHeading())
+                    .setTimeoutConstraint(0)
+                    .build();
+
+            driveDownFromGate = follower.pathBuilder()
+                    .addPath(new BezierLine(gatePickup, downGate))
+                    .setLinearHeadingInterpolation(gatePickup.getHeading(), downGate.getHeading())
+                    .setTimeoutConstraint(0)
+                    .build();
+
+            driveToAwayFromGate = follower.pathBuilder()
+                    .addPath(new BezierCurve(downGate, controlPointDriveToAwayFromGate, scorePose))
+                    .setLinearHeadingInterpolation(downGate.getHeading(), scorePose.getHeading())
+                    .setTimeoutConstraint(0)
+                    .build();
+
+                    // The paths for the third set of artifacts(GPP) are below
+//            driveToPrePickup21 = follower.pathBuilder()
+//                    .addPath(new BezierLine(scorePose, prePickupPose21))
+//                    .setLinearHeadingInterpolation(scorePose.getHeading(), prePickupPose21.getHeading())
+//                    .setTimeoutConstraint(0)
+//                    .build();
+//
+//            driveToPickup21 = follower.pathBuilder()
+//                    .addPath(new BezierLine(prePickupPose21, pickupPose21))
+//                    .setLinearHeadingInterpolation(prePickupPose21.getHeading(), pickupPose21.getHeading())
+//                    .setTimeoutConstraint(0)
+//                    .build();
+
+            driveToPickup21 = follower.pathBuilder()
+                    .addPath(new BezierLine(scorePose, prePickupPose21))
+                    .setLinearHeadingInterpolation(scorePose.getHeading(), prePickupPose21.getHeading())
+                    .addPath(new BezierLine(prePickupPose21, pickupPose21))
+                    .setLinearHeadingInterpolation(prePickupPose21.getHeading(), pickupPose21.getHeading())
+                    .setTimeoutConstraint(0)
+                    .build();
+
+            driveToGoal21 = follower.pathBuilder()
+                    .addPath(new BezierLine(pickupPose21, finalShootPose))
+                    .setLinearHeadingInterpolation(pickupPose21.getHeading(), finalShootPose.getHeading())
+                    .setTimeoutConstraint(0)
+                    .build();
+
+
+
+            driveToEnd = follower.pathBuilder()
+                    .addPath(new BezierLine(scorePose, endPose))
+                    .setLinearHeadingInterpolation(scorePose.getHeading(), endPose.getHeading())
+                    .setTimeoutConstraint(0)
+                    .build();
 
 
         }
@@ -102,13 +218,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
         public void autonomousPathUpdate() {
             switch (pathState) {
                 case 10:
+                    obeliskResult = 23;
                     shooter.closeServoStop();
                     shooter.downServoPaddle();
                     motorIntake.setPower(intakeOn);
-                    if (pathTimer.getElapsedTimeSeconds() > 3) {
-                        follower.followPath(driveToScorePoseS);
-                        setPathState(11);
-                    }
+                    follower.followPath(driveToGoal);
+                    setPathState(11);
                     break;
                 case 11:
                     if (!follower.isBusy()) {
@@ -130,39 +245,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     setPathState(1001);
                     break;
                 case 1001:
-                    if (!follower.isBusy()) {
                         motorIntake.setPower(intakeOn);
-                        motorTransfer.setPower(transferOn);
                         setPathState(10001);
-                    }
                     break;
                 case 10001:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.25) { // changed from 0.5 to 0.25
+                    if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
                         shootTimer.resetTimer();
-                        shooter.openServoStop();
-                        setPathState(10006);
-                    }
-                    break;
-                case 10002:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.25) {
-                        shooter.closeServoStop();
-                        setPathState(10003);
-                    }
-                    break;
-                case 10003:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.25) {
-                        shooter.openServoStop();
-                        setPathState(10004);
-                    }
-                    break;
-                case 10004:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.25) {
-                        shooter.closeServoStop();
-                        setPathState(10005);
-                    }
-                    break;
-                case 10005:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.25) {
                         shooter.openServoStop();
                         setPathState(10006);
                     }
@@ -174,22 +262,15 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     }
                     break;
                 case 10007:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.2) {
                         //motorTransfer.setPower(transferOff);
                         shootingTime = shootTimer.getElapsedTimeSeconds();
                         shooter.downServoPaddle();
                         shooter.closeServoStop();
                         motorIntake.setPower(intakeOff);
-                        setPathState(10008);
-                    }
+                        setPathState(10010);
                     break;
                 case 10008: // updates shooting sequence flag
                     if (pathTimer.getElapsedTimeSeconds() > 0.1) {
-                        setPathState(667);
-                    }
-                    break;
-                case 667:
-                    if(!follower.isBusy()){
                         setPathState(10010);
                     }
                     break;
@@ -197,9 +278,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     if (shootingSequenceFlag == 22) {
                         setPathState(220);
                     } else if (shootingSequenceFlag == 2210) {
-                        setPathState(777);
+                        setPathState(300);
                     } else if (shootingSequenceFlag == 221023) {
-                        setPathState(777);
+                        setPathState(230);
                     } else if (shootingSequenceFlag == 22102321) {
                         setPathState(210);
                     } else if (shootingSequenceFlag == 777) {
@@ -210,13 +291,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                 case 210: // beginning of set of actions for spike mark 21, gets ready to pickup
                     motorIntake.setPower(intakeOn);
                     if (!follower.isBusy()) {
-//                        follower.followPath(driveToPickup21);
+                        follower.followPath(driveToPickup21);
                         setPathState(211);
                     }
                     break;
                 case 211: // drives toward goal to score first set of artifacts (21)
                         if (!follower.isBusy()) {
-//                            follower.followPath(driveToGoal21);
+                            follower.followPath(driveToGoal21);
                             setPathState(214);
                         }
                     break;
@@ -228,26 +309,16 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                 case 220: // beginning of set of actions for spike mark 22, gets ready to pickup
                     motorIntake.setPower(intakeOn);
                     if (!follower.isBusy()) {
-                        follower.followPath(driveToLoadingZone);
-                        setPathState(0221);
-                    }
-                    break;
-                case 0221:
-                    if (!follower.isBusy()) {
-                        follower.followPath(driveAwayToLoadingZone);
-                        setPathState(0222);
-                    }
-                    break;
-                case 0222:
-                    if (!follower.isBusy()) {
-                        follower.followPath(driveToAwayReLoadingZone);
+                        follower.followPath(driveToPickup22);
                         setPathState(221);
                     }
+                    break;
                 case 221: // drives toward goal to score second set of artifacts (22)
                         if (!follower.isBusy()) {
-                            follower.followPath(driveToScorePoseL);
-                            setPathState(11);
+                            follower.followPath(driveToGoal22);
+                            setPathState(224);
                         }
+
                     break;
                 case 224: // case for shooting
                     if (!follower.isBusy()) {
@@ -264,13 +335,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     break;
                 case 231:
                     if (!follower.isBusy()) {
-//                        follower.followPath(driveToPickup23);
+                        follower.followPath(driveToPickup23);
                         setPathState(234);
                     }
                     break;
                 case 234:
                     if (!follower.isBusy()) {
-//                        follower.followPath(driveToGoal23);
+                        follower.followPath(driveToGoal23);
                         setPathState(235);
                     }
                     break;
@@ -281,20 +352,20 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     break;
                 case 300: // case for "gobbling" from the gate
                     if (!follower.isBusy()) {
-                        follower.followPath(driveToScorePoseL);
+                        follower.followPath(driveToGatePickup);
                         motorIntake.setPower(intakeOn);
-                        setPathState(11);
+                        setPathState(301);
                     }
                     break;
                 case 301:
                     if (!follower.isBusy()) {
-//                        follower.followPath(driveDownFromGate);
+                        follower.followPath(driveDownFromGate);
                         setPathState(302);
                     }
                      break;
                 case 302:
                     if (pathTimer.getElapsedTimeSeconds() > 1.5)  {
-//                        follower.followPath(driveToAwayFromGate);
+                        follower.followPath(driveToAwayFromGate);
                         setPathState(303);
                     }
                     break;
@@ -305,7 +376,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     break;
                 case 777:
                     if (!follower.isBusy()) {
-//                        follower.followPath(driveToEnd);
+                        follower.followPath(driveToEnd);
                         TARGET_AUTON_RPM = 0.0;
                         setPathState(999);
                     }
@@ -313,7 +384,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                 case 999: // last state, just stops and waits
                     if(pathTimer.getElapsedTimeSeconds() > 1) {
                         TARGET_AUTON_RPM = 0.0;
-                        motorTransfer.setPower(transferOff);
                         motorIntake.setPower(intakeOff);
                         setPathState(912);
                     }
@@ -337,7 +407,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             targetRPM = TARGET_AUTON_RPM;
             TPS = targetRPM / 60. * CPR;
             motorFlywheel.setVelocity(TPS);
+            motorFlywheel2.setVelocity(TPS);
             flywheelRPM = motorFlywheel.getVelocity() * 60 / CPR;
+            flywheelRPM2 = motorFlywheel2.getVelocity() * 60 / CPR;
 
             telemetry.addData("Obelisk ID", obeliskResult); // telemetry for which motif was detected.
             telemetry.addData("Path State", pathState); // the current path the code is running
@@ -348,6 +420,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             telemetry.addData("OpMode Timer", opmodeTimer.getElapsedTimeSeconds());
             telemetry.addData("Target RPM", targetRPM);
             telemetry.addData("Flywheel RPM", flywheelRPM);
+            telemetry.addData("Flywheel RPM2", flywheelRPM2);
             telemetry.addData("Shooting Sequence", shootingSequenceFlag);
             telemetry.addData("Intake Status", motorIntake.getPower());
 
@@ -368,17 +441,17 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             shooter.init(hardwareMap);
 
             motorIntake = hardwareMap.get(DcMotorEx.class, "motorIntake");
-            motorTransfer = hardwareMap.get(DcMotorEx.class, "motorTransfer");
             motorFlywheel = hardwareMap.get(DcMotorEx.class, "motorFlywheel");
+            motorFlywheel2 = hardwareMap.get(DcMotorEx.class, "motorFlywheel2");
 
-            motorIntake.setDirection(DcMotorEx.Direction.FORWARD);
-            motorTransfer.setDirection(DcMotorEx.Direction.FORWARD);
-            motorFlywheel.setDirection(DcMotorEx.Direction.FORWARD);
+            motorIntake.setDirection(DcMotorEx.Direction.REVERSE);
+            motorFlywheel.setDirection(DcMotorEx.Direction.REVERSE);
+            motorFlywheel2.setDirection(DcMotorEx.Direction.FORWARD);
+
 
             motorFlywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
             motorIntake.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-            motorTransfer.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
             motorFlywheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
             PIDFCoefficients pidfNew = new PIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
@@ -400,7 +473,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             shooter.closeServoStop();
             shooter.downServoPaddle();
 
-            shooter.servoTurretSetPosition(0.5);
+            shooter.centerMotorTurret();
 
         }
 

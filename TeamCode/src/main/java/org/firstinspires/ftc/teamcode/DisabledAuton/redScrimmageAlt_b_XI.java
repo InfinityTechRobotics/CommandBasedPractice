@@ -1,12 +1,12 @@
-    package org.firstinspires.ftc.teamcode.auto;
+    package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -14,9 +14,9 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Hardware.Shooter;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+    @Disabled
     @Autonomous
-        public class redScrimmageAlt_a_XI extends OpMode {
+        public class redScrimmageAlt_b_XI extends OpMode {
 
         Shooter shooter = new Shooter();
 
@@ -37,7 +37,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose startPose = new Pose(80, 8, Math.toRadians(0));
         private final Pose loadingZone = new Pose(138, 8, Math.toRadians(0));
-        private final Pose shhooting = new Pose(82, 12, Math.toRadians(0));
+        private final Pose shhooting = new Pose(82, 12, Math.toRadians(60));
 
         DcMotorEx motorIntake, motorTransfer;
         DcMotorEx motorFlywheel;
@@ -53,7 +53,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
         double intakeOn = 0.8;
         double intakeOff = 0.0;
 
-        double TARGET_AUTON_RPM = 3200.;
+        double TARGET_AUTON_RPM = 3000.;
 
         int shootingSequenceFlag = 1;
 
@@ -61,7 +61,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         int telemtryUpdate = 0;
 
-        private PathChain driveToLoadingZone, driveToScorePose;
+        private PathChain driveToLoadingZone, driveToScorePoseL, driveToScorePoseS;
 
         private void buildPaths() {
 
@@ -71,9 +71,15 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     .setTimeoutConstraint(0)
                     .build();
 
-            driveToScorePose = follower.pathBuilder()
+            driveToScorePoseL = follower.pathBuilder()
                     .addPath(new BezierLine(loadingZone, shhooting))
                     .setLinearHeadingInterpolation(loadingZone.getHeading(), shhooting.getHeading())
+                    .setTimeoutConstraint(0)
+                    .build();
+
+            driveToScorePoseS = follower.pathBuilder()
+                    .addPath(new BezierLine(startPose, shhooting))
+                    .setLinearHeadingInterpolation(startPose.getHeading(), shhooting.getHeading())
                     .setTimeoutConstraint(0)
                     .build();
 
@@ -87,7 +93,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     shooter.closeServoStop();
                     shooter.downServoPaddle();
                     motorIntake.setPower(intakeOn);
-                    setPathState(11);
+                    if (pathTimer.getElapsedTimeSeconds() > 3) {
+                        follower.followPath(driveToScorePoseS);
+                        setPathState(11);
+                    }
                     break;
                 case 11:
                     if (!follower.isBusy()) {
@@ -213,7 +222,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     break;
                 case 221: // drives toward goal to score second set of artifacts (22)
                         if (!follower.isBusy()) {
-                            follower.followPath(driveToScorePose);
+                            follower.followPath(driveToScorePoseL);
                             setPathState(11);
                         }
                     break;
@@ -249,7 +258,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     break;
                 case 300: // case for "gobbling" from the gate
                     if (!follower.isBusy()) {
-                        follower.followPath(driveToScorePose);
+                        follower.followPath(driveToScorePoseL);
                         motorIntake.setPower(intakeOn);
                         setPathState(11);
                     }
@@ -368,7 +377,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             shooter.closeServoStop();
             shooter.downServoPaddle();
 
-            shooter.servoTurretSetPosition(0.05);
+            shooter.servoTurretSetPosition(0.5);
 
         }
 

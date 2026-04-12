@@ -30,7 +30,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Disabled
 @Configurable
 @TeleOp
 public class TeleOpSpinfinityDuoMk5 extends OpMode {
@@ -56,7 +55,7 @@ public class TeleOpSpinfinityDuoMk5 extends OpMode {
 
     private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
 
-    double LONG_DIST_ANGLE_CORRECTION = 4; // Red = 4; Blue = -4;
+    double LONG_DIST_ANGLE_CORRECTION = 2; // Red = 4; Blue = -4;
 
     // Turret variables
     double error;
@@ -174,7 +173,7 @@ public class TeleOpSpinfinityDuoMk5 extends OpMode {
 
         shootTimer = new Timer();
 
-        startingPose = new Pose(72, 24, Math.toRadians(0));
+        startingPose = new Pose(91, 108, Math.toRadians(30));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
@@ -564,7 +563,7 @@ public class TeleOpSpinfinityDuoMk5 extends OpMode {
                 }
                 break;
             case 10006:
-                if (pathTimer.getElapsedTimeSeconds() > 0.45) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
                     shooter.shootServoPaddle();
                     setPathState(10007);
                 }

@@ -30,8 +30,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
 import java.util.function.Supplier;
-
-@Configurable
+@Disabled
+//@Configurable
 @TeleOp
 public class TeleOpRedWorldsTestmk7 extends OpMode {
 

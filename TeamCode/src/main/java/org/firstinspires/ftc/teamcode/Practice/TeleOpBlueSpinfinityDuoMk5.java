@@ -14,7 +14,6 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -29,10 +28,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
 import java.util.function.Supplier;
-@Disabled
-//@Configurable
+
+@Configurable
 @TeleOp
-public class TeleOpSpinfinityDuoMk4 extends OpMode {
+public class TeleOpBlueSpinfinityDuoMk5 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -53,9 +52,9 @@ public class TeleOpSpinfinityDuoMk4 extends OpMode {
 
     double laserTime;
 
-    private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
+    private static final int DESIRED_TAG_ID = 20; // Red = 24; Blue = 20;
 
-    double LONG_DIST_ANGLE_CORRECTION = 2; // Red = 4; Blue = -4;
+    double LONG_DIST_ANGLE_CORRECTION = -2; // Red = 4; Blue = -4;
 
     // Turret variables
     double error;
@@ -173,14 +172,14 @@ public class TeleOpSpinfinityDuoMk4 extends OpMode {
 
         shootTimer = new Timer();
 
-        startingPose = new Pose(72, 24, Math.toRadians(0));
+        startingPose = new Pose(53, 108, Math.toRadians(150));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
 
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(90, 102))))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37.5), 0.8))
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(54, 102))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(142.5), 0.8))
                 .build();
 
     }
@@ -199,6 +198,13 @@ public class TeleOpSpinfinityDuoMk4 extends OpMode {
         autonomousPathUpdate();
 
         follower.update();
+
+        if (elapsedTime > 100) {
+            gamepad1.rumble(1, 1,100);
+        }
+        if (elapsedTime > 110) {
+            gamepad1.rumble(1, 1,500);
+        }
 
         // Laser Artifact Detection (Detected = TRUE --> counter +1)
         stateHigh = laserInput.getState();
@@ -228,7 +234,7 @@ public class TeleOpSpinfinityDuoMk4 extends OpMode {
 //        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
 
         if (gamepad1.aWasPressed()) {
-            follower.setPose(new Pose(72, 72, Math.toRadians(0)));
+            follower.setPose(new Pose(72, 72, Math.toRadians(180)));
             //pinpoint.pinpointReset();
         }
 
@@ -347,7 +353,7 @@ public class TeleOpSpinfinityDuoMk4 extends OpMode {
         robotXPos = follower.getPose().getX();
         robotYPos = follower.getPose().getY();
         botHeading = follower.getHeading();
-        robotToGoalRelativeAngle = shooter.newTurretPoseCalc(robotXPos, robotYPos, botHeading);
+        robotToGoalRelativeAngle = shooter.newTurretBluePoseCalc(robotXPos, robotYPos, botHeading);
 
         turretTimer = timer.seconds() - turretTimer;
 
@@ -480,35 +486,35 @@ public class TeleOpSpinfinityDuoMk4 extends OpMode {
 
 
         // Panels Telemetry Data
-        //        panelsTelemetry.addData("Timer", timer.seconds());
-        panelsTelemetry.addData("Pinpoint Robot X Position", robotXPos);
-        panelsTelemetry.addData("Pinpoint Robot Y Position", robotYPos);
-        panelsTelemetry.addData("Pinpoint Robot Heading", Math.toDegrees(botHeading));
-        panelsTelemetry.addData("MegaTag Robot X Position", MT1XPos);
-        panelsTelemetry.addData("MegaTag Robot Y Position", MT1YPos);
-        panelsTelemetry.addData("MegaTag Robot Heading", MT1botHeading);
-        panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
-        panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
-//        panelsTelemetry.addData("Shooting Sequence State", pathState);
-//        panelsTelemetry.addData("Artifact Counter", counter);
-//        panelsTelemetry.addData("Laser Detection Time", laserTime);
-//        panelsTelemetry.addData("Object Detected", stateHigh);
-        panelsTelemetry.addData("Angle To Goal", robotToGoalRelativeAngle);
-        panelsTelemetry.addData("A2 Angle", a2);
+        panelsTelemetry.addData("Auto Turret", turretTracking);
+        panelsTelemetry.addData("Auto RPM", autoRPM);
         panelsTelemetry.addData("Distance To AprilTag", distanceToGoalInches);
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
         panelsTelemetry.addData("Robot Centric", robotCentric);
+        //        panelsTelemetry.addData("Timer", timer.seconds());
+//        panelsTelemetry.addData("Pinpoint Robot X Position", robotXPos);
+//        panelsTelemetry.addData("Pinpoint Robot Y Position", robotYPos);
+//        panelsTelemetry.addData("Pinpoint Robot Heading", Math.toDegrees(botHeading));
+//        panelsTelemetry.addData("MegaTag Robot X Position", MT1XPos);
+//        panelsTelemetry.addData("MegaTag Robot Y Position", MT1YPos);
+//        panelsTelemetry.addData("MegaTag Robot Heading", MT1botHeading);
+//        panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
+//        panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
+////        panelsTelemetry.addData("Shooting Sequence State", pathState);
+////        panelsTelemetry.addData("Artifact Counter", counter);
+////        panelsTelemetry.addData("Laser Detection Time", laserTime);
+////        panelsTelemetry.addData("Object Detected", stateHigh);
+//        panelsTelemetry.addData("Angle To Goal", robotToGoalRelativeAngle);
+//        panelsTelemetry.addData("A2 Angle", a2);
 //        panelsTelemetry.addData("Drive Power Factor", powerFactor);
-        panelsTelemetry.addData("Auto Turret", turretTracking);
-        panelsTelemetry.addData("Auto RPM", autoRPM);
 //        panelsTelemetry.addData("Intake On", intakeOn);
-        panelsTelemetry.addData("Bearing Error", error);
-        panelsTelemetry.addData("Turret Target Pos", newPos);
-        panelsTelemetry.addData("Turret Target Pose Pos", newPosePos);
-        panelsTelemetry.addData("Turret Current Pos", currentPos);
-        panelsTelemetry.debug("Pinpoint Velocity", follower.getVelocity());
-        panelsTelemetry.debug("Automated Drive", automatedDrive);
+//        panelsTelemetry.addData("Bearing Error", error);
+//        panelsTelemetry.addData("Turret Target Pos", newPos);
+//        panelsTelemetry.addData("Turret Target Pose Pos", newPosePos);
+//        panelsTelemetry.addData("Turret Current Pos", currentPos);
+//        panelsTelemetry.debug("Pinpoint Velocity", follower.getVelocity());
+//        panelsTelemetry.debug("Automated Drive", automatedDrive);
 //        panelsTelemetry.debug("Slow Mode", slowMode);
 //        panelsTelemetry.debug("Slow Mode Multiplier", slowModeMultiplier);
 //        panelsTelemetry.addData("Transfer On", transferOn);

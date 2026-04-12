@@ -1,4 +1,4 @@
-    package org.firstinspires.ftc.teamcode.auto;
+    package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
     @Disabled
     @Autonomous
-        public class redGoalPickUpIX extends OpMode {
+        public class blueSChatGPT_XI extends OpMode {
 
         Shooter shooter = new Shooter();
 
@@ -36,42 +36,42 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         double shootingTime = 0.0;
 
-        private final Pose startPose = new Pose(116, 129, Math.toRadians(36)); // Start Pose of our robot.
+        private final Pose startPose = new Pose(28, 129, Math.toRadians(144)); // Start Pose of our robot.
     //    private final Pose viewPose = new Pose(80, 120, Math.toRadians(90)); // Pose to read the Obelisk.
 
-        private final Pose motifDetection = new Pose(85, 110, Math.toRadians(90));
+        private final Pose motifDetection = new Pose(59, 110, Math.toRadians(90));
 
-        private final Pose scorePose = new Pose(96, 96, Math.toRadians(45)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+        private final Pose scorePose = new Pose(48, 96, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
 
-        private final Pose prePickupPose21 = new Pose(92, 41, Math.toRadians(0)); // Preparing to intake third set of artifacts.
+        private final Pose prePickupPose21 = new Pose(52, 41, Math.toRadians(180)); // Preparing to intake third set of artifacts.
 
-        private final Pose pickupPose21 = new Pose(129, 41, Math.toRadians(0)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
+        private final Pose pickupPose21 = new Pose(16, 41, Math.toRadians(180)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
 
-        private final Pose prePickupPose22 = new Pose(92, 63, Math.toRadians(0)); // Preparing to intake second set of artifacts.
+        private final Pose prePickupPose22 = new Pose(52, 65, Math.toRadians(180)); // Preparing to intake second set of artifacts.
 
-        private final Pose pickupPose22 = new Pose(132, 63, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
+        private final Pose pickupPose22 = new Pose(14, 62, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark(PGP).
 
-        private final Pose prePickupPose23 = new Pose(92, 88.75, Math.toRadians(0)); // Preparing to intake first set of artifacts.
+        private final Pose prePickupPose23 = new Pose(52, 88.75, Math.toRadians(180)); // Preparing to intake first set of artifacts.
 
-        private final Pose pickupPose23 = new Pose(124, 88.75, Math.toRadians(0)); // Highest (First Set) of Artifacts from the Spike Mark(PPG).
+        private final Pose pickupPose23 = new Pose(21, 88.75, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark(PPG).
 
-        private final Pose preGateHit = new Pose(118, 80, Math.toRadians(90));
+        private final Pose preGateHit = new Pose(26, 80, Math.toRadians(90));
 
-        private final Pose gateHit = new Pose( 122, 73.5, Math.toRadians(90));
+        private final Pose gateHit = new Pose( 22, 73.5, Math.toRadians(90));
 
-        private final Pose gatePickup = new Pose(128, 61.5, Math.toRadians(20));
+        private final Pose gatePickup = new Pose(15, 63.5, Math.toRadians(160));
 
-        private final Pose downGate = new Pose(133, 52.5, Math.toRadians(40));
+        private final Pose downGate = new Pose(11, 52.5, Math.toRadians(140));
 
-        private final Pose controlPointDriveToGate = new Pose(90, 54);
+        private final Pose controlPointDriveToGate = new Pose(54, 54);
 
-        private final Pose controlPointDriveToAwayFromGate = new Pose(85, 43);
+        private final Pose controlPointDriveToAwayFromGate = new Pose(59, 48);
 
-        private final Pose controlPoint22 = new Pose(80, 60); // 67! ;) - you should get what this means by now - read the name aigin - idk i cant spel
+        private final Pose controlPoint22 = new Pose(64, 60); // 67! ;) - you should get what this means by now - read the name aigin - idk i cant spel
 
-        private  final Pose endPose = new Pose(90, 67, Math.toRadians(0));//its the end - if you took the time to read this, you get it - otherwise vid the auton eyelid is dissapointed :(
+        private  final Pose endPose = new Pose(54, 67, Math.toRadians(180));//its the end - if you took the time to read this, you get it - otherwise vid the auton eyelid is dissapointed :(
 
-        private final Pose finalShootPose = new Pose (90, 110, Math.toRadians(30));
+        private final Pose finalShootPose = new Pose (54, 110, Math.toRadians(150));
 
         private PathChain driveToGoal, driveToPrePickup23, driveToPickup23, driveToGoal23, driveToPrePickup22, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPrePickup21, driveToPickup21, driveToGoal21, driveToEnd, driveToGate, driveGateToGoal;
 
@@ -94,6 +94,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
         int shootingSequenceFlag = 1;
 
         PIDFCoefficients pidfModified;
+
+        int telemtryUpdate = 0;
 
 
         private void buildPaths() {
@@ -239,7 +241,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     setPathState(11);
                     break;
                 case 11:
-                    if (pathTimer.getElapsedTimeSeconds() > START_DELAY_TIME) {
+                    if (!follower.isBusy()) {
                         setPathState(1000);
                     }
                     break;
@@ -338,12 +340,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     }
                     break;
                 case 211: // drives toward goal to score first set of artifacts (21)
-                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
                         if (!follower.isBusy()) {
                             follower.followPath(driveToGoal21);
                             setPathState(214);
                         }
-                    }
                     break;
                 case 214: // case for shooting
                     if (!follower.isBusy()) {
@@ -357,27 +357,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                         setPathState(221);
                     }
                     break;
-//                case 221: // timer case
-//                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
-//                        if (!follower.isBusy()) {
-//                            motorIntake.setPower(intakeOn);
-//                            setPathState(222);
-//                        }
-//                    }
-//           break;
-//                case 222: // picks up second set of artifacts (22)
-//                    if (!follower.isBusy()) {
-//                        follower.followPath((driveToPickup22));
-//                        setPathState(223);
-//                    }
-//                    break;
                 case 221: // drives toward goal to score second set of artifacts (22)
-                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
                         if (!follower.isBusy()) {
                             follower.followPath(driveToGoal22);
                             setPathState(224);
                         }
-                    }
+
                     break;
                 case 224: // case for shooting
                     if (!follower.isBusy()) {
@@ -398,20 +383,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                         setPathState(234);
                     }
                     break;
-//                case 2322:
-//                    if (pathTimer.getElapsedTimeSeconds() > 0.5) {
-//                        if (!follower.isBusy()) {
-//                            follower.followPath(driveToGate);
-//                            setPathState(233);
-//                        }
-//                    }
-//                    break;
-//                case 233: // timer case
-//                    if (pathTimer.getElapsedTimeSeconds() > 2) {
-//                        follower.followPath(driveGateToGoal);
-//                        setPathState(234);
-//                    }
-//                    break;
                 case 234:
                     if (!follower.isBusy()) {
                         follower.followPath(driveToGoal23);
@@ -482,7 +453,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             TPS = targetRPM / 60. * CPR;
             motorFlywheel.setVelocity(TPS);
             flywheelRPM = motorFlywheel.getVelocity() * 60 / CPR;
-
             telemetry.addData("Obelisk ID", obeliskResult); // telemetry for which motif was detected.
             telemetry.addData("Path State", pathState); // the current path the code is running
             telemetry.addData("X", follower.getPose().getX()); // x pos
@@ -494,7 +464,15 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             telemetry.addData("Flywheel RPM", flywheelRPM);
             telemetry.addData("Shooting Sequence", shootingSequenceFlag);
             telemetry.addData("Intake Status", motorIntake.getPower());
-            telemetry.update();
+
+            if (telemtryUpdate == 49){
+                telemtryUpdate = 0;
+                telemetry.update();
+            } else {
+                telemtryUpdate +=1;
+            }
+
+
 
         }
 

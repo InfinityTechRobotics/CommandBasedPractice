@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
-import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.control.PredictiveBrakingCoefficients;
 import com.pedropathing.follower.Follower;
@@ -13,12 +12,11 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-//This is the one we're using 3/8/26
+public class ConstantsPP21APril10 {
 
-public class Constants {
+
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(13.05)
             .headingPIDFCoefficients(new PIDFCoefficients(
@@ -27,27 +25,27 @@ public class Constants {
                     0.02,
                     0.03
             ))
-//            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(
-//                    0.2,
-//                    0.16006,
-//                    0.00089544
+            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(
+                    0.2,
+                    0.16006,
+                    0.00089544
+            ))
+            .centripetalScaling(0.0);
+//            .forwardZeroPowerAcceleration(-36.4161)
+//            .lateralZeroPowerAcceleration(-82.1192)
+//            .translationalPIDFCoefficients(new PIDFCoefficients(
+//                    0.08,
+//                    0.0,
+//                    0.01,
+//                    0.03
 //            ))
-            .forwardZeroPowerAcceleration(-36.29085) // -36.4161
-            .lateralZeroPowerAcceleration(-58.3757) // -82.1192
-            .translationalPIDFCoefficients(new PIDFCoefficients(
-                    0.1,
-                    0.0,
-                    0.01,
-                    0.035
-            ))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(
-                    0.01,
-                    0.0,
-                    0.0005,
-                    0.6,
-                    0.05
-            ))
-            .centripetalScaling(0.0005);
+//            .drivePIDFCoefficients(new FilteredPIDFCoefficients(
+//                    0.01,
+//                    0.0,
+//                    0.0005,
+//                    0.6,
+//                    0.05
+//            ))
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1.)
@@ -84,4 +82,6 @@ public class Constants {
                 .build();
 
     }
+
+
 }

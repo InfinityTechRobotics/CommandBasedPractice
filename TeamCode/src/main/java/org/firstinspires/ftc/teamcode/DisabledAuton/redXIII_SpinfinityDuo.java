@@ -1,4 +1,4 @@
-    package org.firstinspires.ftc.teamcode.auto;
+    package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -7,21 +7,18 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.teamcode.Hardware.Shooter;
-import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinity;
+import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-    @Disabled
-    @Autonomous
-        public class redChatGPT_XISpinfinity extends OpMode {
 
-        ShooterSpinfinity shooter = new ShooterSpinfinity();
+    @Autonomous
+        public class redXIII_SpinfinityDuo extends OpMode {
+
+        ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
 
         private int obeliskResult = 0;
 
@@ -31,10 +28,11 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
         private Timer pathTimer, opmodeTimer, shootTimer;
         private int pathState;
 
-        public static double NEW_P = 150.;   // 10.
-        public static double NEW_I = 2.5;    // 3.
-        public static double NEW_D = 50.;    // 0.
-        public static double NEW_F = 2.5;    // 0.
+
+        public static double NEW_P = 150.0;   // 10.0
+        public static double NEW_I = 5.0;    // 3.0
+        public static double NEW_D = 40.0;    // 0.0
+        public static double NEW_F = 1.25;    // 0.0
 
         double shootingTime = 0.0;
 
@@ -57,10 +55,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose pickupPose23 = new Pose(124, 88.75, Math.toRadians(0)); // Highest (First Set) of Artifacts from the Spike Mark(PPG).
 
-        private final Pose preGateHit = new Pose(118, 80, Math.toRadians(90));
-
-        private final Pose gateHit = new Pose( 122, 73.5, Math.toRadians(90));
-
         private final Pose gatePickup = new Pose(128, 61.5, Math.toRadians(20));
 
         private final Pose downGate = new Pose(133, 52.5, Math.toRadians(40));
@@ -75,23 +69,25 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
         private final Pose finalShootPose = new Pose (90, 110, Math.toRadians(30));
 
-        private PathChain driveToGoal, driveToPrePickup23, driveToPickup23, driveToGoal23, driveToPrePickup22, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPrePickup21, driveToPickup21, driveToGoal21, driveToEnd, driveToGate, driveGateToGoal;
+        private PathChain driveToGoal, driveToPickup23, driveToGoal23, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPickup21, driveToGoal21, driveToEnd;
 
         DcMotorEx motorIntake;
         DcMotorEx motorFlywheel;
+        DcMotorEx motorFlywheel2;
 
-        double targetRPM = 0.;
-        double flywheelRPM = 0.;
+        double targetRPM = 0.0;
+        double flywheelRPM = 0.0;
+        double flywheelRPM2 = 0.0;
         double TPS;
-        double CPR = 28.;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
+        double CPR = 28.0;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
 
         double transferOn = 0.8;
-        double transferOff = 0.;
+        double transferOff = 0.0;
 
         double intakeOn = 0.8;
         double intakeOff = 0.0;
 
-        double TARGET_AUTON_RPM = 2400.;
+        double TARGET_AUTON_RPM = 2325.0; //2475.0
 
         int shootingSequenceFlag = 1;
 
@@ -209,19 +205,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     .build();
 
 
-            driveToGate = follower.pathBuilder()
-                    .addPath(new BezierLine(pickupPose23, preGateHit))
-                    .setLinearHeadingInterpolation(pickupPose23.getHeading(), preGateHit.getHeading())
-                    .addPath(new BezierLine(preGateHit, gateHit))
-                    .setLinearHeadingInterpolation(preGateHit.getHeading(), gateHit.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
-
-            driveGateToGoal = follower.pathBuilder()
-                    .addPath(new BezierLine(gateHit, scorePose))
-                    .setLinearHeadingInterpolation(gateHit.getHeading(), scorePose.getHeading())
-                    .setTimeoutConstraint(0)
-                    .build();
 
             driveToEnd = follower.pathBuilder()
                     .addPath(new BezierLine(scorePose, endPose))
@@ -262,38 +245,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     setPathState(1001);
                     break;
                 case 1001:
-                    if (!follower.isBusy()) {
                         motorIntake.setPower(intakeOn);
                         setPathState(10001);
-                    }
                     break;
                 case 10001:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.25) { // changed from 0.5 to 0.25
+                    if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
                         shootTimer.resetTimer();
-                        shooter.openServoStop();
-                        setPathState(10006);
-                    }
-                    break;
-                case 10002:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.25) {
-                        shooter.closeServoStop();
-                        setPathState(10003);
-                    }
-                    break;
-                case 10003:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.25) {
-                        shooter.openServoStop();
-                        setPathState(10004);
-                    }
-                    break;
-                case 10004:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.25) {
-                        shooter.closeServoStop();
-                        setPathState(10005);
-                    }
-                    break;
-                case 10005:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.25) {
                         shooter.openServoStop();
                         setPathState(10006);
                     }
@@ -305,14 +262,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                     }
                     break;
                 case 10007:
-                    if (pathTimer.getElapsedTimeSeconds() > 0.2) {
                         //motorTransfer.setPower(transferOff);
                         shootingTime = shootTimer.getElapsedTimeSeconds();
                         shooter.downServoPaddle();
                         shooter.closeServoStop();
                         motorIntake.setPower(intakeOff);
-                        setPathState(10008);
-                    }
+                        setPathState(10010);
                     break;
                 case 10008: // updates shooting sequence flag
                     if (pathTimer.getElapsedTimeSeconds() > 0.1) {
@@ -452,7 +407,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             targetRPM = TARGET_AUTON_RPM;
             TPS = targetRPM / 60. * CPR;
             motorFlywheel.setVelocity(TPS);
+            motorFlywheel2.setVelocity(TPS);
             flywheelRPM = motorFlywheel.getVelocity() * 60 / CPR;
+            flywheelRPM2 = motorFlywheel2.getVelocity() * 60 / CPR;
 
             telemetry.addData("Obelisk ID", obeliskResult); // telemetry for which motif was detected.
             telemetry.addData("Path State", pathState); // the current path the code is running
@@ -463,6 +420,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             telemetry.addData("OpMode Timer", opmodeTimer.getElapsedTimeSeconds());
             telemetry.addData("Target RPM", targetRPM);
             telemetry.addData("Flywheel RPM", flywheelRPM);
+            telemetry.addData("Flywheel RPM2", flywheelRPM2);
             telemetry.addData("Shooting Sequence", shootingSequenceFlag);
             telemetry.addData("Intake Status", motorIntake.getPower());
 
@@ -484,9 +442,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
             motorIntake = hardwareMap.get(DcMotorEx.class, "motorIntake");
             motorFlywheel = hardwareMap.get(DcMotorEx.class, "motorFlywheel");
+            motorFlywheel2 = hardwareMap.get(DcMotorEx.class, "motorFlywheel2");
 
             motorIntake.setDirection(DcMotorEx.Direction.REVERSE);
-            motorFlywheel.setDirection(DcMotorEx.Direction.FORWARD);
+            motorFlywheel.setDirection(DcMotorEx.Direction.REVERSE);
+            motorFlywheel2.setDirection(DcMotorEx.Direction.FORWARD);
+
 
             motorFlywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 

@@ -14,8 +14,8 @@ public class ShooterSpinfinityDuo {
 
 //    public Servo servoHood;
 
-    double SERVO_STOP_OPEN_POS = 0.44; //0.63
-    double SERVO_STOP_CLOSE_POS = 0.88; //0.37
+    double SERVO_STOP_OPEN_POS = 0.32; //0.44
+    double SERVO_STOP_CLOSE_POS = 0.78; //0.88
 
     double SERVO_PADDLE_SHOOT_POS = 0.35; //0.85
     double SERVO_PADDLE_DOWN_POS = 0.9; //0.5
@@ -33,6 +33,10 @@ public class ShooterSpinfinityDuo {
     double RED_GOAL_X_POS = 130.35;
 
     double RED_GOAL_Y_POS = 127.65;
+
+    double BLUE_GOAL_X_POS = 13.65;
+
+    double BLUE_GOAL_Y_POS = 127.65;
 
 
     double HOOD_POS1 = 1.0;
@@ -147,6 +151,20 @@ public class ShooterSpinfinityDuo {
     public int turretPosEncoderCalc (double robotToGoalRelativeAngle) {
         int turretEncoderPosCalc = (int) ((535.0 / 90.0) * robotToGoalRelativeAngle);
         return clamp(turretEncoderPosCalc, MOTOR_TURRET_MIN_POS, MOTOR_TURRET_MAX_POS);
+    }
+
+    public double newTurretBluePoseCalc (double robotXPos, double robotYPos, double robotHeading) {
+
+        double deltaY = BLUE_GOAL_Y_POS - robotYPos;
+
+        double deltaX = BLUE_GOAL_X_POS - robotXPos;
+
+        double robotToGoalAngle = Math.atan2(deltaY, deltaX);
+
+        double robotToGoalRelativeAngle = robotToGoalAngle - robotHeading;
+
+        return Math.toDegrees(robotToGoalRelativeAngle);
+
     }
 
 
