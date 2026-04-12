@@ -1,7 +1,6 @@
     package org.firstinspires.ftc.teamcode.auto;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -16,12 +15,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
     @Autonomous
-        public class redAlt2 extends OpMode {
+        public class blueAlt2 extends OpMode {
 
-        private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
-        private final Pose loadingZone = new Pose(135, 13, Math.toRadians(0));
-        private final Pose reLoadingZone = new Pose(115, 13, Math.toRadians(0));
-        private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
+        private final Pose startPose = new Pose(64, 8, Math.toRadians(90));
+        private final Pose loadingZone = new Pose(9, 13, Math.toRadians(180));
+        private final Pose reLoadingZone = new Pose(29, 13, Math.toRadians(180));
+        private final Pose shhooting = new Pose(60, 16, Math.toRadians(115));
+
         ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
 
         private int obeliskResult = 0;
