@@ -256,8 +256,8 @@ public class TeleOpBlueSpinfinityDuoMk5 extends OpMode {
             //In case the drivers want to use a "slowMode" you can scale the vectors
             //This is the normal version to use in the TeleOp
             follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y * powerFactor,
-                    -gamepad1.left_stick_x * powerFactor,
+                    gamepad1.left_stick_y * powerFactor,
+                    gamepad1.left_stick_x * powerFactor,
                     -gamepad1.right_stick_x * powerFactor,
                     robotCentric // Field Centric
             );
