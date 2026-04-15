@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -22,10 +21,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.Hardware.FlywheelSpinfinity;
+import org.firstinspires.ftc.teamcode.Hardware.Drive;
+import org.firstinspires.ftc.teamcode.Hardware.Flywheel;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
-import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinity;
-import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
+import org.firstinspires.ftc.teamcode.Hardware.Shooter;
+import org.firstinspires.ftc.teamcode.Hardware.Spintake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
@@ -34,13 +34,13 @@ import java.util.function.Supplier;
 @Disabled
 //@Configurable
 @TeleOp
-public class TeleOpSpinfinityMk0 extends OpMode {
+public class TeleOpBlueWorldsTestmk6 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
-    ShooterSpinfinity shooter = new ShooterSpinfinity();
-    FlywheelSpinfinity flywheel = new FlywheelSpinfinity();
-    SpintakeSpinfinity spintake = new SpintakeSpinfinity();
-//    Drive drive = new Drive();
+    Shooter shooter = new Shooter();
+    Flywheel flywheel = new Flywheel();
+    Spintake spintake = new Spintake();
+    Drive drive = new Drive();
 
     Pose2D pose2D;
     double a2 = 0.;
@@ -55,14 +55,12 @@ public class TeleOpSpinfinityMk0 extends OpMode {
 
     double laserTime;
 
-    private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
+    private static final int DESIRED_TAG_ID = 20; // Red = 24; Blue = 20;
 
     double LONG_DIST_ANGLE_CORRECTION = 4; // Red = 4; Blue = -4;
 
     // Turret variables
-    double error;
-
-    int currentPos, newPos;
+    double error, currentPos, newPos;
 
     double prevError;
     double turretTimer;
@@ -73,9 +71,9 @@ public class TeleOpSpinfinityMk0 extends OpMode {
 
     public static double TURRET_TRACKING_TIMER_THRESHOLD = 1.0;
 
-    public static double MOTOR_TURRET_PROPORTIONAL_TERM = 5;
+    public static double SERVO_TURRET_PROPORTIONAL_TERM = 0.0008; //0.0016
 
-    public static double MOTOR_TURRET_DERIVATIVE_TERM = 0.; //0.0
+    public static double SERVO_TURRET_DERIVATIVE_TERM = 0.; //0.0
 
     double botHeading;
 
@@ -94,12 +92,17 @@ public class TeleOpSpinfinityMk0 extends OpMode {
     boolean autoRPM = true;
     boolean robotCentric = false;
 
-    public boolean intakeOn;
+    public boolean intakeOn, transferOn;
 
-    public boolean prevIntake;
+    public boolean prevIntake, prevTransfer;
 
     public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1; //0.25
 
+    boolean paddleOn;
+    boolean stopOn;
+
+    boolean prevPaddle;
+    boolean prevStop;
 
     boolean activeDetecting = false;
     boolean stateHigh;
@@ -140,7 +143,7 @@ public class TeleOpSpinfinityMk0 extends OpMode {
 
     public void init() {
 
-//        drive.init(hardwareMap);
+        drive.init(hardwareMap);
         pinpoint.init(hardwareMap);
         shooter.init(hardwareMap);
         flywheel.init(hardwareMap);
@@ -152,12 +155,12 @@ public class TeleOpSpinfinityMk0 extends OpMode {
 
         laserInput.setMode(DigitalChannel.Mode.INPUT);
 
-        limelight.pipelineSwitch(1);
+        limelight.pipelineSwitch(0);
 
         limelight.start();
 
-        shooter.centerMotorTurret();
-        currentPos = shooter.motorTurretGetPosition();
+        shooter.centerServoTurret();
+        currentPos = shooter.servoTurretGetPosition();
 
         shooter.closeServoStop();
         shooter.downServoPaddle();
@@ -186,12 +189,6 @@ public class TeleOpSpinfinityMk0 extends OpMode {
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(90, 102))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37.5), 0.8))
                 .build();
-
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
-
-        limelight.pipelineSwitch(0);
-
-        limelight.start();
     }
 
     public void start() {
@@ -220,6 +217,7 @@ public class TeleOpSpinfinityMk0 extends OpMode {
             if (activeDetecting) {
                 if (laserTimer.seconds() > SPINTAKE_AUTO_SHUTOFF_THRESHOLD) {
                     intakeOn = false;
+                    transferOn = false;
                     laserTimer.reset();
                 }
             }
@@ -320,9 +318,9 @@ public class TeleOpSpinfinityMk0 extends OpMode {
         if (targetFound) {
             distanceToGoalInches = flywheel.distanceToGoalCalc(a2);
             if (distanceToGoalInches < 80.) {
-                error = -bearing;
+                error = bearing;
             } else {
-                error = -bearing - LONG_DIST_ANGLE_CORRECTION;
+                error = bearing + LONG_DIST_ANGLE_CORRECTION;
             }
         } else {
             error = 0;
@@ -338,14 +336,14 @@ public class TeleOpSpinfinityMk0 extends OpMode {
 
         if (turretTracking) {
             if ((timer.seconds() - aprilTagTimer < TURRET_TRACKING_TIMER_THRESHOLD)) {
-                currentPos = shooter.motorTurretGetPosition();
-                newPos = shooter.newTurretPDCalc(currentPos, error, prevError, turretTimer, MOTOR_TURRET_PROPORTIONAL_TERM, MOTOR_TURRET_DERIVATIVE_TERM);
-                shooter.motorTurretSetPosition(newPos);
+                currentPos = shooter.servoTurretGetPosition();
+                newPos = shooter.newTurretPDCalc(currentPos, error, prevError, turretTimer, SERVO_TURRET_PROPORTIONAL_TERM, SERVO_TURRET_DERIVATIVE_TERM);
+                shooter.servoTurretSetPosition(newPos);
             } else {
-                shooter.centerMotorTurret();
+                shooter.centerServoTurret();
             }
         } else {
-            shooter.centerMotorTurret();
+            shooter.centerServoTurret();
         }
 
         prevError = error;
@@ -373,9 +371,9 @@ public class TeleOpSpinfinityMk0 extends OpMode {
             } else if (gamepad2.b) {
                 targetRPM = 2400.;
             } else if (gamepad2.aWasPressed()) {
-                targetRPM -= 25.;
+                targetRPM -= 50.;
             } else if (gamepad2.yWasPressed()) {
-                targetRPM += 25.;
+                targetRPM += 50.;
             }
         }
 
@@ -386,13 +384,17 @@ public class TeleOpSpinfinityMk0 extends OpMode {
         if (gamepad2.dpadUpWasPressed()) {
             spintake.forwardSpintakes();
             spintake.turnIntakeOff();
+            spintake.turnTransferOff();
             intakeOn = false;
+            transferOn = false;
         }
 
         if (gamepad2.dpadDownWasPressed()) {
             spintake.reverseSpintakes();
             spintake.turnIntakeOff();
+            spintake.turnTransferOff();
             intakeOn = false;
+            transferOn = false;
         }
 
         // Toggle intake when right_bumper is pressed
@@ -410,6 +412,26 @@ public class TeleOpSpinfinityMk0 extends OpMode {
 
         prevIntake = intakeOn;
 
+        // Toggle transfer when left_bumper is pressed
+        if (gamepad2.leftBumperWasPressed()) {
+            transferOn = !transferOn;
+        }
+
+        if (transferOn != prevTransfer) {
+            if (transferOn) {
+                spintake.turnTransferOn();
+                spintake.setTransferLEDOn();
+            } else {
+                spintake.turnTransferOff();
+                spintake.setTransferLEDOff();
+            }
+        }
+
+        prevTransfer = transferOn;
+
+        // Control Paddle Servo
+//        paddleOn = (gamepad2.right_trigger > 0.25);
+
         //start shooting sequence
         if (gamepad2.right_trigger > 0.25) {
             setPathState(10);
@@ -422,11 +444,48 @@ public class TeleOpSpinfinityMk0 extends OpMode {
 
         prevCount = counter;
 
+        if (paddleOn != prevPaddle) {
+            if (paddleOn) {
+                shooter.shootServoPaddle();
+                counter = 0;
+            } else {
+                shooter.downServoPaddle();
+            }
+        }
+
+        prevPaddle = paddleOn;
+
+        // Control Servo Stop and turn intake and transfer on
+//        if (gamepad2.left_trigger > 0.25) {
+//            stopOn = true;
+//            intakeOn = true;
+//            transferOn = true;
+//        }
+//        else {
+//            stopOn = false;
+//        }
+
         //start sequence for shooting paddle
         if (gamepad2.left_trigger > 0.25) {
             setPathState(10100);
             counter = 0;
         }
+
+        if (stopOn != prevStop) {
+            if (stopOn) {
+                shooter.openServoStop();
+                if (!stopAlreadyEngaged) {
+                    counter -= 1;
+                }
+                stopAlreadyEngaged = true;
+            } else {
+                shooter.closeServoStop();
+                stopAlreadyEngaged = false;
+            }
+        }
+
+        prevStop = stopOn;
+
 
         //flywheelRPM = motorFlywheel.getVelocity() / CPR * 60;
         flywheelRPM = flywheel.getFlywheelVel();
@@ -473,6 +532,8 @@ public class TeleOpSpinfinityMk0 extends OpMode {
         panelsTelemetry.debug("Position", follower.getPose());
         panelsTelemetry.debug("Velocity", follower.getVelocity());
         panelsTelemetry.debug("Automated Drive", automatedDrive);
+        panelsTelemetry.debug("Slow Mode", slowMode);
+        panelsTelemetry.debug("Slow Mode Multiplier", slowModeMultiplier);
 //        panelsTelemetry.addData("Transfer On", transferOn);
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());
@@ -507,6 +568,7 @@ public class TeleOpSpinfinityMk0 extends OpMode {
                 break;
             case 1001:
                 spintake.turnIntakeOn();
+                spintake.turnTransferOn();
                 setPathState(10001);
                 break;
             case 10001:
@@ -524,9 +586,11 @@ public class TeleOpSpinfinityMk0 extends OpMode {
                 break;
             case 10007:
                 if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    spintake.turnIntakeOff();
                     shootingTime = shootTimer.getElapsedTimeSeconds();
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
+                    spintake.turnIntakeOff();
                     setPathState(999);
                 }
                 break;

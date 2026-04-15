@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -25,7 +24,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Hardware.FlywheelSpinfinity;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
 import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinity;
-import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityv2;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -35,10 +33,10 @@ import java.util.function.Supplier;
 @Disabled
 //@Configurable
 @TeleOp
-public class TeleOpSpinfinityMk1 extends OpMode {
+public class blueTeleOpSpinfinityMk0 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
-    ShooterSpinfinityv2 shooter = new ShooterSpinfinityv2();
+    ShooterSpinfinity shooter = new ShooterSpinfinity();
     FlywheelSpinfinity flywheel = new FlywheelSpinfinity();
     SpintakeSpinfinity spintake = new SpintakeSpinfinity();
 //    Drive drive = new Drive();
@@ -56,9 +54,9 @@ public class TeleOpSpinfinityMk1 extends OpMode {
 
     double laserTime;
 
-    private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
+    private static final int DESIRED_TAG_ID = 20; // Red = 24; Blue = 20;
 
-    double LONG_DIST_ANGLE_CORRECTION = 4; // Red = 4; Blue = -4;
+    double LONG_DIST_ANGLE_CORRECTION = -4; // Red = 4; Blue = -4;
 
     // Turret variables
     double error;
@@ -79,8 +77,6 @@ public class TeleOpSpinfinityMk1 extends OpMode {
     public static double MOTOR_TURRET_DERIVATIVE_TERM = 0.; //0.0
 
     double botHeading;
-
-    double robotToGoalRelativeAngle;
 
     boolean targetFound = false;
 
@@ -141,8 +137,6 @@ public class TeleOpSpinfinityMk1 extends OpMode {
 
     private boolean automatedDrive;
 
-    double robotHeading;
-
     public void init() {
 
 //        drive.init(hardwareMap);
@@ -182,7 +176,7 @@ public class TeleOpSpinfinityMk1 extends OpMode {
 
         shootTimer = new Timer();
 
-        startingPose = new Pose(72, 24, Math.toRadians(0));
+        startingPose = new Pose(80, 8, Math.toRadians(90));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
@@ -211,8 +205,6 @@ public class TeleOpSpinfinityMk1 extends OpMode {
     public void loop() {
 
         autonomousPathUpdate();
-
-        robotHeading = follower.getHeading();
 
         follower.update();
 
@@ -289,12 +281,12 @@ public class TeleOpSpinfinityMk1 extends OpMode {
 
         pose2D = pinpoint.getPinpointPose();
 
-//        if (robotCentric) {
-//            botHeading = pose2D.getHeading(AngleUnit.RADIANS);
-//        }
-//        else {
-//            botHeading = 0;
-//        }
+        if (robotCentric) {
+            botHeading = pose2D.getHeading(AngleUnit.RADIANS);
+        }
+        else {
+            botHeading = 0;
+        }
 
 //        if (x != prevX || y != prevY || rx != prevRX) {
 //            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
@@ -303,13 +295,6 @@ public class TeleOpSpinfinityMk1 extends OpMode {
 //        prevX = x;
 //        prevY = y;
 //        prevRX = rx;
-
-        //
-        double robotXPos = follower.getPose().getX();
-        double robotYPos = follower.getPose().getY();
-        botHeading = pose2D.getHeading(AngleUnit.RADIANS);
-        double robotToGoalAngle = shooter.newTurretPoseCalc(robotXPos, robotYPos, botHeading);
-        int newPosePos = shooter.turretPosEncoderCalc(robotToGoalRelativeAngle);
 
         LLResult result = limelight.getLatestResult();
         targetFound = false;
@@ -350,15 +335,13 @@ public class TeleOpSpinfinityMk1 extends OpMode {
             turretTracking = !turretTracking;
         }
 
-        // Rotate turret based on limelight reading or pose
         if (turretTracking) {
             if ((timer.seconds() - aprilTagTimer < TURRET_TRACKING_TIMER_THRESHOLD)) {
                 currentPos = shooter.motorTurretGetPosition();
                 newPos = shooter.newTurretPDCalc(currentPos, error, prevError, turretTimer, MOTOR_TURRET_PROPORTIONAL_TERM, MOTOR_TURRET_DERIVATIVE_TERM);
                 shooter.motorTurretSetPosition(newPos);
             } else {
-                shooter.motorTurretSetPosition(newPosePos);
-//                shooter.centerMotorTurret();
+                shooter.centerMotorTurret();
             }
         } else {
             shooter.centerMotorTurret();
@@ -389,9 +372,9 @@ public class TeleOpSpinfinityMk1 extends OpMode {
             } else if (gamepad2.b) {
                 targetRPM = 2400.;
             } else if (gamepad2.aWasPressed()) {
-                targetRPM -= 50.;
+                targetRPM -= 25.;
             } else if (gamepad2.yWasPressed()) {
-                targetRPM += 50.;
+                targetRPM += 25.;
             }
         }
 
@@ -468,7 +451,6 @@ public class TeleOpSpinfinityMk1 extends OpMode {
 
 
         // Panels Telemetry Data
-        panelsTelemetry.addData("Angle To Goal", robotToGoalAngle);
         panelsTelemetry.addData("Timer", timer.seconds());
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
         panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
@@ -488,11 +470,8 @@ public class TeleOpSpinfinityMk1 extends OpMode {
         panelsTelemetry.addData("Turret Target Pos", newPos);
         panelsTelemetry.addData("Turret Current Pos", currentPos);
         panelsTelemetry.debug("Position", follower.getPose());
-        panelsTelemetry.debug("Robot Heading", follower.getHeading());
         panelsTelemetry.debug("Velocity", follower.getVelocity());
         panelsTelemetry.debug("Automated Drive", automatedDrive);
-        panelsTelemetry.debug("Slow Mode", slowMode);
-        panelsTelemetry.debug("Slow Mode Multiplier", slowModeMultiplier);
 //        panelsTelemetry.addData("Transfer On", transferOn);
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());

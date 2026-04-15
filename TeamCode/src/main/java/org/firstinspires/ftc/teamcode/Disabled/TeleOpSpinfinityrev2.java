@@ -1,22 +1,15 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
-import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-
 @Disabled
-//@Configurable
 @TeleOp
-public class TeleOpSpinfinityrev3 extends OpMode {
+public class TeleOpSpinfinityrev2 extends OpMode {
 
     public static double NEW_P = 100.;   // 10.
     public static double NEW_I = 1.;    // 3.
@@ -36,15 +29,10 @@ public class TeleOpSpinfinityrev3 extends OpMode {
 
     public DcMotorEx motorIntake;
     public DcMotorEx motorFlywheel;
-
     public DcMotorEx motorTurret;
 
-    public double max = 500;
 
-    public double min = -500;
-
-
-    public boolean intakeOn;
+    public boolean intakeOn, transferOn;
 
     double CPR = 28.;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
     double targetRPM = 0.;
@@ -61,14 +49,6 @@ public class TeleOpSpinfinityrev3 extends OpMode {
 
     double SERVO_PADDLE_SHOOT_POS = 0.85;
     double SERVO_PADDLE_DOWN_POS = 0.5;
-
-    boolean turretTracking = true;
-
-    int error, currentPos, newPos;
-
-    public static double turretPTerm = 5;
-
-    TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     public void init() {
 
@@ -106,11 +86,6 @@ public class TeleOpSpinfinityrev3 extends OpMode {
 
         servoStop.setPosition(SERVO_STOP_CLOSE_POS);
         servoPaddleLeft.setPosition(SERVO_PADDLE_DOWN_POS);
-
-        motorTurret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        motorTurret.setTargetPosition(newPos);
-        motorTurret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
        /* outputAngleServo = hardwareMap.get(Servo.class, "outputAngleServo");
         outputAngleServo.setDirection(Servo.Direction.FORWARD);
         outputAngleServo.setPosition(0.47); */
@@ -138,41 +113,33 @@ public class TeleOpSpinfinityrev3 extends OpMode {
 
 
         // manually set RPM distance
-//        if (gamepad1.x) {
-//            targetRPM = 0.;
-//        } else if (gamepad1.b) {
-//            targetRPM = 2400.;
-//        } else if (gamepad1.aWasPressed()) {
-//            targetRPM -= 50.;
-//        } else if (gamepad1.yWasPressed()) {
-//            targetRPM += 50.;
-//        }
-
         if (gamepad1.x) {
-            error = -50;
+            targetRPM = 0.;
         } else if (gamepad1.b) {
-            error = 50;
+            targetRPM = 2400.;
         } else if (gamepad1.aWasPressed()) {
-            error -= 10;
+            targetRPM -= 50.;
         } else if (gamepad1.yWasPressed()) {
-            error += 10;
+            targetRPM += 50.;
         }
 
         // Calculate and set flywheel motor velocity
         TPS = targetRPM / 60. * CPR;
         motorFlywheel.setVelocity(TPS);
 
-        // Control Direction of Intake
+        // Control Direction of Intake and Transfer Motors
         if (gamepad1.dpadUpWasPressed()) {
             motorIntake.setPower(0.);
             motorIntake.setDirection(DcMotorEx.Direction.REVERSE);
             intakeOn = false;
+            transferOn = false;
         }
 
         if (gamepad1.dpadDownWasPressed()) {
             motorIntake.setPower(0.);
             motorIntake.setDirection(DcMotorEx.Direction.FORWARD);
             intakeOn = false;
+            transferOn = false;
         }
 
         // Toggle intake when right_bumper is pressed
@@ -198,40 +165,14 @@ public class TeleOpSpinfinityrev3 extends OpMode {
             servoPaddleLeft.setPosition(SERVO_PADDLE_DOWN_POS);
         }
 
-        if (turretTracking) {
-            currentPos = motorTurret.getCurrentPosition();
-            if (Math.abs(error) > 1.0) {
-                newPos = (int) (currentPos + error * turretPTerm); // 0.0016
-            } else {
-                newPos = currentPos;
-            }
-            newPos = (int) clamp(newPos, -500, 500);
-            motorTurret.setTargetPosition(newPos);
-        } else {
-            motorTurret.setTargetPosition(0);
-        }
-
-
-        motorTurret.setPower(0.5);
-
         // Telemetry Data
-        panelsTelemetry.addData("Drive Power Factor", powerFactor);
-        panelsTelemetry.addData("Intake On", intakeOn);
-        panelsTelemetry.addData("Target RPM", targetRPM);
-        panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
-        panelsTelemetry.addData("Turret Target Position", newPos);
-        panelsTelemetry.addData("Motor Turret Position", motorTurret.getCurrentPosition());
-        panelsTelemetry.addData("Turret Current", motorTurret.getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("Drive Power Factor", powerFactor);
+        telemetry.addData("Intake On", intakeOn);
+        telemetry.addData("Transfer On", transferOn);
+        telemetry.addData("Target RPM", targetRPM);
+        telemetry.addData("Flywheel RPM", flywheelRPM);
 
-        panelsTelemetry.addData("Intake Current", motorIntake.getCurrent(CurrentUnit.AMPS));
-        panelsTelemetry.addData("Flywheel Current", motorFlywheel.getCurrent(CurrentUnit.AMPS));
-        panelsTelemetry.addData("Turret Current", motorTurret.getCurrent(CurrentUnit.AMPS));
-        panelsTelemetry.addData("FL Current", frontLeftMotor.getCurrent(CurrentUnit.AMPS));
-        panelsTelemetry.addData("FR Current", frontRightMotor.getCurrent(CurrentUnit.AMPS));
-        panelsTelemetry.addData("RL Current", backLeftMotor.getCurrent(CurrentUnit.AMPS));
-        panelsTelemetry.addData("RR Current", backRightMotor.getCurrent(CurrentUnit.AMPS));
-
-        panelsTelemetry.update(telemetry);
+        telemetry.update();
 
     }
 
@@ -251,10 +192,6 @@ public class TeleOpSpinfinityrev3 extends OpMode {
         backLeftMotor.setPower(powerFactor * backLeftPower);
         frontRightMotor.setPower(powerFactor * frontRightPower);
         backRightMotor.setPower(powerFactor * backRightPower);
-    }
-
-    public double clamp (double value, double min, double max) {
-        return Math.max(min, Math.min(max, value));
     }
 
 }

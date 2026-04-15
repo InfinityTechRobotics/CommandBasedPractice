@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -20,24 +19,25 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.teamcode.Hardware.FlywheelSpinfinityDuo;
+import org.firstinspires.ftc.teamcode.Hardware.FlywheelSpinfinity;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
-import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
+import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinity;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
 import java.util.function.Supplier;
+
 @Disabled
 //@Configurable
 @TeleOp
-public class TeleOpSpinfinityDuoMk3 extends OpMode {
+public class TeleOpSpinfinityMk0 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
-    ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
-    FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
+    ShooterSpinfinity shooter = new ShooterSpinfinity();
+    FlywheelSpinfinity flywheel = new FlywheelSpinfinity();
     SpintakeSpinfinity spintake = new SpintakeSpinfinity();
 //    Drive drive = new Drive();
 
@@ -61,7 +61,7 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
     // Turret variables
     double error;
 
-    int currentPos, newPos, newPosePos;
+    int currentPos, newPos;
 
     double prevError;
     double turretTimer;
@@ -76,13 +76,7 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
 
     public static double MOTOR_TURRET_DERIVATIVE_TERM = 0.; //0.0
 
-    // Pinpoint Robot Positions
-    public static double robotXPos, robotYPos, botHeading;
-
-    //MegaTag Robot Positions
-    public static double MT1XPos, MT1YPos, MT1botHeading;
-
-    double robotToGoalRelativeAngle;
+    double botHeading;
 
     boolean targetFound = false;
 
@@ -94,6 +88,8 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
 
     double powerFactor = DRIVE_POWER_FACTOR;
 
+    double prevX, prevY, prevRX;
+
     boolean autoRPM = true;
     boolean robotCentric = false;
 
@@ -103,11 +99,14 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
 
     public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1; //0.25
 
+
     boolean activeDetecting = false;
     boolean stateHigh;
 
     int counter = 0;
     int prevCount = 0;
+
+    boolean stopAlreadyEngaged = false;
 
     double targetRPM = 0.;
     double flywheelRPM = 0.;
@@ -131,11 +130,12 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
     private Follower follower;
     public static Pose startingPose; // Start Pose of our robot.
 
+    private boolean slowMode = false;
+    private double slowModeMultiplier = 0.95;
+
     private Supplier<PathChain> pathChain;
 
     private boolean automatedDrive;
-
-    double robotHeading;
 
     public void init() {
 
@@ -146,12 +146,14 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
         spintake.init(hardwareMap);
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(1);
-        limelight.start();
 
         laserInput = hardwareMap.get(DigitalChannel.class, "laserDigitalInput");
 
         laserInput.setMode(DigitalChannel.Mode.INPUT);
+
+        limelight.pipelineSwitch(1);
+
+        limelight.start();
 
         shooter.centerMotorTurret();
         currentPos = shooter.motorTurretGetPosition();
@@ -174,7 +176,7 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
 
         shootTimer = new Timer();
 
-        startingPose = new Pose(72, 24, Math.toRadians(0));
+        startingPose = new Pose(80, 8, Math.toRadians(90));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
@@ -184,6 +186,11 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37.5), 0.8))
                 .build();
 
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+        limelight.pipelineSwitch(0);
+
+        limelight.start();
     }
 
     public void start() {
@@ -229,8 +236,7 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
 //        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
 
         if (gamepad1.aWasPressed()) {
-            follower.setPose(new Pose(72, 72, Math.toRadians(0)));
-            //pinpoint.pinpointReset();
+            follower.setHeading(Math.toRadians(0));
         }
 
         if (gamepad1.left_bumper) {
@@ -269,14 +275,18 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
             automatedDrive = false;
         }
 
-//        pose2D = pinpoint.getPinpointPose();
+        if (gamepad1.a) {
+            pinpoint.pinpointReset();
+        }
 
-//        if (robotCentric) {
-//            botHeading = pose2D.getHeading(AngleUnit.RADIANS);
-//        }
-//        else {
-//            botHeading = 0;
-//        }
+        pose2D = pinpoint.getPinpointPose();
+
+        if (robotCentric) {
+            botHeading = pose2D.getHeading(AngleUnit.RADIANS);
+        }
+        else {
+            botHeading = 0;
+        }
 
 //        if (x != prevX || y != prevY || rx != prevRX) {
 //            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
@@ -285,14 +295,6 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
 //        prevX = x;
 //        prevY = y;
 //        prevRX = rx;
-
-        //
-
-//        robotHeading = follower.getHeading();
-
-//        botHeading = pose2D.getHeading(AngleUnit.RADIANS);
-
-
 
         LLResult result = limelight.getLatestResult();
         targetFound = false;
@@ -314,24 +316,6 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
             telemetry.addData("Limelight", "No data available");
         }
 
-        // MegaTag Robot Position Determination
-//        if (result != null && result.isValid()) {
-//            Pose3D botpose = result.getBotpose();
-//            if (botpose != null) {
-//                double xpos = botpose.getPosition().x;
-//                double ypos = botpose.getPosition().y;
-//                double headingpos = botpose.getOrientation().getYaw();
-//                telemetry.addData("MT1 Location", "(" + xpos + ", " + ypos + ", " + headingpos + ")");
-//
-//                //follower.setPose(new Pose(xpos, ypos, headingpos, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE));
-//                //Pose convertedPos = new Pose(xpos, ypos, headingpos, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
-//                //telemetry.addData("Converted Location", "(" + convertedPos.getX() + ", " + convertedPos.getY() + ", " + convertedPos.getHeading() + ")");
-//                MT1XPos = 72 + (ypos * 39.37);
-//                MT1YPos = 72 - (xpos * 39.37);
-//                MT1botHeading = headingpos - 90;
-//            }
-//        }
-
         if (targetFound) {
             distanceToGoalInches = flywheel.distanceToGoalCalc(a2);
             if (distanceToGoalInches < 80.) {
@@ -344,12 +328,6 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
             distanceToGoalInches = 54.;
         }
 
-        // Calculate robot angle to AprilTag
-        robotXPos = follower.getPose().getX();
-        robotYPos = follower.getPose().getY();
-        botHeading = follower.getHeading();
-        robotToGoalRelativeAngle = shooter.newTurretPoseCalc(robotXPos, robotYPos, botHeading);
-
         turretTimer = timer.seconds() - turretTimer;
 
         // Toggle turret auto tracking when B is pressed on gamepad 1
@@ -357,16 +335,13 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
             turretTracking = !turretTracking;
         }
 
-        // Rotate turret based on limelight reading or pose
         if (turretTracking) {
             if ((timer.seconds() - aprilTagTimer < TURRET_TRACKING_TIMER_THRESHOLD)) {
                 currentPos = shooter.motorTurretGetPosition();
                 newPos = shooter.newTurretPDCalc(currentPos, error, prevError, turretTimer, MOTOR_TURRET_PROPORTIONAL_TERM, MOTOR_TURRET_DERIVATIVE_TERM);
                 shooter.motorTurretSetPosition(newPos);
             } else {
-                newPosePos = shooter.turretPosEncoderCalc(robotToGoalRelativeAngle);
-                shooter.motorTurretSetPosition(newPosePos);
-//                shooter.centerMotorTurret();
+                shooter.centerMotorTurret();
             }
         } else {
             shooter.centerMotorTurret();
@@ -397,15 +372,14 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
             } else if (gamepad2.b) {
                 targetRPM = 2400.;
             } else if (gamepad2.aWasPressed()) {
-                targetRPM -= 50.;
+                targetRPM -= 25.;
             } else if (gamepad2.yWasPressed()) {
-                targetRPM += 50.;
+                targetRPM += 25.;
             }
         }
 
         // Calculate and set flywheel motor velocity
         flywheel.setFlywheelVel(targetRPM);
-//        flywheel.setFlywheelVel(0);
 
         // Control Direction of Intake and Transfer Motors
         if (gamepad2.dpadUpWasPressed()) {
@@ -477,37 +451,27 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
 
 
         // Panels Telemetry Data
-        //        panelsTelemetry.addData("Timer", timer.seconds());
-        panelsTelemetry.addData("Pinpoint Robot X Position", robotXPos);
-        panelsTelemetry.addData("Pinpoint Robot Y Position", robotYPos);
-        panelsTelemetry.addData("Pinpoint Robot Heading", Math.toDegrees(botHeading));
-        panelsTelemetry.addData("MegaTag Robot X Position", MT1XPos);
-        panelsTelemetry.addData("MegaTag Robot Y Position", MT1YPos);
-        panelsTelemetry.addData("MegaTag Robot Heading", MT1botHeading);
+        panelsTelemetry.addData("Timer", timer.seconds());
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
         panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
-//        panelsTelemetry.addData("Shooting Sequence State", pathState);
-//        panelsTelemetry.addData("Artifact Counter", counter);
-//        panelsTelemetry.addData("Laser Detection Time", laserTime);
-//        panelsTelemetry.addData("Object Detected", stateHigh);
-        panelsTelemetry.addData("Angle To Goal", robotToGoalRelativeAngle);
-        panelsTelemetry.addData("A2 Angle", a2);
+        panelsTelemetry.addData("Shooting Sequence State", pathState);
+        panelsTelemetry.addData("Artifact Counter", counter);
+        panelsTelemetry.addData("Laser Detection Time", laserTime);
+        panelsTelemetry.addData("Object Detected", stateHigh);
         panelsTelemetry.addData("Distance To AprilTag", distanceToGoalInches);
+        panelsTelemetry.addData("Bearing Error", error);
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
         panelsTelemetry.addData("Robot Centric", robotCentric);
-//        panelsTelemetry.addData("Drive Power Factor", powerFactor);
+        panelsTelemetry.addData("Drive Power Factor", powerFactor);
         panelsTelemetry.addData("Auto Turret", turretTracking);
         panelsTelemetry.addData("Auto RPM", autoRPM);
-//        panelsTelemetry.addData("Intake On", intakeOn);
-        panelsTelemetry.addData("Bearing Error", error);
+        panelsTelemetry.addData("Intake On", intakeOn);
         panelsTelemetry.addData("Turret Target Pos", newPos);
-        panelsTelemetry.addData("Turret Target Pose Pos", newPosePos);
         panelsTelemetry.addData("Turret Current Pos", currentPos);
-        panelsTelemetry.debug("Pinpoint Velocity", follower.getVelocity());
+        panelsTelemetry.debug("Position", follower.getPose());
+        panelsTelemetry.debug("Velocity", follower.getVelocity());
         panelsTelemetry.debug("Automated Drive", automatedDrive);
-//        panelsTelemetry.debug("Slow Mode", slowMode);
-//        panelsTelemetry.debug("Slow Mode Multiplier", slowModeMultiplier);
 //        panelsTelemetry.addData("Transfer On", transferOn);
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());
@@ -523,7 +487,6 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
     }
 
     public void stop() {
-        shooter.centerMotorTurret();
         limelight.stop();
     }
 
@@ -553,7 +516,7 @@ public class TeleOpSpinfinityDuoMk3 extends OpMode {
                 }
                 break;
             case 10006:
-                if (pathTimer.getElapsedTimeSeconds() > 0.45) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
                     shooter.shootServoPaddle();
                     setPathState(10007);
                 }

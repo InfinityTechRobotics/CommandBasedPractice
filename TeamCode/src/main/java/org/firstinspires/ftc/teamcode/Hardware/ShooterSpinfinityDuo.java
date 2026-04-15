@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+
 public class ShooterSpinfinityDuo {
 
     public Servo servoStop;
@@ -165,6 +167,13 @@ public class ShooterSpinfinityDuo {
 
         return Math.toDegrees(robotToGoalRelativeAngle);
 
+    }
+
+    public double getMotorTurretCurrent () {
+        return motorTurret.getCurrent(CurrentUnit.AMPS);
+    }
+    public double getMotorTurretPower () {
+        return motorTurret.getPower();
     }
 
 

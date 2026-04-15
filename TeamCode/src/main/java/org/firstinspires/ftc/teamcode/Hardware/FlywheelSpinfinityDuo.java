@@ -102,11 +102,18 @@ public class FlywheelSpinfinityDuo {
 
     }
 
-    public double getMotorFlywheelCurrent () {
+    public double getMotorFlywheel1Current () {
         return motorFlywheel1.getCurrent(CurrentUnit.AMPS);
     }
-    public double getMotorFlywheelPower () {
+    public double getMotorFlywheel1Power () {
         return motorFlywheel1.getPower();
+    }
+
+    public double getMotorFlywheel2Current () {
+        return motorFlywheel2.getCurrent(CurrentUnit.AMPS);
+    }
+    public double getMotorFlywheel2Power () {
+        return motorFlywheel2.getPower();
     }
 
 }

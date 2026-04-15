@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -35,7 +34,7 @@ import java.util.function.Supplier;
 @Disabled
 //@Configurable
 @TeleOp
-public class TeleOpBlueWorldsTestmk6 extends OpMode {
+public class TeleOpRedWorldsTestmk6 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
@@ -56,7 +55,7 @@ public class TeleOpBlueWorldsTestmk6 extends OpMode {
 
     double laserTime;
 
-    private static final int DESIRED_TAG_ID = 20; // Red = 24; Blue = 20;
+    private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
 
     double LONG_DIST_ANGLE_CORRECTION = 4; // Red = 4; Blue = -4;
 
