@@ -30,9 +30,9 @@ public class FlywheelSpinfinityDuo {
 //    // double a2 = 0.; // Limelight angle measurement between camera and AprilTag.
 //    double x1 = -3.5;    // Distance between camera and ramp
 
-    double h1 = 15.375;  // Height of camera lens from ground. 14.25
+    double h1 = 13;  // Height of camera lens from ground. 14.25
     double h2 = 29.5; // Height of AprilTag
-    double a1 = 15.; // 21.8Angle of camera relative to ground.
+    double a1 = 14.; // 21.8Angle of camera relative to ground.
     // double a2 = 0.; // Limelight angle measurement between camera and AprilTag.
     double x1 = -1.5;    // Distance between camera and ramp
 

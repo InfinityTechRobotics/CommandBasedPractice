@@ -30,7 +30,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
 import java.util.function.Supplier;
-@Disabled
+//@Disabled
 //@Configurable
 @TeleOp
 public class TeleOpSpinfinityDuoMk4HoodAdjust extends OpMode {
@@ -138,7 +138,7 @@ public class TeleOpSpinfinityDuoMk4HoodAdjust extends OpMode {
     double robotHeading;
 
     public Servo servoHood;
-    double servoPosition = 0.;
+    double servoPosition = 0.5;
 
     public void init() {
 
