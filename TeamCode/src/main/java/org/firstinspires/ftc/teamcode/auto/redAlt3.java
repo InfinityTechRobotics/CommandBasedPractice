@@ -18,15 +18,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class redAlt3 extends OpMode {
 
     private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
-
     private final Pose loadingZone = new Pose(135, 13, Math.toRadians(0));
-
     private final Pose reLoadingZone = new Pose(115, 13, Math.toRadians(0));
-
     private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
-
     private final Pose finaley = new Pose(107.5, 13, Math.toRadians(0));
-
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
 
     private int obeliskResult = 0;
@@ -196,7 +191,7 @@ public class redAlt3 extends OpMode {
                     shootingTime = shootTimer.getElapsedTimeSeconds();
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
-                    motorIntake.setPower(intakeOff);
+//                    motorIntake.setPower(intakeOff);
                     setPathState(10008);
                 }
                 break;
