@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -6,6 +6,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -13,16 +14,16 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+@Disabled
 @Autonomous
-public class redAlt5 extends OpMode {
+public class redAlt3 extends OpMode {
 
     private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
-    private final Pose loadingZone = new Pose(135, 15, Math.toRadians(0));
+    private final Pose loadingZone = new Pose(135, 13, Math.toRadians(0));
     private final Pose reLoadingZone = new Pose(115, 13, Math.toRadians(0));
     private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
     private final Pose finaley = new Pose(107.5, 13, Math.toRadians(0));
-    private final Pose shiftL = new Pose(135, 20, Math.toRadians(0));
+    private final Pose shiftL = new Pose(135, 16, Math.toRadians(0));
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
 
     private int obeliskResult = 0;
@@ -85,14 +86,14 @@ public class redAlt5 extends OpMode {
                 .build();
 
         driveReLoadingToLZone = follower.pathBuilder()
-                .addPath(new BezierLine(reLoadingZone, shiftL))
-                .setLinearHeadingInterpolation(reLoadingZone.getHeading(), shiftL.getHeading())
+                .addPath(new BezierLine(reLoadingZone, loadingZone))
+                .setLinearHeadingInterpolation(reLoadingZone.getHeading(), loadingZone.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
         driveToScorePoseL = follower.pathBuilder()
-                .addPath(new BezierLine(shiftL, shhooting))
-                .setLinearHeadingInterpolation(shiftL.getHeading(), shhooting.getHeading())
+                .addPath(new BezierLine(loadingZone, shhooting))
+                .setLinearHeadingInterpolation(loadingZone.getHeading(), shhooting.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -119,14 +120,14 @@ public class redAlt5 extends OpMode {
                 shooter.closeServoStop();
                 shooter.downServoPaddle();
                 motorIntake.setPower(intakeOn);
-                follower.followPath(driveToScorePoseS);
-                setPathState(11);
+                if (pathTimer.getElapsedTimeSeconds() > 3) {
+                    follower.followPath(driveToScorePoseS);
+                    setPathState(11);
+                }
                 break;
             case 11:
                 if (!follower.isBusy()) {
-                    if (pathTimer.getElapsedTimeSeconds() > 3) {
-                        setPathState(1000);
-                    }
+                    setPathState(1000);
                 }
                 break;
             case 1000:
@@ -253,6 +254,17 @@ public class redAlt5 extends OpMode {
                 }
                 break;
             case 0222:
+                if (!follower.isBusy()) {
+                    follower.followPath(driveReLoadingToLZone);
+                    setPathState(0223);
+                }
+            case 0223:
+                if (!follower.isBusy()) {
+                    follower.followPath(driveAwayFromLoadingZone);
+                    setPathState(0224);
+                }
+                break;
+            case 0224:
                 if (!follower.isBusy()) {
                     follower.followPath(driveReLoadingToLZone);
                     setPathState(221);

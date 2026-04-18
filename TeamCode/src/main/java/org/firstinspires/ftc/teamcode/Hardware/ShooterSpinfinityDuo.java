@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -13,6 +14,13 @@ public class ShooterSpinfinityDuo {
     public Servo servoStop;
     public Servo servoPaddleLeft;
     public DcMotorEx motorTurret;
+
+
+    // Turret Motor PID Values
+    public static double NEW_P = 20.;
+    public static double NEW_I = 0.;
+    public static double NEW_D = 1.;
+    public static double NEW_F = 1.;
 
 //    public Servo servoHood;
 
@@ -59,7 +67,11 @@ public class ShooterSpinfinityDuo {
         motorTurret.setTargetPosition(0);
         motorTurret.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         motorTurret.setDirection(DcMotorEx.Direction.FORWARD);
-        motorTurret.setPower(0.5);
+
+        PIDFCoefficients pidfNew = new PIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
+        motorTurret.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
+
+        motorTurret.setPower(0.75);
     }
 
     public void openServoStop () {
@@ -92,7 +104,8 @@ public class ShooterSpinfinityDuo {
 
     public double newTurretPositionCalc(double currentPos, double error) {
         if (Math.abs(error) > TURRET_ADJUSTMENT_THRESHOLD) {
-            return (currentPos + error * MOTOR_TURRET_PROPORTIONAL_TERM);
+//            return (currentPos + error * MOTOR_TURRET_PROPORTIONAL_TERM);
+            return (currentPos + error * (535.0 / 90.0));
         } else {
             return currentPos;
         }
@@ -106,9 +119,10 @@ public class ShooterSpinfinityDuo {
         return motorTurret.getCurrentPosition();
     }
 
-    public double newTurretPositionClampedCalc(double currentPos, double error) {
+    public int newTurretPositionClampedCalc(int currentPos, double error) {
         if (Math.abs(error) > TURRET_ADJUSTMENT_THRESHOLD) {
-            int value = (int) (currentPos + error * MOTOR_TURRET_PROPORTIONAL_TERM);
+//            int value = (int) (currentPos + error * MOTOR_TURRET_PROPORTIONAL_TERM);
+            int value = (int) (currentPos + error * (535.0 / 90.0));
             return clamp(value, MOTOR_TURRET_MIN_POS, MOTOR_TURRET_MAX_POS);
         } else {
             return currentPos;
@@ -176,5 +190,10 @@ public class ShooterSpinfinityDuo {
         return motorTurret.getPower();
     }
 
+
+    public void setMotorTurretPIDF (double P, double I, double D, double F) {
+        PIDFCoefficients pidfNew = new PIDFCoefficients(P, I, D, F);
+        motorTurret.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
+    }
 
 }

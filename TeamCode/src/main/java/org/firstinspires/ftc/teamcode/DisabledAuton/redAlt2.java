@@ -1,4 +1,4 @@
-    package org.firstinspires.ftc.teamcode.auto;
+    package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -6,6 +6,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -13,15 +14,14 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+    @Disabled
     @Autonomous
-        public class blueAlt2 extends OpMode {
+        public class redAlt2 extends OpMode {
 
-        private final Pose startPose = new Pose(64, 8, Math.toRadians(90));
-        private final Pose loadingZone = new Pose(9, 13, Math.toRadians(180));
-        private final Pose reLoadingZone = new Pose(29, 13, Math.toRadians(180));
-        private final Pose shhooting = new Pose(60, 16, Math.toRadians(115));
-
+        private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
+        private final Pose loadingZone = new Pose(135, 13, Math.toRadians(0));
+        private final Pose reLoadingZone = new Pose(115, 13, Math.toRadians(0));
+        private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
         ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
 
         private int obeliskResult = 0;

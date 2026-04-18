@@ -221,7 +221,7 @@ public class TeleOpSpinfinityDuoMk8 extends OpMode {
         follower.update();
 
         if (timer.seconds() > 98 && !endgameRumbleFlag) {
-            gamepad1.rumble(1, 1,200);
+            gamepad1.rumble(1, 1,1000);
             endgameRumbleFlag = true;
         }
         if (timer.seconds() > 110 && !parkRumbleFlag) {
@@ -297,31 +297,6 @@ public class TeleOpSpinfinityDuoMk8 extends OpMode {
             automatedDrive = false;
         }
 
-//        pose2D = pinpoint.getPinpointPose();
-
-//        if (robotCentric) {
-//            botHeading = pose2D.getHeading(AngleUnit.RADIANS);
-//        }
-//        else {
-//            botHeading = 0;
-//        }
-
-//        if (x != prevX || y != prevY || rx != prevRX) {
-//            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
-//        }
-//
-//        prevX = x;
-//        prevY = y;
-//        prevRX = rx;
-
-        //
-
-//        robotHeading = follower.getHeading();
-
-//        botHeading = pose2D.getHeading(AngleUnit.RADIANS);
-
-
-
         LLResult result = limelight.getLatestResult();
         targetFound = false;
 
@@ -342,24 +317,6 @@ public class TeleOpSpinfinityDuoMk8 extends OpMode {
             telemetry.addData("Limelight", "No data available");
         }
 
-        // MegaTag Robot Position Determination
-//        if (result != null && result.isValid()) {
-//            Pose3D botpose = result.getBotpose();
-//            if (botpose != null) {
-//                double xpos = botpose.getPosition().x;
-//                double ypos = botpose.getPosition().y;
-//                double headingpos = botpose.getOrientation().getYaw();
-//                telemetry.addData("MT1 Location", "(" + xpos + ", " + ypos + ", " + headingpos + ")");
-//
-//                //follower.setPose(new Pose(xpos, ypos, headingpos, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE));
-//                //Pose convertedPos = new Pose(xpos, ypos, headingpos, FTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
-//                //telemetry.addData("Converted Location", "(" + convertedPos.getX() + ", " + convertedPos.getY() + ", " + convertedPos.getHeading() + ")");
-//                MT1XPos = 72 + (ypos * 39.37);
-//                MT1YPos = 72 - (xpos * 39.37);
-//                MT1botHeading = headingpos - 90;
-//            }
-//        }
-
         if (targetFound) {
             distanceToGoalInches = flywheel.distanceToGoalCalc(a2);
             if (distanceToGoalInches < 80.) {
@@ -376,17 +333,28 @@ public class TeleOpSpinfinityDuoMk8 extends OpMode {
         robotXPos = follower.getPose().getX();
         robotYPos = follower.getPose().getY();
         botHeading = follower.getHeading();
-        if(botHeading > -180 && botHeading < -90) {
-            correctedBotHeading = 360 + botHeading;
+
+//        if (botHeading > -95 && botHeading < -85) {
+//            correctedBotHeading = -90.;
+//        } else if (botHeading > -180 && botHeading < -95) {
+//            correctedBotHeading = 360. + botHeading;
+//        } else {
+//            correctedBotHeading = botHeading;
+//        }
+
+        if (botHeading > -1.658 && botHeading < -1.4835) {  // -95 to -85 degrees
+            correctedBotHeading = -1.5708;  // -90 degrees
+        } else if (botHeading > -3.14159 && botHeading < -1.658) {  // -180 to -95 degrees
+            correctedBotHeading = 6.28319 + botHeading;
         } else {
             correctedBotHeading = botHeading;
         }
 //        correctedBotHeading = (botHeading % 360 + 360) % 360;
+
         robotToGoalRelativeAngle = shooter.newTurretPoseCalc(robotXPos, robotYPos, correctedBotHeading);
         newPosePos = shooter.turretPosEncoderCalc(robotToGoalRelativeAngle);
 
         turretTimer = timer.seconds() - turretTimer;
-
 
 
         // Toggle turret auto tracking when B is pressed on gamepad 1
@@ -527,14 +495,14 @@ public class TeleOpSpinfinityDuoMk8 extends OpMode {
         panelsTelemetry.addData("Pinpoint Robot X Position", robotXPos);
         panelsTelemetry.addData("Pinpoint Robot Y Position", robotYPos);
         panelsTelemetry.addData("Pinpoint Robot Heading", Math.toDegrees(botHeading));
-        panelsTelemetry.addData("Relative Angle To Goal", robotToGoalRelativeAngle);
-        panelsTelemetry.addData("Turret Encoder Calc", newPosePos);
-        panelsTelemetry.addData("Corrected Bot Heading", correctedBotHeading);
+//        panelsTelemetry.addData("Corrected Bot Heading", Math.toDegrees(correctedBotHeading));
+//        panelsTelemetry.addData("Relative Angle To Goal", robotToGoalRelativeAngle);
+//        panelsTelemetry.addData("Turret Encoder Calc", newPosePos);
 //        panelsTelemetry.addData("MegaTag Robot X Position", MT1XPos);
 //        panelsTelemetry.addData("MegaTag Robot Y Position", MT1YPos);
 //        panelsTelemetry.addData("MegaTag Robot Heading", MT1botHeading);
-//        panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
-//        panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
+        panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
+        panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
 ////        panelsTelemetry.addData("Shooting Sequence State", pathState);
 ////        panelsTelemetry.addData("Artifact Counter", counter);
 ////        panelsTelemetry.addData("Laser Detection Time", laserTime);
@@ -596,6 +564,9 @@ public class TeleOpSpinfinityDuoMk8 extends OpMode {
                 }
                 break;
             case 10006:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2){
+                    gamepad1.rumble(0.5, 0.5, 200);
+                }
                 if (pathTimer.getElapsedTimeSeconds() > 0.6) {
                     shooter.shootServoPaddle();
                     setPathState(10007);

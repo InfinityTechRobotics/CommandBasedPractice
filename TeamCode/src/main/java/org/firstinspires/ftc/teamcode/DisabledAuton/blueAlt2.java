@@ -1,12 +1,12 @@
-    package org.firstinspires.ftc.teamcode.auto;
+    package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -14,14 +14,15 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+    @Disabled
     @Autonomous
-        public class redAlt extends OpMode {
+        public class blueAlt2 extends OpMode {
 
-        private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
-        private final Pose loadingZone = new Pose(133, 15, Math.toRadians(0));
-        private final Pose reLoadingZone = new Pose(113, 15, Math.toRadians(0));
-        private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
+        private final Pose startPose = new Pose(64, 8, Math.toRadians(90));
+        private final Pose loadingZone = new Pose(9, 13, Math.toRadians(180));
+        private final Pose reLoadingZone = new Pose(29, 13, Math.toRadians(180));
+        private final Pose shhooting = new Pose(60, 16, Math.toRadians(115));
+
         ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
 
         private int obeliskResult = 0;
@@ -247,8 +248,20 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                 case 0222:
                     if (!follower.isBusy()) {
                         follower.followPath(driveToAwayReLoadingZone);
+                        setPathState(0223);
+                    }
+                case 0223:
+                    if (!follower.isBusy()) {
+                    follower.followPath(driveAwayToLoadingZone);
+                    setPathState(0224);
+                }
+                break;
+                case 0224:
+                    if (!follower.isBusy()) {
+                        follower.followPath(driveToAwayReLoadingZone);
                         setPathState(221);
                     }
+                    break;
                 case 221: // drives toward goal to score second set of artifacts (22)
                     if (!follower.isBusy()) {
                         follower.followPath(driveToScorePoseL);
