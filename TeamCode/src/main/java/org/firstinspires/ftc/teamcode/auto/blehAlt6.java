@@ -15,14 +15,14 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Autonomous
-public class redAlt3 extends OpMode {
+public class blehAlt6 extends OpMode {
 
-    private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
-    private final Pose loadingZone = new Pose(135, 13, Math.toRadians(0));
-    private final Pose reLoadingZone = new Pose(115, 13, Math.toRadians(0));
-    private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
-    private final Pose finaley = new Pose(107.5, 13, Math.toRadians(0));
-    private final Pose shiftL = new Pose(135, 16, Math.toRadians(0));
+    private final Pose startPose = new Pose(64, 8, Math.toRadians(90));
+    private final Pose loadingZone = new Pose(14, 15, Math.toRadians(180));
+    private final Pose reLoadingZone = new Pose(36, 13, Math.toRadians(180));
+    private final Pose shhooting = new Pose(60, 16, Math.toRadians(115));
+    private final Pose finaley = new Pose(36.5, 13, Math.toRadians(180));
+    private final Pose shiftL = new Pose(16, 20, Math.toRadians(180));
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
 
     private int obeliskResult = 0;
@@ -85,14 +85,14 @@ public class redAlt3 extends OpMode {
                 .build();
 
         driveReLoadingToLZone = follower.pathBuilder()
-                .addPath(new BezierLine(reLoadingZone, loadingZone))
-                .setLinearHeadingInterpolation(reLoadingZone.getHeading(), loadingZone.getHeading())
+                .addPath(new BezierLine(reLoadingZone, shiftL))
+                .setLinearHeadingInterpolation(reLoadingZone.getHeading(), shiftL.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
         driveToScorePoseL = follower.pathBuilder()
-                .addPath(new BezierLine(loadingZone, shhooting))
-                .setLinearHeadingInterpolation(loadingZone.getHeading(), shhooting.getHeading())
+                .addPath(new BezierLine(shiftL, shhooting))
+                .setLinearHeadingInterpolation(shiftL.getHeading(), shhooting.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -119,14 +119,14 @@ public class redAlt3 extends OpMode {
                 shooter.closeServoStop();
                 shooter.downServoPaddle();
                 motorIntake.setPower(intakeOn);
-                if (pathTimer.getElapsedTimeSeconds() > 3) {
-                    follower.followPath(driveToScorePoseS);
-                    setPathState(11);
-                }
+                follower.followPath(driveToScorePoseS);
+                setPathState(11);
                 break;
             case 11:
                 if (!follower.isBusy()) {
-                    setPathState(1000);
+                    if (pathTimer.getElapsedTimeSeconds() > 3) {
+                        setPathState(1000);
+                    }
                 }
                 break;
             case 1000:
@@ -213,11 +213,11 @@ public class redAlt3 extends OpMode {
                 } else if (shootingSequenceFlag == 2210) {
                     setPathState(220);
                 } else if (shootingSequenceFlag == 221023) {
-                    setPathState(400);
+                    setPathState(220);
                 } else if (shootingSequenceFlag == 22102321) {
-                    setPathState(777);
+                    setPathState(400);
                 } else if (shootingSequenceFlag == 777) {
-                    setPathState(999);
+                    setPathState(777);
                 }
                 //motorTransfer.setPower(transferOn);
                 break;
@@ -243,36 +243,25 @@ public class redAlt3 extends OpMode {
                 motorIntake.setPower(intakeOn);
                 if (!follower.isBusy()) {
                     follower.followPath(driveToLoadingZone);
-                    setPathState(0221);
-                }
-                break;
-            case 0221:
-                if (!follower.isBusy()) {
-                    follower.followPath(driveAwayFromLoadingZone);
-                    setPathState(0222);
-                }
-                break;
-            case 0222:
-                if (!follower.isBusy()) {
-                    follower.followPath(driveReLoadingToLZone);
-                    setPathState(0223);
-                }
-            case 0223:
-                if (!follower.isBusy()) {
-                    follower.followPath(driveAwayFromLoadingZone);
-                    setPathState(0224);
-                }
-                break;
-            case 0224:
-                if (!follower.isBusy()) {
-                    follower.followPath(driveReLoadingToLZone);
                     setPathState(221);
                 }
                 break;
-            case 221: // drives toward goal to score second set of artifacts (22)
+            case 221:
+                if (!follower.isBusy()) {
+                    follower.followPath(driveAwayFromLoadingZone);
+                    setPathState(222);
+                }
+                break;
+            case 222:
+                if (!follower.isBusy()) {
+                    follower.followPath(driveReLoadingToLZone);
+                    setPathState(223);
+                }
+                break;
+            case 223: // drives toward goal to score second set of artifacts (22)
                 if (!follower.isBusy()) {
                     follower.followPath(driveToScorePoseL);
-                    setPathState(11);
+                    setPathState(224);
                 }
                 break;
             case 224: // case for shooting
@@ -309,7 +298,7 @@ public class redAlt3 extends OpMode {
                 if (!follower.isBusy()) {
                     follower.followPath(driveToScorePoseL);
                     motorIntake.setPower(intakeOn);
-                    setPathState(11);
+                    setPathState(1000);
                 }
                 break;
             case 301:

@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Autonomous
-public class redAlt3 extends OpMode {
+public class redAlt4 extends OpMode {
 
     private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
     private final Pose loadingZone = new Pose(135, 13, Math.toRadians(0));
@@ -85,14 +85,14 @@ public class redAlt3 extends OpMode {
                 .build();
 
         driveReLoadingToLZone = follower.pathBuilder()
-                .addPath(new BezierLine(reLoadingZone, loadingZone))
-                .setLinearHeadingInterpolation(reLoadingZone.getHeading(), loadingZone.getHeading())
+                .addPath(new BezierLine(reLoadingZone, shiftL))
+                .setLinearHeadingInterpolation(reLoadingZone.getHeading(), shiftL.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
         driveToScorePoseL = follower.pathBuilder()
-                .addPath(new BezierLine(loadingZone, shhooting))
-                .setLinearHeadingInterpolation(loadingZone.getHeading(), shhooting.getHeading())
+                .addPath(new BezierLine(shiftL, shhooting))
+                .setLinearHeadingInterpolation(shiftL.getHeading(), shhooting.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -253,17 +253,6 @@ public class redAlt3 extends OpMode {
                 }
                 break;
             case 0222:
-                if (!follower.isBusy()) {
-                    follower.followPath(driveReLoadingToLZone);
-                    setPathState(0223);
-                }
-            case 0223:
-                if (!follower.isBusy()) {
-                    follower.followPath(driveAwayFromLoadingZone);
-                    setPathState(0224);
-                }
-                break;
-            case 0224:
                 if (!follower.isBusy()) {
                     follower.followPath(driveReLoadingToLZone);
                     setPathState(221);

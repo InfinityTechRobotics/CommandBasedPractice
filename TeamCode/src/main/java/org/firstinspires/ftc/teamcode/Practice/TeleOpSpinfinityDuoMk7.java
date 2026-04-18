@@ -513,6 +513,7 @@ public class TeleOpSpinfinityDuoMk7 extends OpMode {
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
         panelsTelemetry.addData("Robot Centric", robotCentric);
+        panelsTelemetry.addData("Turret Encoder Calc", newPosePos);
         //        panelsTelemetry.addData("Timer", timer.seconds());
 //        panelsTelemetry.addData("Pinpoint Robot X Position", robotXPos);
 //        panelsTelemetry.addData("Pinpoint Robot Y Position", robotYPos);
