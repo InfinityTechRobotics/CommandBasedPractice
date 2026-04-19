@@ -59,23 +59,12 @@ public class radAlt7 extends OpMode {
     private static ElapsedTime laserTimer = new ElapsedTime();
 
     double laserTime;
-    
 
-    DcMotorEx motorIntake;
-    DcMotorEx motorFlywheel;
-    DcMotorEx motorFlywheel2;
 
     double targetRPM = 0.0;
     double flywheelRPM = 0.0;
     double flywheelRPM2 = 0.0;
-    double TPS;
-    double CPR = 28.0;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
 
-    double transferOn = 0.8;
-    double transferOff = 0.0;
-
-    double intakeOn = 0.8;
-    double intakeOff = 0.0;
 
     double TARGET_AUTON_RPM = 3150; //2475.0
 
@@ -372,11 +361,7 @@ public class radAlt7 extends OpMode {
         autonomousPathUpdate();
 
         targetRPM = TARGET_AUTON_RPM;
-        TPS = targetRPM / 60. * CPR;
-        motorFlywheel.setVelocity(TPS);
-        motorFlywheel2.setVelocity(TPS);
-        flywheelRPM = motorFlywheel.getVelocity() * 60 / CPR;
-        flywheelRPM2 = motorFlywheel2.getVelocity() * 60 / CPR;
+        flywheel.setFlywheelVel(targetRPM);
 
         telemetry.addData("Obelisk ID", obeliskResult); // telemetry for which motif was detected.
         telemetry.addData("Path State", pathState); // the current path the code is running
@@ -389,7 +374,6 @@ public class radAlt7 extends OpMode {
         telemetry.addData("Flywheel RPM", flywheelRPM);
         telemetry.addData("Flywheel RPM2", flywheelRPM2);
         telemetry.addData("Shooting Sequence", shootingSequenceFlag);
-        telemetry.addData("Intake Status", motorIntake.getPower());
 
         if (telemtryUpdate == 49){
             telemtryUpdate = 0;
