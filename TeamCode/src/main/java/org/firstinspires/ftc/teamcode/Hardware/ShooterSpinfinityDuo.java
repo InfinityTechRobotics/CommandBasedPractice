@@ -13,6 +13,7 @@ public class ShooterSpinfinityDuo {
 
     public Servo servoStop;
     public Servo servoPaddleLeft;
+    public Servo servoHood;
     public DcMotorEx motorTurret;
 
 
@@ -22,7 +23,9 @@ public class ShooterSpinfinityDuo {
     public static double NEW_D = 1.;
     public static double NEW_F = 1.;
 
-//    public Servo servoHood;
+    double SERVO_HOOD_UP_POS = 0.5;
+    double SERVO_HOOD_DOWN_POS = 0.2;
+    double SERVO_HOOD_MID_POS = 0.4;
 
     double SERVO_STOP_OPEN_POS = 0.32; //0.44
     double SERVO_STOP_CLOSE_POS = 0.78; //0.88
@@ -58,7 +61,9 @@ public class ShooterSpinfinityDuo {
         servoStop = hardwareMap.get(Servo.class, "servoStop");
         servoPaddleLeft = hardwareMap.servo.get("servoPaddleLeft");
 
-//        servoHood = hardwareMap.get(Servo.class, "servoHood");
+        servoHood = hardwareMap.get(Servo.class, "servoHood");
+
+        servoHood.setPosition(0.2);
 
         motorTurret = hardwareMap.get(DcMotorEx.class, "motorTurret");
         motorTurret.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -194,6 +199,16 @@ public class ShooterSpinfinityDuo {
     public void setMotorTurretPIDF (double P, double I, double D, double F) {
         PIDFCoefficients pidfNew = new PIDFCoefficients(P, I, D, F);
         motorTurret.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
+    }
+
+    public void setServoHoodUpPos () {
+        servoHood.setPosition(SERVO_HOOD_UP_POS);
+    }
+    public void setServoHoodDownPos () {
+        servoHood.setPosition(SERVO_HOOD_DOWN_POS);
+    }
+    public void setServoHoodMidPos () {
+        servoHood.setPosition(SERVO_HOOD_MID_POS);
     }
 
 }
