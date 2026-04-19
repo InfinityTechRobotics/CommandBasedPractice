@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-@Disabled
-//@Configurable
+//@Disabled
+@Configurable
 @TeleOp
 public class FlywheelDuoTuning extends OpMode {
 

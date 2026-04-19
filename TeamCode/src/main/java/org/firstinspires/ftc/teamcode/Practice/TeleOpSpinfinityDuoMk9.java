@@ -147,7 +147,7 @@ public class TeleOpSpinfinityDuoMk9 extends OpMode {
 
         servoHood = hardwareMap.get(Servo.class, "servoHood");
 
-        servoHood.setPosition(0.1);
+        servoHood.setPosition(0.2);
 
 //        drive.init(hardwareMap);
         pinpoint.init(hardwareMap);
@@ -210,11 +210,11 @@ public class TeleOpSpinfinityDuoMk9 extends OpMode {
 //        shooter.setMotorTurretPIDF(NEW_P,NEW_I,NEW_D,NEW_F);
 
         if (gamepad2.dpadLeftWasPressed()) {
-            servoHood.setPosition(0.5);
+            servoHood.setPosition(0.6);
         } else if (gamepad2.leftBumperWasPressed()) {
-            servoHood.setPosition(0.3);
+            servoHood.setPosition(0.4);
         } else if (gamepad2.dpadRightWasPressed()) {
-            servoHood.setPosition(0.1);
+            servoHood.setPosition(0.2);
 
         }
 

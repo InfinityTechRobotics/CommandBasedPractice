@@ -37,8 +37,8 @@ public class ShooterSpinfinityDuo {
 
     double TURRET_ADJUSTMENT_THRESHOLD = 1.0;
 
-    int MOTOR_TURRET_MIN_POS = -550;
-    int MOTOR_TURRET_MAX_POS = 550;
+    int MOTOR_TURRET_MIN_POS = -525;    // -550
+    int MOTOR_TURRET_MAX_POS = 525; // 550
 
     double RED_GOAL_X_POS = 130.35;
 
