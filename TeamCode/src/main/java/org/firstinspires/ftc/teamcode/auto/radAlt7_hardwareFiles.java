@@ -7,7 +7,6 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -19,7 +18,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Autonomous
-public class radAlt8 extends OpMode {
+public class radAlt7_hardwareFiles extends OpMode {
 
     private DigitalChannel laserInput;
     
@@ -29,9 +28,6 @@ public class radAlt8 extends OpMode {
     private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
     private final Pose finaley = new Pose(107.5, 13, Math.toRadians(0));
     private final Pose shiftL = new Pose(135, 20, Math.toRadians(0));
-    private final Pose prePickupPose21 = new Pose(92, 41, Math.toRadians(0)); // Preparing to intake third set of artifacts.
-    private final Pose pickupPose21 = new Pose(129, 41, Math.toRadians(0)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
-
     
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
@@ -62,23 +58,12 @@ public class radAlt8 extends OpMode {
     private static ElapsedTime laserTimer = new ElapsedTime();
 
     double laserTime;
-    
 
-    DcMotorEx motorIntake;
-    DcMotorEx motorFlywheel;
-    DcMotorEx motorFlywheel2;
 
     double targetRPM = 0.0;
     double flywheelRPM = 0.0;
     double flywheelRPM2 = 0.0;
-    double TPS;
-    double CPR = 28.0;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
 
-    double transferOn = 0.8;
-    double transferOff = 0.0;
-
-    double intakeOn = 0.8;
-    double intakeOff = 0.0;
 
     double TARGET_AUTON_RPM = 3150; //2475.0
 
@@ -88,7 +73,7 @@ public class radAlt8 extends OpMode {
 
     int telemtryUpdate = 0;
 
-    private PathChain driveToTheFinaley, driveTo21, drive21Shhooting, driveToLoadingZone, driveToScorePoseL, driveToScorePoseS, driveAwayFromLoadingZone, driveReLoadingToLZone;
+    private PathChain driveToTheFinaley, driveToLoadingZone, driveToScorePoseL, driveToScorePoseS, driveAwayFromLoadingZone, driveReLoadingToLZone;
 
     private void buildPaths() {
 
@@ -121,20 +106,6 @@ public class radAlt8 extends OpMode {
         driveToScorePoseS = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, shhooting))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shhooting.getHeading())
-                .setTimeoutConstraint(0)
-                .build();
-
-        driveTo21 = follower.pathBuilder()
-                .addPath(new BezierLine(shhooting, prePickupPose21))
-                .setLinearHeadingInterpolation(shhooting.getHeading(), prePickupPose21.getHeading())
-                .addPath(new BezierLine(prePickupPose21, pickupPose21))
-                .setLinearHeadingInterpolation(prePickupPose21.getHeading(), pickupPose21.getHeading())
-                .setTimeoutConstraint(0)
-                .build();
-
-        drive21Shhooting = follower.pathBuilder()
-                .addPath(new BezierLine(pickupPose21, shhooting))
-                .setLinearHeadingInterpolation(pickupPose21.getHeading(), shhooting.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -389,11 +360,7 @@ public class radAlt8 extends OpMode {
         autonomousPathUpdate();
 
         targetRPM = TARGET_AUTON_RPM;
-        TPS = targetRPM / 60. * CPR;
-        motorFlywheel.setVelocity(TPS);
-        motorFlywheel2.setVelocity(TPS);
-        flywheelRPM = motorFlywheel.getVelocity() * 60 / CPR;
-        flywheelRPM2 = motorFlywheel2.getVelocity() * 60 / CPR;
+        flywheel.setFlywheelVel(targetRPM);
 
         telemetry.addData("Obelisk ID", obeliskResult); // telemetry for which motif was detected.
         telemetry.addData("Path State", pathState); // the current path the code is running
@@ -406,7 +373,6 @@ public class radAlt8 extends OpMode {
         telemetry.addData("Flywheel RPM", flywheelRPM);
         telemetry.addData("Flywheel RPM2", flywheelRPM2);
         telemetry.addData("Shooting Sequence", shootingSequenceFlag);
-        telemetry.addData("Intake Status", motorIntake.getPower());
 
         if (telemtryUpdate == 49){
             telemtryUpdate = 0;
@@ -447,13 +413,13 @@ public class radAlt8 extends OpMode {
         laserInput = hardwareMap.get(DigitalChannel.class, "laserDigitalInput");
 
         laserInput.setMode(DigitalChannel.Mode.INPUT);
-        
-       
 
         shooter.init(hardwareMap);
         flywheel.init(hardwareMap);
         spintake.init(hardwareMap);
-        
+
+        shooter.setServoHoodUpPos();
+
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
