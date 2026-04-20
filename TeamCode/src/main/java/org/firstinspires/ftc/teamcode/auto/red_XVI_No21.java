@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Autonomous
-public class red_XV_No21 extends OpMode {
+public class red_XVI_No21 extends OpMode {
 
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
@@ -87,9 +87,11 @@ public class red_XV_No21 extends OpMode {
 
     private final Pose finalShootPose = new Pose (90, 110, Math.toRadians(30));
 
+    private final Pose finaley = new Pose(92, 63, Math.toRadians(90));
 
 
-    private PathChain driveToGoal, driveToPickup23, driveToGoal23, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPickup21, driveToGoal21, driveToEnd;
+
+    private PathChain driveToGoal, driveToPickup23, driveToFinaley, driveToGoal23, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPickup21, driveToGoal21, driveToEnd;
 
 //        DcMotorEx motorIntake;
 //        DcMotorEx motorFlywheel;
@@ -114,6 +116,12 @@ public class red_XV_No21 extends OpMode {
 
 
     private void buildPaths() {
+
+        driveToFinaley = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, finaley))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), finaley.getHeading())
+                .setTimeoutConstraint(0)
+                .build();
 
         driveToGoal = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scorePose))
@@ -259,7 +267,7 @@ public class red_XV_No21 extends OpMode {
                 } else if (shootingSequenceFlag == 22102321) {
                     setPathState(300);
                 } else if (shootingSequenceFlag == 777) {
-                    setPathState(999);
+                    setPathState(777);
                 }
                 //motorTransfer.setPower(transferOn);
                 break;
@@ -351,16 +359,16 @@ public class red_XV_No21 extends OpMode {
                 break;
             case 777:
                 if (!follower.isBusy()) {
-                    follower.followPath(driveToEnd);
+                    follower.followPath(driveToFinaley);
                     TARGET_AUTON_RPM = 0.0;
                     setPathState(999);
                 }
                 break;
             case 999: // last state, just stops and waits
-                if(pathTimer.getElapsedTimeSeconds() > 1) {
-                    TARGET_AUTON_RPM = 0.0;
-                    spintake.turnIntakeOff();
-                    setPathState(912);
+                if (!follower.isBusy()) {
+                        TARGET_AUTON_RPM = 0.0;
+                        spintake.turnIntakeOff();
+                        setPathState(912);
                 }
                 break;
         }
