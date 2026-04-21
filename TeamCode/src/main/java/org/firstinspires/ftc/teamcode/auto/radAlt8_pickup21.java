@@ -68,7 +68,7 @@ public class radAlt8_pickup21 extends OpMode {
     double flywheelRPM2 = 0.0;
 
 
-    double TARGET_AUTON_RPM = 3150; //2475.0
+    double TARGET_AUTON_RPM = 3300; //2475.0
 
     int shootingSequenceFlag = 1;
 

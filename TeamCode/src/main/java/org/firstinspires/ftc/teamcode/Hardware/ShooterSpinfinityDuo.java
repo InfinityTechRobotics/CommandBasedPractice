@@ -210,5 +210,8 @@ public class ShooterSpinfinityDuo {
     public void setServoHoodMidPos () {
         servoHood.setPosition(SERVO_HOOD_MID_POS);
     }
+    public void setServoHoodManual (double manual_hood_pos) {
+        servoHood.setPosition(manual_hood_pos);
+    }
 
 }

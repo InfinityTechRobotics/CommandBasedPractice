@@ -89,10 +89,10 @@ public class FlywheelSpinfinityDuo {
 
     public void setFlywheelRGB (double flywheelRPM, double targetRPM) {
 
-        if (flywheelRPM < (targetRPM - 150)) { // turns the RGB lights blue if the flywheel speed is too low
+        if (flywheelRPM < (targetRPM - 100)) { // turns the RGB lights blue if the flywheel speed is too low
             RPMIndicatorLeft.setPosition(0.611);
             RPMIndicatorRight.setPosition(0.611);
-        } else if (flywheelRPM > (targetRPM + 150)) { // turns the RGB lights orange if the flywheel speed is too high
+        } else if (flywheelRPM > (targetRPM + 100)) { // turns the RGB lights orange if the flywheel speed is too high
             RPMIndicatorLeft.setPosition(0.3);
             RPMIndicatorRight.setPosition(0.3);
         } else { // turns the RGB indicator green if the flywheel speed is correct
