@@ -3,17 +3,24 @@ package org.firstinspires.ftc.teamcode.SKR;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
+import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
+
 //@Disabled
 @Configurable
 @TeleOp
 public class FlywheelDuoTuning extends OpMode {
 
+
+    ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
+    SpintakeSpinfinity spintake = new SpintakeSpinfinity();
     TelemetryManager panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
     public static double NEW_P = 10.;   // 10.
@@ -33,6 +40,17 @@ public class FlywheelDuoTuning extends OpMode {
     PIDFCoefficients pidfModified;
     PIDFCoefficients pidfModified2;
 
+    public boolean intakeOn;
+
+    public boolean prevIntake;
+
+    double shootingTime = 0.;
+    private Timer pathTimer, opmodeTimer;
+
+    private int pathState;
+
+    public static double FAR_ZONE_HOOD_POS = 0.5;
+
 
     public void init() {
 
@@ -49,12 +67,18 @@ public class FlywheelDuoTuning extends OpMode {
         motorFlywheel2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         motorFlywheel2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
+        pathTimer = new Timer();
+        opmodeTimer = new Timer();
+        opmodeTimer.resetTimer();
+
         panelsTelemetry.debug("Init was ran!");
         panelsTelemetry.update(telemetry);
 
     }
 
     public void loop() {
+
+        autonomousPathUpdate();
 
         PIDFCoefficients pidfNew = new PIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
         motorFlywheel.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
@@ -74,12 +98,46 @@ public class FlywheelDuoTuning extends OpMode {
             targetRPM += 50.;
         }
 
+        if (gamepad2.dpadLeftWasPressed()) {
+            FAR_ZONE_HOOD_POS = 0.5;
+        } else if (gamepad2.leftBumperWasPressed()) {
+            FAR_ZONE_HOOD_POS = 0.4;
+        } else if (gamepad2.dpadRightWasPressed()) {
+            FAR_ZONE_HOOD_POS = 0.2;;
+        }
+
+        shooter.setServoHoodManual(FAR_ZONE_HOOD_POS);
+
         // Calculate and set flywheel motor velocity
         TPS = targetRPM / 60. * CPR;
         motorFlywheel.setVelocity(TPS);
 
         flywheelRPM = motorFlywheel.getVelocity() / CPR * 60;
         flywheelRPM2 = motorFlywheel2.getVelocity() / CPR * 60;
+
+
+        // Toggle intake when right_bumper is pressed
+        if (gamepad2.rightBumperWasPressed()) {
+            intakeOn = !intakeOn;
+        }
+
+        if (intakeOn != prevIntake) {
+            if (intakeOn) {
+                spintake.turnIntakeOn();
+            } else {
+                spintake.turnIntakeOff();
+            }
+        }
+
+        //start shooting sequence
+        if (gamepad2.right_trigger > 0.25) {
+            setPathState(10);
+        }
+
+        //start sequence for shooting paddle
+        if (gamepad2.left_trigger > 0.25) {
+            setPathState(10100);
+        }
 
         telemetry.addData("Target RPM", targetRPM);
         telemetry.addData("Flywheel RPM", flywheelRPM);
@@ -96,6 +154,67 @@ public class FlywheelDuoTuning extends OpMode {
         panelsTelemetry.addData("Flywheel 2 RPM", flywheelRPM2);
         panelsTelemetry.update(telemetry);
 
+    }
+
+
+    public void setPathState (int pState){
+
+        pathState = pState;
+        pathTimer.resetTimer();
+
+    }
+
+    public void autonomousPathUpdate () {
+        switch (pathState) {
+            case 10:
+                shooter.closeServoStop();
+                shooter.downServoPaddle();
+                setPathState(1001);
+                break;
+            case 1001:
+                spintake.turnIntakeOn();
+                setPathState(10001);
+                break;
+            case 10001:
+                if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
+                    shooter.openServoStop();
+                    setPathState(10006);
+                }
+                break;
+            case 10006:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2){
+                    gamepad1.rumble(0.5, 0.5, 200);
+                }
+                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
+                    shooter.shootServoPaddle();
+                    setPathState(10007);
+                }
+                break;
+            case 10007:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    shooter.downServoPaddle();
+                    shooter.closeServoStop();
+                    setPathState(999);
+                }
+                break;
+            case 10100:
+                shooter.openServoStop();
+                if (pathTimer.getElapsedTimeSeconds() > 0.05) {
+                    setPathState(10101);
+                }
+                break;
+            case 10101:
+                shooter.shootServoPaddle();
+                setPathState(10102);
+                break;
+            case 10102:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    shooter.downServoPaddle();
+                    shooter.closeServoStop();
+                    setPathState(999);
+                }
+                break;
+        }
     }
 
 }
