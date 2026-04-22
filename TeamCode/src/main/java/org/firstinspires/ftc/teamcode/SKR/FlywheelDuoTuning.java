@@ -51,8 +51,14 @@ public class FlywheelDuoTuning extends OpMode {
 
     public static double FAR_ZONE_HOOD_POS = 0.5;
 
+    boolean prevRightTrigger = false;
+    boolean prevLeftTrigger = false;
+
 
     public void init() {
+
+        shooter.init(hardwareMap);
+        spintake.init(hardwareMap);
 
         telemetry.setMsTransmissionInterval(11);
 
@@ -129,15 +135,32 @@ public class FlywheelDuoTuning extends OpMode {
             }
         }
 
-        //start shooting sequence
-        if (gamepad2.right_trigger > 0.25) {
+
+
+
+        boolean rightTriggerPressed = gamepad2.right_trigger > 0.25;
+        boolean leftTriggerPressed  = gamepad2.left_trigger > 0.25;
+
+        if (rightTriggerPressed && !prevRightTrigger) {
             setPathState(10);
         }
 
-        //start sequence for shooting paddle
-        if (gamepad2.left_trigger > 0.25) {
-            setPathState(10100);
+        if (leftTriggerPressed && !prevLeftTrigger) {
+            setPathState(11000); //10100
         }
+
+        prevRightTrigger = rightTriggerPressed;
+        prevLeftTrigger = leftTriggerPressed;
+//
+//        //start shooting sequence
+//        if (gamepad2.right_trigger > 0.25) {
+//            setPathState(10);
+//        }
+//
+//        //start sequence for shooting paddle
+//        if (gamepad2.left_trigger > 0.25) {
+//            setPathState(10100);
+//        }
 
         telemetry.addData("Target RPM", targetRPM);
         telemetry.addData("Flywheel RPM", flywheelRPM);
@@ -208,6 +231,56 @@ public class FlywheelDuoTuning extends OpMode {
                 setPathState(10102);
                 break;
             case 10102:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    shooter.downServoPaddle();
+                    shooter.closeServoStop();
+                    setPathState(999);
+                }
+                break;
+            case 11000:
+                intakeOn = true;
+                setPathState(11001);
+                break;
+            case 11001:
+                if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
+                    shooter.openServoStop();
+                    setPathState(11002);
+                }
+                break;
+            case 11002:
+                if (pathTimer.getElapsedTimeSeconds() > 0.1) {
+                    shooter.closeServoStop();
+                    setPathState(11003);
+                }
+                break;
+            case 11003:
+                if (pathTimer.getElapsedTimeSeconds() > 0.4) {
+                    shooter.openServoStop();
+                    setPathState(11004);
+                }
+                break;
+            case 11004:
+                if (pathTimer.getElapsedTimeSeconds() > 0.1) {
+                    shooter.closeServoStop();
+                    setPathState(11005);
+                }
+                break;
+            case 11005:
+                if (pathTimer.getElapsedTimeSeconds() > 0.4) {
+                    shooter.openServoStop();
+                    setPathState(11006);
+                }
+                break;
+            case 11006:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2){
+                    gamepad1.rumble(0.5, 0.5, 200);
+                }
+                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
+                    shooter.shootServoPaddle();
+                    setPathState(11007);
+                }
+                break;
+            case 11007:
                 if (pathTimer.getElapsedTimeSeconds() > 0.2) {
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
