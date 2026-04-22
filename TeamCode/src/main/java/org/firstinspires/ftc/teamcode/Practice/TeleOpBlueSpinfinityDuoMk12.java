@@ -553,14 +553,7 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
                 }
                 if (pathTimer.getElapsedTimeSeconds() > 0.6) {
                     shooter.shootServoPaddle();
-                    setPathState(10007);
-                }
-                break;
-            case 10007:
-                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
-                    shooter.downServoPaddle();
-                    shooter.closeServoStop();
-                    setPathState(999);
+                    setPathState(777);
                 }
                 break;
             case 10100:
@@ -576,14 +569,7 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
                 break;
             case 10102:
                 shooter.shootServoPaddle();
-                setPathState(10103);
-                break;
-            case 10103:
-                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
-                    shooter.downServoPaddle();
-                    shooter.closeServoStop();
-                    setPathState(999);
-                }
+                setPathState(777);
                 break;
             case 11000:
                 spintake.turnIntakeOn();
@@ -627,10 +613,10 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
                 }
                 if (pathTimer.getElapsedTimeSeconds() > 0.6) {
                     shooter.shootServoPaddle();
-                    setPathState(11007);
+                    setPathState(777);
                 }
                 break;
-            case 11007:
+            case 777:
                 if (pathTimer.getElapsedTimeSeconds() > 0.2) {
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
