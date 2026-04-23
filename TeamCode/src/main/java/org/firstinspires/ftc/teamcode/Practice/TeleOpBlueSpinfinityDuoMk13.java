@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 
 @Configurable
 @TeleOp
-public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
+public class TeleOpBlueSpinfinityDuoMk13 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -54,7 +54,7 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
 
     public static int DESIRED_TAG_ID = 20; // Red = 24; Blue = 20;
 
-    public static double LONG_DIST_ANGLE_CORRECTION = -3; // Red = 4; Blue = -4;
+    public static double LONG_DIST_ANGLE_CORRECTION = 0; // Red = 4; Blue = -4;
 
     // Turret variables
     double error;
@@ -70,8 +70,15 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
 
     public static double TURRET_TRACKING_TIMER_THRESHOLD = .25;
 
+    public static double MOTOR_TURRET_PROPORTIONAL_TERM = 5;
+
+    public static double MOTOR_TURRET_DERIVATIVE_TERM = 0.; //0.0
+
     // Pinpoint Robot Positions
     public static double robotXPos, robotYPos, botHeading;
+
+    //MegaTag Robot Positions
+    public static double MT1XPos, MT1YPos, MT1botHeading;
 
     double robotToGoalRelativeAngle;
 
@@ -93,6 +100,7 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
     public static double FAR_ZONE_HOOD_POS = 0.5;
 
     public boolean intakeOn;
+
     public boolean prevIntake;
 
     public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 0.4; //0.25
@@ -115,7 +123,10 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
 
     int i = 0;
 
+    double shootingTime = 0.;
     private Timer pathTimer, opmodeTimer;
+
+    private Timer shootTimer;
 
     private int pathState;
 
@@ -137,7 +148,6 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
     boolean leftTriggerPressed;
     boolean prevRightTrigger = false;
     boolean prevLeftTrigger = false;
-
 
     public void init() {
 
@@ -175,6 +185,8 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
+
+        shootTimer = new Timer();
 
         startingPose = new Pose(53, 108, Math.toRadians(150));
         follower = Constants.createFollower(hardwareMap);
@@ -244,20 +256,19 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
 
         activeDetecting = stateHigh;
 
-        if (counter != prevCount) {
-            spintake.setArtifactIndicator(counter);
-        }
-
-        prevCount = counter;
+        // Driver Controls
+//        double y = drive.squareInputWithSign(-gamepad1.left_stick_y);
+//        double x = drive.squareInputWithSign(gamepad1.left_stick_x * 1.1);
+//        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
 
         if (gamepad1.aWasPressed()) {
             follower.setPose(new Pose(72, 72, Math.toRadians(180)));
             //pinpoint.pinpointReset();
         }
 
-        if (gamepad1.dpad_down) {
+        if (gamepad1.left_bumper) {
             powerFactor = DRIVE_POWER_FACTOR_LOW;
-        } else if (gamepad1.dpad_up) {
+        } else if (gamepad1.right_bumper) {
             powerFactor = DRIVE_POWER_FACTOR_HIGH;
         } else {
             powerFactor = DRIVE_POWER_FACTOR;
@@ -266,6 +277,7 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
         if (gamepad1.yWasPressed()) {
             robotCentric = !robotCentric;
         }
+
 
         if (!automatedDrive) {
             //Make the last parameter false for field-centric
@@ -322,7 +334,10 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
             distanceToGoalInches = 54.;
         }
 
+
+
         turretTimer = timer.seconds() - turretTimer;
+
 
         // Toggle turret auto tracking when B is pressed on gamepad 1
         if (gamepad1.bWasPressed()) {
@@ -428,7 +443,7 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
 
         prevIntake = intakeOn;
 
-        // Start shooting sequence
+        //start shooting sequence
         rightTriggerPressed = gamepad2.right_trigger > 0.25;
         leftTriggerPressed  = gamepad2.left_trigger > 0.25;
 
@@ -442,19 +457,26 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
         if (leftTriggerPressed && !prevLeftTrigger) {
             counter = 0;
             laserTimer.reset();
-            setPathState(11000); //10100
+            setPathState(10100); //10100
         }
 
         prevRightTrigger = rightTriggerPressed;
         prevLeftTrigger = leftTriggerPressed;
 
 
-        // RGB Indicator Lights
-        // indicates when we have 3 artifacts
+        if (counter != prevCount) {
+            spintake.setArtifactIndicator(counter);
+        }
+
+        prevCount = counter;
+
         //flywheelRPM = motorFlywheel.getVelocity() / CPR * 60;
         flywheelRPM = flywheel.getFlywheelVel();
+
+        // RGB Indicator Lights
         flywheel.setFlywheelRGB(flywheelRPM, targetRPM);
 
+        // indicates when we have 3 artifacts
 
         i += 1;
 
@@ -482,8 +504,6 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
         panelsTelemetry.addData("Pinpoint Robot X Position", robotXPos);
         panelsTelemetry.addData("Pinpoint Robot Y Position", robotYPos);
         panelsTelemetry.addData("Pinpoint Robot Heading", Math.toDegrees(botHeading));
-        panelsTelemetry.addData("Intake On", intakeOn);
-        panelsTelemetry.addData("Intake Power", spintake.getIntakeMotorPower());
 //        panelsTelemetry.addData("Corrected Bot Heading", Math.toDegrees(correctedBotHeading));
 //        panelsTelemetry.addData("Relative Angle To Goal", robotToGoalRelativeAngle);
 //        panelsTelemetry.addData("Turret Encoder Calc", newPosePos);
@@ -492,12 +512,13 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
 //        panelsTelemetry.addData("MegaTag Robot Heading", MT1botHeading);
         panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
         panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
-        panelsTelemetry.addData("Shooting Sequence State", pathState);
+////        panelsTelemetry.addData("Shooting Sequence State", pathState);
 ////        panelsTelemetry.addData("Artifact Counter", counter);
 ////        panelsTelemetry.addData("Laser Detection Time", laserTime);
 ////        panelsTelemetry.addData("Object Detected", stateHigh);
 //        panelsTelemetry.addData("A2 Angle", a2);
 //        panelsTelemetry.addData("Drive Power Factor", powerFactor);
+//        panelsTelemetry.addData("Intake On", intakeOn);
         panelsTelemetry.addData("Bearing Error", error);
         panelsTelemetry.addData("Turret Target Pos", newPos);
         panelsTelemetry.addData("Turret Current Pos", currentPos);
@@ -537,15 +558,15 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
             case 10:
                 shooter.closeServoStop();
                 shooter.downServoPaddle();
-                setPathState(10000);
+                setPathState(1001);
                 break;
-            case 10000:
+            case 1001:
                 spintake.turnIntakeOn();
-                intakeOn = true;
                 setPathState(10001);
                 break;
             case 10001:
                 if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
+                    shootTimer.resetTimer();
                     shooter.openServoStop();
                     counter = 0;
                     setPathState(10006);
@@ -557,70 +578,28 @@ public class TeleOpBlueSpinfinityDuoMk12 extends OpMode {
                 }
                 if (pathTimer.getElapsedTimeSeconds() > 0.6) {
                     shooter.shootServoPaddle();
-                    setPathState(777);
+                    setPathState(10007);
+                }
+                break;
+            case 10007:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    shootingTime = shootTimer.getElapsedTimeSeconds();
+                    shooter.downServoPaddle();
+                    shooter.closeServoStop();
+                    setPathState(999);
                 }
                 break;
             case 10100:
-                spintake.turnIntakeOn();
-                intakeOn = true;
-                setPathState(10101);
-                break;
-            case 10101:
                 shooter.openServoStop();
                 if (pathTimer.getElapsedTimeSeconds() > 0.05) {
-                    setPathState(10102);
+                    setPathState(10101);
                 }
+                break;
+            case 10101:
+                shooter.shootServoPaddle();
+                setPathState(10102);
                 break;
             case 10102:
-                shooter.shootServoPaddle();
-                setPathState(777);
-                break;
-            case 11000:
-                spintake.turnIntakeOn();
-                intakeOn = true;
-                setPathState(11001);
-                break;
-            case 11001:
-                if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
-                    shooter.openServoStop();
-                    counter = 0;
-                    setPathState(11002);
-                }
-                break;
-            case 11002:
-                if (pathTimer.getElapsedTimeSeconds() > 0.1) {
-                    shooter.closeServoStop();
-                    setPathState(11003);
-                }
-                break;
-            case 11003:
-                if (pathTimer.getElapsedTimeSeconds() > 0.4) {
-                    shooter.openServoStop();
-                    setPathState(11004);
-                }
-                break;
-            case 11004:
-                if (pathTimer.getElapsedTimeSeconds() > 0.1) {
-                    shooter.closeServoStop();
-                    setPathState(11005);
-                }
-                break;
-            case 11005:
-                if (pathTimer.getElapsedTimeSeconds() > 0.4) {
-                    shooter.openServoStop();
-                    setPathState(11006);
-                }
-                break;
-            case 11006:
-                if (pathTimer.getElapsedTimeSeconds() > 0.2){
-                    gamepad1.rumble(0.5, 0.5, 200);
-                }
-                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
-                    shooter.shootServoPaddle();
-                    setPathState(777);
-                }
-                break;
-            case 777:
                 if (pathTimer.getElapsedTimeSeconds() > 0.2) {
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
