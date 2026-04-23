@@ -9,11 +9,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Hardware.Drive;
-import org.firstinspires.ftc.teamcode.Hardware.Flywheel;
-import org.firstinspires.ftc.teamcode.Hardware.Limelight;
+import org.firstinspires.ftc.teamcode.DisabledHardware.Flywheel;
+import org.firstinspires.ftc.teamcode.DisabledHardware.Limelight;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
-import org.firstinspires.ftc.teamcode.Hardware.Shooter;
-import org.firstinspires.ftc.teamcode.Hardware.Spintake;
+import org.firstinspires.ftc.teamcode.DisabledHardware.Shooter;
+import org.firstinspires.ftc.teamcode.DisabledHardware.Spintake;
 
 import java.util.List;
 

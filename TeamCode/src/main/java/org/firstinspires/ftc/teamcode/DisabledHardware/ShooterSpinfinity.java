@@ -1,11 +1,14 @@
-package org.firstinspires.ftc.teamcode.Hardware;
+package org.firstinspires.ftc.teamcode.DisabledHardware;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class ShooterSpinfinityv2 {
+@Disabled
+
+public class ShooterSpinfinity {
 
     public Servo servoStop;
     public Servo servoPaddleLeft;
@@ -26,10 +29,6 @@ public class ShooterSpinfinityv2 {
 
     int MOTOR_TURRET_MIN_POS = -500;
     int MOTOR_TURRET_MAX_POS = 500;
-
-    double RED_GOAL_X_POS = 130.35;
-
-    double RED_GOAL_Y_POS = 127.65;
 
 
     public void init(HardwareMap hardwareMap) {
@@ -115,28 +114,6 @@ public class ShooterSpinfinityv2 {
         }
     }
 
-    public double newTurretPoseCalc (double robotXPos, double robotYPos, double robotHeading) {
-
-        double deltaY = RED_GOAL_Y_POS - robotYPos;
-
-        double deltaX = RED_GOAL_X_POS - robotXPos;
-
-        double robotToGoalAngle = Math.atan2(deltaY, deltaX);
-
-        double robotToGoalRelativeAngle = robotToGoalAngle - robotHeading;
-
-        return Math.toDegrees(robotToGoalRelativeAngle);
-//        return Math.toDegrees(robotToGoalAngle);
-
-
-//         return clamp(value, MOTOR_TURRET_MIN_POS, MOTOR_TURRET_MAX_POS);
-
-    }
-
-    public int turretPosEncoderCalc (double robotToGoalRelativeAngle) {
-        int turretEncoderPosCalc = (int) ((535.0 / 90.0) * robotToGoalRelativeAngle);
-        return clamp(turretEncoderPosCalc, MOTOR_TURRET_MIN_POS, MOTOR_TURRET_MAX_POS);
-    }
 
 
 }

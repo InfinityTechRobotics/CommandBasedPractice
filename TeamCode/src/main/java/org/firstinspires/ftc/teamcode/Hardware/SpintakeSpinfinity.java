@@ -1,10 +1,6 @@
 package org.firstinspires.ftc.teamcode.Hardware;
 
-import static org.firstinspires.ftc.teamcode.Hardware.Spintake.TRANSFER_LOW_POWER;
-
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -20,7 +16,6 @@ public class SpintakeSpinfinity {
 
     public static double INTAKE_LOW_POWER = 0.2;
 
-    int counter = 0;
 
     private Servo artifactIndicator3, artifactIndicator2, artifactIndicator1;
 
@@ -60,14 +55,6 @@ public class SpintakeSpinfinity {
     public void forwardSpintakes () {
         motorIntake.setDirection(DcMotorEx.Direction.REVERSE);
     }
-
-//    public void getIntakeCurrent () {
-//        intakeCurrent = motorIntake.getCurrent(CurrentUnit.AMPS);
-//    }
-//
-//    public void getTransferCurrent () {
-//        transferCurrent = motorTransfer.getCurrent(CurrentUnit.AMPS);
-//    }
 
     public void checkIntakeCurrent () {
         if (motorIntake.isOverCurrent()) {

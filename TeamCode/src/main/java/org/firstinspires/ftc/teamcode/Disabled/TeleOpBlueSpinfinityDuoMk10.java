@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -14,10 +13,10 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -30,9 +29,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Configurable
+@Disabled
+//@Configurable
 @TeleOp
-public class TeleOpSpinfinityDuoMk9 extends OpMode {
+public class TeleOpBlueSpinfinityDuoMk10 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -53,11 +53,9 @@ public class TeleOpSpinfinityDuoMk9 extends OpMode {
 
     double laserTime;
 
-    private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
+    private static final int DESIRED_TAG_ID = 20; // Red = 24; Blue = 20;
 
-    double LONG_DIST_ANGLE_CORRECTION = 2; // Red = 4; Blue = -4;
-
-    public Servo servoHood;
+    double LONG_DIST_ANGLE_CORRECTION = -2; // Red = 4; Blue = -4;
 
     // Turret variables
     double error;
@@ -145,10 +143,6 @@ public class TeleOpSpinfinityDuoMk9 extends OpMode {
 
     public void init() {
 
-        servoHood = hardwareMap.get(Servo.class, "servoHood");
-
-        servoHood.setPosition(0.2);
-
 //        drive.init(hardwareMap);
         pinpoint.init(hardwareMap);
         shooter.init(hardwareMap);
@@ -178,13 +172,15 @@ public class TeleOpSpinfinityDuoMk9 extends OpMode {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
+        shooter.setServoHoodDownPos();
+
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
 
         shootTimer = new Timer();
 
-        startingPose = new Pose(91, 108, Math.toRadians(30));
+        startingPose = new Pose(53, 108, Math.toRadians(150));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
@@ -210,12 +206,11 @@ public class TeleOpSpinfinityDuoMk9 extends OpMode {
 //        shooter.setMotorTurretPIDF(NEW_P,NEW_I,NEW_D,NEW_F);
 
         if (gamepad2.dpadLeftWasPressed()) {
-            servoHood.setPosition(0.6);
+            shooter.setServoHoodUpPos();
         } else if (gamepad2.leftBumperWasPressed()) {
-            servoHood.setPosition(0.4);
+            shooter.setServoHoodMidPos();
         } else if (gamepad2.dpadRightWasPressed()) {
-            servoHood.setPosition(0.2);
-
+            shooter.setServoHoodDownPos();
         }
 
         autonomousPathUpdate();
@@ -259,7 +254,7 @@ public class TeleOpSpinfinityDuoMk9 extends OpMode {
 //        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
 
         if (gamepad1.aWasPressed()) {
-            follower.setPose(new Pose(72, 72, Math.toRadians(0)));
+            follower.setPose(new Pose(72, 72, Math.toRadians(180)));
             //pinpoint.pinpointReset();
         }
 
@@ -281,8 +276,8 @@ public class TeleOpSpinfinityDuoMk9 extends OpMode {
             //In case the drivers want to use a "slowMode" you can scale the vectors
             //This is the normal version to use in the TeleOp
             follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y * powerFactor,
-                    -gamepad1.left_stick_x * powerFactor,
+                    gamepad1.left_stick_y * powerFactor,
+                    gamepad1.left_stick_x * powerFactor,
                     -gamepad1.right_stick_x * powerFactor,
                     robotCentric // Field Centric
             );
@@ -321,7 +316,7 @@ public class TeleOpSpinfinityDuoMk9 extends OpMode {
 
         if (targetFound) {
             distanceToGoalInches = flywheel.distanceToGoalCalc(a2);
-            if (distanceToGoalInches < 80.) {
+            if (distanceToGoalInches < 85.) {
                 error = -bearing;
             } else {
                 error = -bearing - LONG_DIST_ANGLE_CORRECTION;
@@ -361,7 +356,7 @@ public class TeleOpSpinfinityDuoMk9 extends OpMode {
                     correctedBotHeading = botHeading;
                 }
 
-                robotToGoalRelativeAngle = shooter.newTurretPoseCalc(robotXPos, robotYPos, correctedBotHeading);
+                robotToGoalRelativeAngle = shooter.newTurretBluePoseCalc(robotXPos, robotYPos, correctedBotHeading);
                 newPosePos = shooter.turretPosEncoderCalc(robotToGoalRelativeAngle);
                 shooter.motorTurretSetPosition(newPosePos);
             }
@@ -384,8 +379,10 @@ public class TeleOpSpinfinityDuoMk9 extends OpMode {
 //            if (distanceToGoalInches < 80. || distanceToGoalInches > 100) {
             if (distanceToGoalInches > 85) {
                 targetRPM = 3325;
+                shooter.setServoHoodUpPos();
             } else {
                 targetRPM = flywheel.targetRPMCalc(distanceToGoalInches);
+                shooter.setServoHoodDownPos();
             }
 //            }
 //            else {

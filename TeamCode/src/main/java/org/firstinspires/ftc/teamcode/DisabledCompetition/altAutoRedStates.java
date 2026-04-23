@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.DisabledCompetition;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -12,34 +12,34 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.teamcode.Hardware.Shooter;
+import org.firstinspires.ftc.teamcode.DisabledHardware.Shooter;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Disabled
 @Autonomous
-    public class altAutoBlueStates extends OpMode {
+    public class altAutoRedStates extends OpMode {
     Shooter shooter = new Shooter();
 
-    double START_DELAY_TIME = 5.0;
+    double START_DELAY_TIME = 5.;
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
 
     public static double NEW_P = 100.;   // 10.
-    public static double NEW_I = 1.0;    // 3.00
-    public static double NEW_D = 20.0;    // 0.0
-    public static double NEW_F = 3.5;    // 0.0
+    public static double NEW_I = 1.;    // 3.
+    public static double NEW_D = 20.;    // 0.
+    public static double NEW_F = 3.5;    // 0.
 
-    private final Pose startPose = new Pose(64, 8, Math.toRadians(90));
-    private final Pose leavePose = new Pose(46, 18, Math.toRadians(180));
-    private final Pose prePickupPose21 = new Pose(54, 36, Math.toRadians(180)); // Preparing to intake third set of artifacts.
-    private final Pose pickupPose21 = new Pose(21, 36, Math.toRadians(180)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
-    private final Pose scorePose = new Pose(61, 16, Math.toRadians(115));
-    private final Pose prePickupPoseLoadingZone = new Pose(21, 36, Math.toRadians(270));
-    private final Pose pickupPoseLoadingZone = new Pose(21, 18, Math.toRadians(270));
-    private final Pose controlPoint1 = new Pose(56, 48); // Control point - you get the idea - read the name
-    private final Pose controlPoint2 = new Pose(56, 72); // Control point - you get the idea - read the name
+    private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
+    private final Pose leavePose = new Pose(106, 22, Math.toRadians(0));
+    private final Pose prePickupPose21 = new Pose(92, 44, Math.toRadians(0)); // Preparing to intake third set of artifacts.
+    private final Pose pickupPose21 = new Pose(130, 44, Math.toRadians(0)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
+    private final Pose scorePose = new Pose(83, 16, Math.toRadians(65));
+    private final Pose prePickupPoseLoadingZone = new Pose(142, 36, Math.toRadians(270));
+    private final Pose pickupPoseLoadingZone = new Pose(142, 18, Math.toRadians(270));
+    private final Pose controlPoint1 = new Pose(93, 48); // Control point - you get the idea - read the name
+    private final Pose controlPoint2 = new Pose(93, 72); // Control point - you get the idea - read the name
 
 
     private PathChain driveStartToScore, driveToScore, driveToLeave, driveToPrePickup21, driveToPickup21, driveToPrePickupLoadingZone, driveToPickupLoadingZone, driveToLoadingScore;
@@ -47,18 +47,18 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
     DcMotorEx motorIntake, motorTransfer;
     DcMotorEx motorFlywheel;
 
-    double targetRPM = 0.0;
-    double flywheelRPM = 0.0;
+    double targetRPM = 0.;
+    double flywheelRPM = 0.;
     double TPS;
-    double CPR = 28.0;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
+    double CPR = 28.;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
 
     double transferOn = 0.8;
-    double transferOff = 0.0;
+    double transferOff = 0.;
 
     double intakeOn = 0.8;
     double intakeOff = 0.0;
 
-    double TARGET_AUTON_RPM = 3100.0;
+    double TARGET_AUTON_RPM = 3100.;
 
     int shootingSequenceFlag = 1;
 
@@ -229,6 +229,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
                 break;
             case 213: // drives toward goal to score first set of artifacts (21)
                 if (pathTimer.getElapsedTimeSeconds() > 0.5) {
+//                    motorIntake.setPower(intakeOff);
                     if (!follower.isBusy()) {
                         follower.followPath(driveToScore);
                         setPathState(214);
@@ -277,11 +278,11 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
             case 777:
                 if (!follower.isBusy()) {
                     follower.followPath(driveToLeave);
-                    TARGET_AUTON_RPM = 0.0;
+                    TARGET_AUTON_RPM = 0.;
                     setPathState(999);
                 }
                 break;
-            case 999: // last state, just stops and turns things off
+            case 999: // last state, just stops and waits
                 if(!follower.isBusy()) {
                     motorTransfer.setPower(transferOff);
                     motorIntake.setPower(intakeOff);

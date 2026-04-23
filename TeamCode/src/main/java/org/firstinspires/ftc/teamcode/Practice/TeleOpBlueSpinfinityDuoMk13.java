@@ -54,7 +54,9 @@ public class TeleOpBlueSpinfinityDuoMk13 extends OpMode {
 
     public static int DESIRED_TAG_ID = 20; // Red = 24; Blue = 20;
 
-    public static double LONG_DIST_ANGLE_CORRECTION = 0; // Red = 4; Blue = -4;
+    public static double LONG_DIST_ANGLE_CORRECTION = -3; // Red = 4; Blue = -4;
+
+    public double FALLBACK_APRILTAG_DISTANCE = 54.;
 
     // Turret variables
     double error;
@@ -62,7 +64,6 @@ public class TeleOpBlueSpinfinityDuoMk13 extends OpMode {
     int currentPos, newPos, newPosePos;
 
     double prevError;
-    double turretTimer;
 
     double bearing;
 
@@ -203,7 +204,6 @@ public class TeleOpBlueSpinfinityDuoMk13 extends OpMode {
     public void start() {
         timer.reset();
         prevTime = 0.;
-        turretTimer = timer.seconds();
         aprilTagTimer = timer.seconds();
 
         follower.startTeleopDrive();
@@ -256,19 +256,14 @@ public class TeleOpBlueSpinfinityDuoMk13 extends OpMode {
 
         activeDetecting = stateHigh;
 
-        // Driver Controls
-//        double y = drive.squareInputWithSign(-gamepad1.left_stick_y);
-//        double x = drive.squareInputWithSign(gamepad1.left_stick_x * 1.1);
-//        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
-
         if (gamepad1.aWasPressed()) {
             follower.setPose(new Pose(72, 72, Math.toRadians(180)));
             //pinpoint.pinpointReset();
         }
 
-        if (gamepad1.left_bumper) {
+        if (gamepad1.dpad_left) {
             powerFactor = DRIVE_POWER_FACTOR_LOW;
-        } else if (gamepad1.right_bumper) {
+        } else if (gamepad1.dpad_right) {
             powerFactor = DRIVE_POWER_FACTOR_HIGH;
         } else {
             powerFactor = DRIVE_POWER_FACTOR;
@@ -305,7 +300,7 @@ public class TeleOpBlueSpinfinityDuoMk13 extends OpMode {
         LLResult result = limelight.getLatestResult();
         targetFound = false;
 
-        if (result.isValid()) {
+        if (result != null && result.isValid()) {
             // Access fiducial results
             List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
             for (LLResultTypes.FiducialResult fr : fiducialResults) {
@@ -331,13 +326,8 @@ public class TeleOpBlueSpinfinityDuoMk13 extends OpMode {
             }
         } else {
             error = 0;
-            distanceToGoalInches = 54.;
+            distanceToGoalInches = FALLBACK_APRILTAG_DISTANCE;
         }
-
-
-
-        turretTimer = timer.seconds() - turretTimer;
-
 
         // Toggle turret auto tracking when B is pressed on gamepad 1
         if (gamepad1.bWasPressed()) {
@@ -519,9 +509,9 @@ public class TeleOpBlueSpinfinityDuoMk13 extends OpMode {
 //        panelsTelemetry.addData("A2 Angle", a2);
 //        panelsTelemetry.addData("Drive Power Factor", powerFactor);
 //        panelsTelemetry.addData("Intake On", intakeOn);
-        panelsTelemetry.addData("Bearing Error", error);
-        panelsTelemetry.addData("Turret Target Pos", newPos);
-        panelsTelemetry.addData("Turret Current Pos", currentPos);
+//        panelsTelemetry.addData("Bearing Error", error);
+//        panelsTelemetry.addData("Turret Target Pos", newPos);
+//        panelsTelemetry.addData("Turret Current Pos", currentPos);
 //        panelsTelemetry.addData("Turret Target Pose Pos", newPosePos);
 //        panelsTelemetry.debug("Pinpoint Velocity", follower.getVelocity());
 //        panelsTelemetry.debug("Automated Drive", automatedDrive);

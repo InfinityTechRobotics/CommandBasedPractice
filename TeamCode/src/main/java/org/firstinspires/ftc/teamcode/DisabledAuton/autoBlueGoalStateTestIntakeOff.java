@@ -10,9 +10,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.Hardware.Flywheel;
-import org.firstinspires.ftc.teamcode.Hardware.Shooter;
-import org.firstinspires.ftc.teamcode.Hardware.Spintake;
+import org.firstinspires.ftc.teamcode.DisabledHardware.Flywheel;
+import org.firstinspires.ftc.teamcode.DisabledHardware.Shooter;
+import org.firstinspires.ftc.teamcode.DisabledHardware.Spintake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Disabled
