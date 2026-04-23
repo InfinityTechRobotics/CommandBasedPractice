@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Competition;
+package org.firstinspires.ftc.teamcode.DisabledCompetition;
 
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 @Disabled
 //@Configurable
 @TeleOp
-public class TeleOpRedSpinfinityDuoMiSci extends OpMode {
+public class TeleOpBlueSpinfinityDuoMiSci extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -53,9 +53,9 @@ public class TeleOpRedSpinfinityDuoMiSci extends OpMode {
 
     double laserTime;
 
-    private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
+    private static final int DESIRED_TAG_ID = 20; // Red = 24; Blue = 20;
 
-    double LONG_DIST_ANGLE_CORRECTION = 2; // Red = 4; Blue = -4;
+    double LONG_DIST_ANGLE_CORRECTION = -2; // Red = 4; Blue = -4;
 
     // Turret variables
     double error;
@@ -173,14 +173,14 @@ public class TeleOpRedSpinfinityDuoMiSci extends OpMode {
 
         shootTimer = new Timer();
 
-        startingPose = new Pose(91, 108, Math.toRadians(30));
+        startingPose = new Pose(53, 108, Math.toRadians(150));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
 
         pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(90, 102))))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37.5), 0.8))
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(54, 102))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(142.5), 0.8))
                 .build();
 
     }
@@ -235,7 +235,7 @@ public class TeleOpRedSpinfinityDuoMiSci extends OpMode {
 //        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
 
         if (gamepad1.aWasPressed()) {
-            follower.setPose(new Pose(72, 72, Math.toRadians(0)));
+            follower.setPose(new Pose(72, 72, Math.toRadians(180)));
             //pinpoint.pinpointReset();
         }
 
@@ -257,8 +257,8 @@ public class TeleOpRedSpinfinityDuoMiSci extends OpMode {
             //In case the drivers want to use a "slowMode" you can scale the vectors
             //This is the normal version to use in the TeleOp
             follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y * powerFactor,
-                    -gamepad1.left_stick_x * powerFactor,
+                    gamepad1.left_stick_y * powerFactor,
+                    gamepad1.left_stick_x * powerFactor,
                     -gamepad1.right_stick_x * powerFactor,
                     robotCentric // Field Centric
             );
@@ -354,7 +354,7 @@ public class TeleOpRedSpinfinityDuoMiSci extends OpMode {
         robotXPos = follower.getPose().getX();
         robotYPos = follower.getPose().getY();
         botHeading = follower.getHeading();
-        robotToGoalRelativeAngle = shooter.newTurretPoseCalc(robotXPos, robotYPos, botHeading);
+        robotToGoalRelativeAngle = shooter.newTurretBluePoseCalc(robotXPos, robotYPos, botHeading);
 
         turretTimer = timer.seconds() - turretTimer;
 
