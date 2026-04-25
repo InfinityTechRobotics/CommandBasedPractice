@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.DisabledAuton;
+package org.firstinspires.ftc.teamcode.Competition;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -7,7 +7,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -19,9 +18,8 @@ import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
-@Disabled
 @Autonomous
-public class bleh_XVI_Spinfinity extends OpMode {
+public class BLUENearWith21 extends OpMode {
 
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
@@ -59,29 +57,27 @@ public class bleh_XVI_Spinfinity extends OpMode {
     private final Pose startPose = new Pose(28, 129, Math.toRadians(144)); // Reflected over x = 72
 // private final Pose viewPose = new Pose(64, 120, Math.toRadians(90)); // Reflected over x = 72
 
-    private final Pose motifDetection = new Pose(59, 110, Math.toRadians(90));
-
     private final Pose scorePose = new Pose(48, 96, Math.toRadians(135)); // Reflected heading: 180 - 45 = 135
 
-    private final Pose prePickupPose21 = new Pose(52, 41, Math.toRadians(180)); // Reflected heading: 180 - 0 = 180
+    private final Pose prePickupPose21 = new Pose(55, 41, Math.toRadians(180)); // Reflected heading: 180 - 0 = 180
 
-    private final Pose pickupPose21 = new Pose(15, 41, Math.toRadians(180));
+    private final Pose pickupPose21 = new Pose(20, 41, Math.toRadians(180));
 
     private final Pose prePickupPose22 = new Pose(52, 63, Math.toRadians(180));
 
-    private final Pose pickupPose22 = new Pose(14, 63, Math.toRadians(180));
+    private final Pose pickupPose22 = new Pose(20, 63, Math.toRadians(180));
 
     private final Pose prePickupPose23 = new Pose(52, 88.75, Math.toRadians(180));
 
-    private final Pose pickupPose23 = new Pose(22, 88.75, Math.toRadians(180));
+    private final Pose pickupPose23 = new Pose(23, 88.75, Math.toRadians(180));
 
-    private final Pose gatePickup = new Pose(16, 61.5, Math.toRadians(160));
+    private final Pose gatePickup = new Pose(16, 61.5, Math.toRadians(150));
 
-    private final Pose downGate = new Pose(11, 52.5, Math.toRadians(140));
+    private final Pose downGate = new Pose(11, 54, Math.toRadians(140));
 
     private final Pose controlPointDriveToGate = new Pose(54, 54);
 
-    private final Pose controlPointDriveToAwayFromGate = new Pose(59, 50);
+    private final Pose controlPointDriveToAwayFromGate = new Pose(60, 77.3); //(60, 50)
 
     private final Pose controlPoint22 = new Pose(64, 60);
 
@@ -89,7 +85,7 @@ public class bleh_XVI_Spinfinity extends OpMode {
 
     private final Pose finalShootPose = new Pose(54, 110, Math.toRadians(150));
 
-    private final Pose finaley = new Pose(52, 63, Math.toRadians(180));
+    private final Pose finaley = new Pose(30, 75, Math.toRadians(94));
 
     private PathChain driveToGoal, driveToFinaley, driveToPickup23, driveToGoal23, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPickup21, driveToGoal21, driveToEnd;
 
@@ -184,8 +180,8 @@ public class bleh_XVI_Spinfinity extends OpMode {
                 .build();
 
         driveToGoal21 = follower.pathBuilder()
-                .addPath(new BezierLine(pickupPose21, finalShootPose))
-                .setLinearHeadingInterpolation(pickupPose21.getHeading(), finalShootPose.getHeading())
+                .addPath(new BezierLine(pickupPose21, scorePose))
+                .setLinearHeadingInterpolation(pickupPose21.getHeading(), scorePose.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -209,6 +205,11 @@ public class bleh_XVI_Spinfinity extends OpMode {
                 break;
             case 11:
                 if (!follower.isBusy()) {
+                        setPathState(12);
+                }
+                break;
+            case 12:
+                if (pathTimer.getElapsedTimeSeconds() > 1) {
                     setPathState(1000);
                 }
                 break;
@@ -250,6 +251,7 @@ public class bleh_XVI_Spinfinity extends OpMode {
                 shooter.downServoPaddle();
                 shooter.closeServoStop();
                 spintake.turnIntakeOff();
+                shooter.setServoHoodDownPos();
                 setPathState(10010);
                 break;
             case 10008: // updates shooting sequence flag
@@ -459,6 +461,8 @@ public class bleh_XVI_Spinfinity extends OpMode {
 
         shooter.closeServoStop();
         shooter.downServoPaddle();
+
+        shooter.setServoHoodMidPos();
 
         shooter.centerMotorTurret();
 

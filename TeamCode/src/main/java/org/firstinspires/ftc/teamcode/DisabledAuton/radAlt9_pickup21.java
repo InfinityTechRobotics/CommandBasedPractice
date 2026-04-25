@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -6,6 +6,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -16,20 +17,20 @@ import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+@Disabled
 @Autonomous
-public class blehAlt8_pickup21 extends OpMode {
+public class radAlt9_pickup21 extends OpMode {
 
     private DigitalChannel laserInput;
-
-    private final Pose startPose = new Pose(64, 8, Math.toRadians(90));
-    private final Pose loadingZone = new Pose(16, 13, Math.toRadians(180));
-    private final Pose reLoadingZone = new Pose(36, 13, Math.toRadians(180));
-    private final Pose shhooting = new Pose(60, 16, Math.toRadians(115));
-    private final Pose finaley = new Pose(36.5, 15, Math.toRadians(180));
-    private final Pose shiftL = new Pose(16, 20, Math.toRadians(180));
-    private final Pose prePickupPose21 = new Pose(52, 38, Math.toRadians(180));
-    private final Pose pickupPose21 = new Pose(11, 38, Math.toRadians(180));
+    
+    private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
+    private final Pose loadingZone = new Pose(135, 20, Math.toRadians(0));
+    private final Pose reLoadingZone = new Pose(115, 18, Math.toRadians(0));
+    private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
+    private final Pose finaley = new Pose(107.5, 15, Math.toRadians(0));
+    private final Pose shiftL = new Pose(135, 13, Math.toRadians(0));
+    private final Pose prePickupPose21 = new Pose(92, 41, Math.toRadians(0)); // Preparing to intake third set of artifacts.
+    private final Pose pickupPose21 = new Pose(133, 41, Math.toRadians(0)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
 
 
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -68,7 +69,7 @@ public class blehAlt8_pickup21 extends OpMode {
     double flywheelRPM2 = 0.0;
 
 
-    double TARGET_AUTON_RPM = 3150; //2475.0
+    double TARGET_AUTON_RPM = 3300; //2475.0
 
     int shootingSequenceFlag = 1;
 

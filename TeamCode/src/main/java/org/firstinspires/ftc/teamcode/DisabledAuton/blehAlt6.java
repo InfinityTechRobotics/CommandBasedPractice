@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -6,21 +6,17 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Hardware.FlywheelSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
-import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+@Disabled
 @Autonomous
-public class blehAlt7_hardwareFiles extends OpMode {
-
-    private DigitalChannel laserInput;
+public class blehAlt6 extends OpMode {
 
     private final Pose startPose = new Pose(64, 8, Math.toRadians(90));
     private final Pose loadingZone = new Pose(14, 15, Math.toRadians(180));
@@ -28,10 +24,7 @@ public class blehAlt7_hardwareFiles extends OpMode {
     private final Pose shhooting = new Pose(60, 16, Math.toRadians(115));
     private final Pose finaley = new Pose(36.5, 13, Math.toRadians(180));
     private final Pose shiftL = new Pose(16, 20, Math.toRadians(180));
-    
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
-    FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
-    SpintakeSpinfinity spintake = new SpintakeSpinfinity();
 
     private int obeliskResult = 0;
 
@@ -49,21 +42,22 @@ public class blehAlt7_hardwareFiles extends OpMode {
 
     double shootingTime = 0.0;
 
-    boolean activeDetecting = false;
-    boolean stateHigh;
 
-    int counter = 3;
-    int prevCount = 0;
-    
-    private static ElapsedTime laserTimer = new ElapsedTime();
-
-    double laserTime;
-
+    DcMotorEx motorIntake;
+    DcMotorEx motorFlywheel;
+    DcMotorEx motorFlywheel2;
 
     double targetRPM = 0.0;
     double flywheelRPM = 0.0;
     double flywheelRPM2 = 0.0;
+    double TPS;
+    double CPR = 28.0;   // 6000 RPM = 28.; 1620 RPM = 103.8; 1150 RPM = 145.1;
 
+    double transferOn = 0.8;
+    double transferOff = 0.0;
+
+    double intakeOn = 0.8;
+    double intakeOff = 0.0;
 
     double TARGET_AUTON_RPM = 3150; //2475.0
 
@@ -125,7 +119,7 @@ public class blehAlt7_hardwareFiles extends OpMode {
             case 10:
                 shooter.closeServoStop();
                 shooter.downServoPaddle();
-                spintake.turnIntakeOn();
+                motorIntake.setPower(intakeOn);
                 follower.followPath(driveToScorePoseS);
                 setPathState(11);
                 break;
@@ -152,7 +146,8 @@ public class blehAlt7_hardwareFiles extends OpMode {
                 break;
             case 1001:
                 if (!follower.isBusy()) {
-                    spintake.turnIntakeOn();
+                    motorIntake.setPower(intakeOn);
+
                     setPathState(10001);
                 }
                 break;
@@ -195,9 +190,11 @@ public class blehAlt7_hardwareFiles extends OpMode {
                 break;
             case 10007:
                 if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    //motorTransfer.setPower(transferOff);
                     shootingTime = shootTimer.getElapsedTimeSeconds();
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
+//                    motorIntake.setPower(intakeOff);
                     setPathState(10008);
                 }
                 break;
@@ -226,7 +223,7 @@ public class blehAlt7_hardwareFiles extends OpMode {
                 //motorTransfer.setPower(transferOn);
                 break;
             case 210: // beginning of set of actions for spike mark 21, gets ready to pickup
-                spintake.turnIntakeOn();
+                motorIntake.setPower(intakeOn);
                 if (!follower.isBusy()) {
 //                        follower.followPath(driveToPickup21);
                     setPathState(211);
@@ -244,7 +241,7 @@ public class blehAlt7_hardwareFiles extends OpMode {
                 }
                 break;
             case 220: // beginning of set of actions for spike mark 22, gets ready to pickup
-                spintake.turnIntakeOn();
+                motorIntake.setPower(intakeOn);
                 if (!follower.isBusy()) {
                     follower.followPath(driveToLoadingZone);
                     setPathState(221);
@@ -276,7 +273,7 @@ public class blehAlt7_hardwareFiles extends OpMode {
             case 230: // beginning of actions for spike mark 23, gets ready to pickup
                 if (pathTimer.getElapsedTimeSeconds() > 0.5) {
                     if (!follower.isBusy()) {
-                        spintake.turnIntakeOn();
+                        motorIntake.setPower(intakeOn);
                         setPathState(231);
                     }
                 }
@@ -301,7 +298,7 @@ public class blehAlt7_hardwareFiles extends OpMode {
             case 300: // case for "gobbling" from the gate
                 if (!follower.isBusy()) {
                     follower.followPath(driveToScorePoseL);
-                    spintake.turnIntakeOn();
+                    motorIntake.setPower(intakeOn);
                     setPathState(1000);
                 }
                 break;
@@ -338,10 +335,11 @@ public class blehAlt7_hardwareFiles extends OpMode {
             case 999: // last state, just stops and waits
                 if (pathTimer.getElapsedTimeSeconds() > 1) {
                     TARGET_AUTON_RPM = 0.0;
-                    spintake.turnIntakeOff();
+                    motorIntake.setPower(intakeOff);
                     setPathState(912);
                 }
                 break;
+
 
         }
     }
@@ -360,7 +358,11 @@ public class blehAlt7_hardwareFiles extends OpMode {
         autonomousPathUpdate();
 
         targetRPM = TARGET_AUTON_RPM;
-        flywheel.setFlywheelVel(targetRPM);
+        TPS = targetRPM / 60. * CPR;
+        motorFlywheel.setVelocity(TPS);
+        motorFlywheel2.setVelocity(TPS);
+        flywheelRPM = motorFlywheel.getVelocity() * 60 / CPR;
+        flywheelRPM2 = motorFlywheel2.getVelocity() * 60 / CPR;
 
         telemetry.addData("Obelisk ID", obeliskResult); // telemetry for which motif was detected.
         telemetry.addData("Path State", pathState); // the current path the code is running
@@ -373,6 +375,7 @@ public class blehAlt7_hardwareFiles extends OpMode {
         telemetry.addData("Flywheel RPM", flywheelRPM);
         telemetry.addData("Flywheel RPM2", flywheelRPM2);
         telemetry.addData("Shooting Sequence", shootingSequenceFlag);
+        telemetry.addData("Intake Status", motorIntake.getPower());
 
         if (telemtryUpdate == 49){
             telemtryUpdate = 0;
@@ -382,43 +385,32 @@ public class blehAlt7_hardwareFiles extends OpMode {
         }
 
 
-        // Laser Artifact Detection (Detected = TRUE --> counter +1)
-        stateHigh = laserInput.getState();
-
-        if (stateHigh) {
-            if (!activeDetecting) {
-                laserTimer.reset();
-                counter += 1;
-            }
-        } else {        // not detecting
-            if (activeDetecting) {
-                laserTime = laserTimer.seconds();
-            }
-        }
-
-        activeDetecting = stateHigh;
-
-        if (counter != prevCount) {
-            spintake.setArtifactIndicator(counter);
-        }
-
-        prevCount = counter;
-
 
     }
 
     @Override
     public void init() {
-        
-        laserInput = hardwareMap.get(DigitalChannel.class, "laserDigitalInput");
-
-        laserInput.setMode(DigitalChannel.Mode.INPUT);
 
         shooter.init(hardwareMap);
-        flywheel.init(hardwareMap);
-        spintake.init(hardwareMap);
 
-        shooter.setServoHoodUpPos();
+        motorIntake = hardwareMap.get(DcMotorEx.class, "motorIntake");
+        motorFlywheel = hardwareMap.get(DcMotorEx.class, "motorFlywheel");
+        motorFlywheel2 = hardwareMap.get(DcMotorEx.class, "motorFlywheel2");
+
+        motorIntake.setDirection(DcMotorEx.Direction.REVERSE);
+        motorFlywheel.setDirection(DcMotorEx.Direction.REVERSE);
+        motorFlywheel2.setDirection(DcMotorEx.Direction.FORWARD);
+
+
+        motorFlywheel.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        motorIntake.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        motorFlywheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+
+        PIDFCoefficients pidfNew = new PIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
+        motorFlywheel.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
+
+        pidfModified = motorFlywheel.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();

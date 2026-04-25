@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -7,6 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -17,9 +18,9 @@ import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+@Disabled
 @Autonomous
-public class bleh_XIX_Spinfinity extends OpMode {
+public class bleh_FINAL_Spinfinity extends OpMode {
 
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
@@ -65,7 +66,7 @@ public class bleh_XIX_Spinfinity extends OpMode {
 
     private final Pose prePickupPose21 = new Pose(55, 41, Math.toRadians(180)); // Reflected heading: 180 - 0 = 180
 
-    private final Pose pickupPose21 = new Pose(17, 41, Math.toRadians(180));
+    private final Pose pickupPose21 = new Pose(20, 41, Math.toRadians(180));
 
     private final Pose prePickupPose22 = new Pose(52, 63, Math.toRadians(180));
 
@@ -73,15 +74,15 @@ public class bleh_XIX_Spinfinity extends OpMode {
 
     private final Pose prePickupPose23 = new Pose(52, 88.75, Math.toRadians(180));
 
-    private final Pose pickupPose23 = new Pose(22, 88.75, Math.toRadians(180));
+    private final Pose pickupPose23 = new Pose(23, 88.75, Math.toRadians(180));
 
-    private final Pose gatePickup = new Pose(16, 61.5, Math.toRadians(150)); //angle 155
+    private final Pose gatePickup = new Pose(16, 61.5, Math.toRadians(150));
 
-    private final Pose downGate = new Pose(11, 52.5, Math.toRadians(140));
+    private final Pose downGate = new Pose(11, 54, Math.toRadians(140));
 
     private final Pose controlPointDriveToGate = new Pose(54, 54);
 
-    private final Pose controlPointDriveToAwayFromGate = new Pose(60, 50); //(59, 50)
+    private final Pose controlPointDriveToAwayFromGate = new Pose(60, 77.3); //(60, 50)
 
     private final Pose controlPoint22 = new Pose(64, 60);
 
@@ -89,9 +90,9 @@ public class bleh_XIX_Spinfinity extends OpMode {
 
     private final Pose finalShootPose = new Pose(54, 110, Math.toRadians(150));
 
-    private final Pose finaley = new Pose(52, 63, Math.toRadians(180));
+    private final Pose finaley = new Pose(30, 75, Math.toRadians(94));
 
-    private PathChain preToScore, driveToGoal, driveToFinaley, driveToPickup23, driveToGoal23, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPickup21, driveToGoal21, driveToEnd;
+    private PathChain driveToGoal, driveToFinaley, driveToPickup23, driveToGoal23, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPickup21, driveToGoal21, driveToEnd;
 
 //        DcMotorEx motorIntake;
 //        DcMotorEx motorFlywheel;
@@ -138,8 +139,8 @@ public class bleh_XIX_Spinfinity extends OpMode {
                 .build();
 
         driveToGoal23 = follower.pathBuilder()
-                .addPath(new BezierLine(pickupPose23, preScorePose))
-                .setLinearHeadingInterpolation(pickupPose23.getHeading(), preScorePose.getHeading())
+                .addPath(new BezierLine(pickupPose23, scorePose))
+                .setLinearHeadingInterpolation(pickupPose23.getHeading(), scorePose.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -152,8 +153,8 @@ public class bleh_XIX_Spinfinity extends OpMode {
                 .build();
 
         driveToGoal22 = follower.pathBuilder()
-                .addPath(new BezierCurve(pickupPose22, controlPoint22, preScorePose))
-                .setLinearHeadingInterpolation(pickupPose22.getHeading(), preScorePose.getHeading())
+                .addPath(new BezierCurve(pickupPose22, controlPoint22, scorePose))
+                .setLinearHeadingInterpolation(pickupPose22.getHeading(), scorePose.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -170,8 +171,8 @@ public class bleh_XIX_Spinfinity extends OpMode {
                 .build();
 
         driveToAwayFromGate = follower.pathBuilder()
-                .addPath(new BezierCurve(downGate, controlPointDriveToAwayFromGate, preScorePose))
-                .setLinearHeadingInterpolation(downGate.getHeading(), preScorePose.getHeading())
+                .addPath(new BezierCurve(downGate, controlPointDriveToAwayFromGate, scorePose))
+                .setLinearHeadingInterpolation(downGate.getHeading(), scorePose.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -184,20 +185,14 @@ public class bleh_XIX_Spinfinity extends OpMode {
                 .build();
 
         driveToGoal21 = follower.pathBuilder()
-                .addPath(new BezierLine(pickupPose21, finalShootPose))
-                .setLinearHeadingInterpolation(pickupPose21.getHeading(), finalShootPose.getHeading())
+                .addPath(new BezierLine(pickupPose21, scorePose))
+                .setLinearHeadingInterpolation(pickupPose21.getHeading(), scorePose.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
         driveToEnd = follower.pathBuilder()
                 .addPath(new BezierLine(scorePose, endPose))
                 .setLinearHeadingInterpolation(scorePose.getHeading(), endPose.getHeading())
-                .setTimeoutConstraint(0)
-                .build();
-
-        preToScore = follower.pathBuilder()
-                .addPath(new BezierLine(preScorePose, scorePose))
-                .setLinearHeadingInterpolation(preScorePose.getHeading(), scorePose.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -215,22 +210,25 @@ public class bleh_XIX_Spinfinity extends OpMode {
                 break;
             case 11:
                 if (!follower.isBusy()) {
+                        setPathState(12);
+                }
+                break;
+            case 12:
+                if (pathTimer.getElapsedTimeSeconds() > 1) {
                     setPathState(1000);
                 }
                 break;
             case 1000:
-                if (shootingSequenceFlag == 400) {
-                    shootingSequenceFlag = 221023;
+                if (shootingSequenceFlag == 22102321) {
+                    shootingSequenceFlag = 777;
                 } else if (shootingSequenceFlag == 221023) {
                     shootingSequenceFlag = 22102321;
                 } else if (shootingSequenceFlag == 2210) {
-                    shootingSequenceFlag = 400;
+                    shootingSequenceFlag = 221023;
                 } else if (shootingSequenceFlag == 1) {
                     shootingSequenceFlag = 22;
                 } else if (shootingSequenceFlag == 22) {
                     shootingSequenceFlag = 2210;
-                } else if (shootingSequenceFlag == 22102321) {
-                    shootingSequenceFlag = 777;
                 }
                 setPathState(1001);
                 break;
@@ -257,6 +255,8 @@ public class bleh_XIX_Spinfinity extends OpMode {
                 shootingTime = shootTimer.getElapsedTimeSeconds();
                 shooter.downServoPaddle();
                 shooter.closeServoStop();
+                spintake.turnIntakeOff();
+                shooter.setServoHoodDownPos();
                 setPathState(10010);
                 break;
             case 10008: // updates shooting sequence flag
@@ -273,8 +273,6 @@ public class bleh_XIX_Spinfinity extends OpMode {
                     setPathState(230);
                 } else if (shootingSequenceFlag == 22102321) {
                     setPathState(210);
-                } else if (shootingSequenceFlag == 400) {
-                    setPathState(300);
                 } else if (shootingSequenceFlag == 777) {
                     setPathState(777);
                 }
@@ -295,7 +293,6 @@ public class bleh_XIX_Spinfinity extends OpMode {
                 break;
             case 214: // case for shooting
                 if (!follower.isBusy()) {
-                    follower.followPath(driveToGoal21);
                     setPathState(1000);
                 }
                 break;
@@ -315,7 +312,6 @@ public class bleh_XIX_Spinfinity extends OpMode {
                 break;
             case 224: // case for shooting
                 if (!follower.isBusy()) {
-                    follower.followPath(preToScore);
                     setPathState(1000);
                 }
                 break;
@@ -341,7 +337,6 @@ public class bleh_XIX_Spinfinity extends OpMode {
                 break;
             case 235: // case for shooting
                 if (!follower.isBusy()) {
-                    follower.followPath(preToScore);
                     setPathState(1000);
                 }
                 break;
@@ -366,13 +361,12 @@ public class bleh_XIX_Spinfinity extends OpMode {
                 break;
             case 303:
                 if (!follower.isBusy()) {
-                    follower.followPath(preToScore);
                     setPathState(1000);
                 }
                 break;
             case 777:
                 if (!follower.isBusy()) {
-//                    follower.followPath(driveToFinaley);
+                    follower.followPath(driveToFinaley);
                     TARGET_AUTON_RPM = 0.0;
                     setPathState(999);
                 }
@@ -472,6 +466,8 @@ public class bleh_XIX_Spinfinity extends OpMode {
 
         shooter.closeServoStop();
         shooter.downServoPaddle();
+
+        shooter.setServoHoodMidPos();
 
         shooter.centerMotorTurret();
 

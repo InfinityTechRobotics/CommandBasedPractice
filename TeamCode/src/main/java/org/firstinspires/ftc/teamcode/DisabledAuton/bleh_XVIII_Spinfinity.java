@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Disabled
 @Autonomous
-public class bleh_XVI_Spinfinity extends OpMode {
+public class bleh_XVIII_Spinfinity extends OpMode {
 
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
@@ -63,13 +63,13 @@ public class bleh_XVI_Spinfinity extends OpMode {
 
     private final Pose scorePose = new Pose(48, 96, Math.toRadians(135)); // Reflected heading: 180 - 45 = 135
 
-    private final Pose prePickupPose21 = new Pose(52, 41, Math.toRadians(180)); // Reflected heading: 180 - 0 = 180
+    private final Pose prePickupPose21 = new Pose(55, 41, Math.toRadians(180)); // Reflected heading: 180 - 0 = 180
 
-    private final Pose pickupPose21 = new Pose(15, 41, Math.toRadians(180));
+    private final Pose pickupPose21 = new Pose(17, 41, Math.toRadians(180));
 
     private final Pose prePickupPose22 = new Pose(52, 63, Math.toRadians(180));
 
-    private final Pose pickupPose22 = new Pose(14, 63, Math.toRadians(180));
+    private final Pose pickupPose22 = new Pose(20, 63, Math.toRadians(180));
 
     private final Pose prePickupPose23 = new Pose(52, 88.75, Math.toRadians(180));
 
@@ -81,7 +81,7 @@ public class bleh_XVI_Spinfinity extends OpMode {
 
     private final Pose controlPointDriveToGate = new Pose(54, 54);
 
-    private final Pose controlPointDriveToAwayFromGate = new Pose(59, 50);
+    private final Pose controlPointDriveToAwayFromGate = new Pose(60, 50); //(59, 50)
 
     private final Pose controlPoint22 = new Pose(64, 60);
 
@@ -213,16 +213,18 @@ public class bleh_XVI_Spinfinity extends OpMode {
                 }
                 break;
             case 1000:
-                if (shootingSequenceFlag == 22102321) {
-                    shootingSequenceFlag = 777;
+                if (shootingSequenceFlag == 400) {
+                    shootingSequenceFlag = 221023;
                 } else if (shootingSequenceFlag == 221023) {
                     shootingSequenceFlag = 22102321;
                 } else if (shootingSequenceFlag == 2210) {
-                    shootingSequenceFlag = 221023;
+                    shootingSequenceFlag = 400;
                 } else if (shootingSequenceFlag == 1) {
                     shootingSequenceFlag = 22;
                 } else if (shootingSequenceFlag == 22) {
                     shootingSequenceFlag = 2210;
+                } else if (shootingSequenceFlag == 22102321) {
+                    shootingSequenceFlag = 777;
                 }
                 setPathState(1001);
                 break;
@@ -249,7 +251,6 @@ public class bleh_XVI_Spinfinity extends OpMode {
                 shootingTime = shootTimer.getElapsedTimeSeconds();
                 shooter.downServoPaddle();
                 shooter.closeServoStop();
-                spintake.turnIntakeOff();
                 setPathState(10010);
                 break;
             case 10008: // updates shooting sequence flag
@@ -266,6 +267,8 @@ public class bleh_XVI_Spinfinity extends OpMode {
                     setPathState(230);
                 } else if (shootingSequenceFlag == 22102321) {
                     setPathState(210);
+                } else if (shootingSequenceFlag == 400) {
+                    setPathState(300);
                 } else if (shootingSequenceFlag == 777) {
                     setPathState(777);
                 }
@@ -359,7 +362,7 @@ public class bleh_XVI_Spinfinity extends OpMode {
                 break;
             case 777:
                 if (!follower.isBusy()) {
-                    follower.followPath(driveToFinaley);
+//                    follower.followPath(driveToFinaley);
                     TARGET_AUTON_RPM = 0.0;
                     setPathState(999);
                 }

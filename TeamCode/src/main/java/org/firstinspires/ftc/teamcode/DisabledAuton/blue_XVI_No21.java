@@ -18,10 +18,9 @@ import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
 @Disabled
 @Autonomous
-public class bleh_XVI_Spinfinity extends OpMode {
+public class blue_XVI_No21 extends OpMode {
 
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
@@ -53,9 +52,6 @@ public class bleh_XVI_Spinfinity extends OpMode {
     public static double NEW_I = 5.0;    // 3.0
     public static double NEW_D = 40.0;    // 0.0
     public static double NEW_F = 1.25;    // 0.0
-
-    double shootingTime = 0.0;
-
     private final Pose startPose = new Pose(28, 129, Math.toRadians(144)); // Reflected over x = 72
 // private final Pose viewPose = new Pose(64, 120, Math.toRadians(90)); // Reflected over x = 72
 
@@ -91,7 +87,14 @@ public class bleh_XVI_Spinfinity extends OpMode {
 
     private final Pose finaley = new Pose(52, 63, Math.toRadians(180));
 
-    private PathChain driveToGoal, driveToFinaley, driveToPickup23, driveToGoal23, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPickup21, driveToGoal21, driveToEnd;
+
+
+    double shootingTime = 0.0;
+
+
+
+
+    private PathChain driveToGoal, driveToPickup23, driveToFinaley, driveToGoal23, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPickup21, driveToGoal21, driveToEnd;
 
 //        DcMotorEx motorIntake;
 //        DcMotorEx motorFlywheel;
@@ -265,7 +268,7 @@ public class bleh_XVI_Spinfinity extends OpMode {
                 } else if (shootingSequenceFlag == 221023) {
                     setPathState(230);
                 } else if (shootingSequenceFlag == 22102321) {
-                    setPathState(210);
+                    setPathState(300);
                 } else if (shootingSequenceFlag == 777) {
                     setPathState(777);
                 }
@@ -365,7 +368,7 @@ public class bleh_XVI_Spinfinity extends OpMode {
                 }
                 break;
             case 999: // last state, just stops and waits
-                if (!follower.isBusy()) {
+                if(!follower.isBusy()) {
                     TARGET_AUTON_RPM = 0.0;
                     spintake.turnIntakeOff();
                     setPathState(912);

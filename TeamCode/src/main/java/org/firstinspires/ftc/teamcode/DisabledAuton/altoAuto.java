@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Disabled;
+package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 
 import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;

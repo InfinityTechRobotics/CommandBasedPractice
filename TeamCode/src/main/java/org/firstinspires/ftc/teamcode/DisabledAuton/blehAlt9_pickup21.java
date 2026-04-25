@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -6,6 +6,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -16,19 +17,22 @@ import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+@Disabled
 @Autonomous
-public class radAlt7_hardwareFiles extends OpMode {
+public class blehAlt9_pickup21 extends OpMode {
 
     private DigitalChannel laserInput;
-    
-    private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
-    private final Pose loadingZone = new Pose(135, 15, Math.toRadians(0));
-    private final Pose reLoadingZone = new Pose(115, 13, Math.toRadians(0));
-    private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
-    private final Pose finaley = new Pose(107.5, 13, Math.toRadians(0));
-    private final Pose shiftL = new Pose(135, 20, Math.toRadians(0));
-    
+
+    private final Pose startPose = new Pose(64, 8, Math.toRadians(90));
+    private final Pose loadingZone = new Pose(16, 18, Math.toRadians(180));
+    private final Pose reLoadingZone = new Pose(36, 16, Math.toRadians(180));
+    private final Pose shhooting = new Pose(60, 16, Math.toRadians(115));
+    private final Pose finaley = new Pose(36.5, 13, Math.toRadians(180));
+    private final Pose shiftL = new Pose(16, 11, Math.toRadians(180));
+    private final Pose prePickupPose21 = new Pose(52, 38, Math.toRadians(180));
+    private final Pose pickupPose21 = new Pose(13, 38, Math.toRadians(180));
+
+
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
     SpintakeSpinfinity spintake = new SpintakeSpinfinity();
@@ -65,7 +69,7 @@ public class radAlt7_hardwareFiles extends OpMode {
     double flywheelRPM2 = 0.0;
 
 
-    double TARGET_AUTON_RPM = 3150; //2475.0
+    double TARGET_AUTON_RPM = 3300; //2475.0
 
     int shootingSequenceFlag = 1;
 
@@ -73,7 +77,7 @@ public class radAlt7_hardwareFiles extends OpMode {
 
     int telemtryUpdate = 0;
 
-    private PathChain driveToTheFinaley, driveToLoadingZone, driveToScorePoseL, driveToScorePoseS, driveAwayFromLoadingZone, driveReLoadingToLZone;
+    private PathChain driveToTheFinaley, driveTo21, drive21Shhooting, driveToLoadingZone, driveToScorePoseL, driveToScorePoseS, driveAwayFromLoadingZone, driveReLoadingToLZone;
 
     private void buildPaths() {
 
@@ -106,6 +110,20 @@ public class radAlt7_hardwareFiles extends OpMode {
         driveToScorePoseS = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, shhooting))
                 .setLinearHeadingInterpolation(startPose.getHeading(), shhooting.getHeading())
+                .setTimeoutConstraint(0)
+                .build();
+
+        driveTo21 = follower.pathBuilder()
+                .addPath(new BezierLine(shhooting, prePickupPose21))
+                .setLinearHeadingInterpolation(shhooting.getHeading(), prePickupPose21.getHeading())
+                .addPath(new BezierLine(prePickupPose21, pickupPose21))
+                .setLinearHeadingInterpolation(prePickupPose21.getHeading(), pickupPose21.getHeading())
+                .setTimeoutConstraint(0)
+                .build();
+
+        drive21Shhooting = follower.pathBuilder()
+                .addPath(new BezierLine(pickupPose21, shhooting))
+                .setLinearHeadingInterpolation(pickupPose21.getHeading(), shhooting.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -160,6 +178,7 @@ public class radAlt7_hardwareFiles extends OpMode {
                 if (pathTimer.getElapsedTimeSeconds() > 0.25) { // changed from 0.5 to 0.25
                     shootTimer.resetTimer();
                     shooter.openServoStop();
+                    counter = 0;
                     setPathState(10006);
                 }
                 break;
@@ -213,7 +232,7 @@ public class radAlt7_hardwareFiles extends OpMode {
                 break;
             case 10010:  // sends to next driving path
                 if (shootingSequenceFlag == 22) {
-                    setPathState(220);
+                    setPathState(2100);
                 } else if (shootingSequenceFlag == 2210) {
                     setPathState(220);
                 } else if (shootingSequenceFlag == 221023) {
@@ -228,17 +247,10 @@ public class radAlt7_hardwareFiles extends OpMode {
             case 210: // beginning of set of actions for spike mark 21, gets ready to pickup
                 spintake.turnIntakeOn();
                 if (!follower.isBusy()) {
-//                        follower.followPath(driveToPickup21);
                     setPathState(211);
                 }
                 break;
             case 211: // drives toward goal to score first set of artifacts (21)
-                if (!follower.isBusy()) {
-//                            follower.followPath(driveToGoal21);
-                    setPathState(214);
-                }
-                break;
-            case 214: // case for shooting
                 if (!follower.isBusy()) {
                     setPathState(1000);
                 }
@@ -318,6 +330,24 @@ public class radAlt7_hardwareFiles extends OpMode {
                 }
                 break;
             case 303:
+                if (!follower.isBusy()) {
+                    setPathState(1000);
+                }
+                break;
+            case 2100: // beginning of set of actions for spike mark 21, gets ready to pickup
+                spintake.turnIntakeOn();
+                if (!follower.isBusy()) {
+                    follower.followPath(driveTo21);
+                    setPathState(2101);
+                }
+                break;
+            case 2101: // drives toward goal to score first set of artifacts (21)
+                if (!follower.isBusy()) {
+                    follower.followPath(drive21Shhooting);
+                    setPathState(2102);
+                }
+                break;
+            case 2102: // case for shooting
                 if (!follower.isBusy()) {
                     setPathState(1000);
                 }

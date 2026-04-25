@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Competition;
+package org.firstinspires.ftc.teamcode.DisabledCompetition;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -22,15 +22,15 @@ import java.util.List;
 //@Configurable
 @Disabled
 @TeleOp
-public class TeleOpRedStates extends OpMode {
+public class TeleOpBlueStates extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     Shooter shooter = new Shooter();
     Pose2D pose2D;
 
     public static double NEW_P = 100.;   // 10.
-    public static double NEW_I = 1.;    // 3.
-    public static double NEW_D = 20.;    // 0.
+    public static double NEW_I = 1.0;    // 3.
+    public static double NEW_D = 20.0;    // 0.
     public static double NEW_F = 3.5;    // 0.
 
     double h1 = 13.3;  // 13.25 // 14.25
@@ -52,9 +52,9 @@ public class TeleOpRedStates extends OpMode {
 
     public DigitalChannel ledTransferGreen, ledTransferRed;
 
-    private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
+    private static final int DESIRED_TAG_ID = 20; // Red = 24; Blue = 20;
 
-    double LONG_DIST_ANGLE_CORRECTION = 4; // Red = 4; Blue = -4;
+    double LONG_DIST_ANGLE_CORRECTION = -4; // Red = 4; Blue = -4;
 
     double error, currentPos, newPos;
 
@@ -194,7 +194,7 @@ public class TeleOpRedStates extends OpMode {
             if (stateHigh) {
                 telemetry.addLine("Object detected!");
             } else {
-                telemetry.addLine("No object detected");
+                telemetry.addLine("No object detected :( ");
             }
 
         // Set Flywheel Motor PIDF coefficients
@@ -297,6 +297,8 @@ public class TeleOpRedStates extends OpMode {
         }
 
         if (targetFound) {
+
+
             angleToGoalDegrees = a1 + a2;
             angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
 
@@ -314,7 +316,7 @@ public class TeleOpRedStates extends OpMode {
             error = 0;
             distanceToGoalInches = 54.;
 
-            telemetry.addData("Target", "Not Found\n");
+            telemetry.addData("Target", "Not Found/n");
         }
 
         // Toggle turret auto tracking when B is pressed on gamepad 1
@@ -523,7 +525,7 @@ public class TeleOpRedStates extends OpMode {
                 pidfModified.p, pidfModified.i, pidfModified.d, pidfModified.f);
 //        telemetry.addData("Intake Motor Power", motorIntake.getPower());
 //        telemetry.addData("Intake Motor Current", intakeCurrent);
-//        telemetry.addData("Intake Motor Current Alert Level", motorIntake.getCurrentAlert(CurrentUnit.AMPS));
+//        telemetry.`addData("Intake Motor Current Alert Level", motorIntake.getCurrentAlert(CurrentUnit.AMPS));
 //        telemetry.addData("Transfer Motor Power", motorTransfer.getPower());
 //        telemetry.addData("Transfer Motor Current", transferCurrent);
 //        telemetry.addData("Transfer Motor Current Alert Level", motorTransfer.getCurrentAlert(CurrentUnit.AMPS));

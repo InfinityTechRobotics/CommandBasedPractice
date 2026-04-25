@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto;
+package org.firstinspires.ftc.teamcode.DisabledAuton;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
@@ -7,6 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -17,9 +18,9 @@ import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
+@Disabled
 @Autonomous
-public class red_XV_Spinfinity extends OpMode {
+public class rad_FINAL_No21 extends OpMode {
 
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
@@ -57,8 +58,6 @@ public class red_XV_Spinfinity extends OpMode {
     private final Pose startPose = new Pose(116, 129, Math.toRadians(36)); // Start Pose of our robot.
     //    private final Pose viewPose = new Pose(80, 120, Math.toRadians(90)); // Pose to read the Obelisk.
 
-    private final Pose motifDetection = new Pose(85, 110, Math.toRadians(90));
-
     private final Pose scorePose = new Pose(96, 96, Math.toRadians(45)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
 
     private final Pose prePickupPose21 = new Pose(92, 41, Math.toRadians(0)); // Preparing to intake third set of artifacts.
@@ -73,13 +72,13 @@ public class red_XV_Spinfinity extends OpMode {
 
     private final Pose pickupPose23 = new Pose(124, 88.75, Math.toRadians(0)); // Highest (First Set) of Artifacts from the Spike Mark(PPG).
 
-    private final Pose gatePickup = new Pose(128, 61.5, Math.toRadians(20));
+    private final Pose gatePickup = new Pose(128, 61.5, Math.toRadians(30));
 
-    private final Pose downGate = new Pose(133, 52.5, Math.toRadians(40));
+    private final Pose downGate = new Pose(133, 54, Math.toRadians(40));
 
     private final Pose controlPointDriveToGate = new Pose(90, 54);
 
-    private final Pose controlPointDriveToAwayFromGate = new Pose(85, 43);
+    private final Pose controlPointDriveToAwayFromGate = new Pose(84, 77.3);
 
     private final Pose controlPoint22 = new Pose(80, 60); // 67! ;) - you should get what this means by now - read the name aigin - idk i cant spel
 
@@ -87,7 +86,9 @@ public class red_XV_Spinfinity extends OpMode {
 
     private final Pose finalShootPose = new Pose (90, 110, Math.toRadians(30));
 
-    private PathChain driveToGoal, driveToPickup23, driveToGoal23, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPickup21, driveToGoal21, driveToEnd;
+    private final Pose finaley = new Pose(114, 75, Math.toRadians(86));
+
+    private PathChain driveToGoal, driveToFinaley, driveToPickup23, driveToGoal23, driveToPickup22, driveToGatePickup, driveDownFromGate, driveToAwayFromGate, driveToGoal22, driveToPickup21, driveToGoal21, driveToEnd;
 
 //        DcMotorEx motorIntake;
 //        DcMotorEx motorFlywheel;
@@ -112,6 +113,12 @@ public class red_XV_Spinfinity extends OpMode {
 
 
     private void buildPaths() {
+
+        driveToFinaley = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, finaley))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), finaley.getHeading())
+                .setTimeoutConstraint(0)
+                .build();
 
         driveToGoal = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scorePose))
@@ -174,8 +181,8 @@ public class red_XV_Spinfinity extends OpMode {
                 .build();
 
         driveToGoal21 = follower.pathBuilder()
-                .addPath(new BezierLine(pickupPose21, finalShootPose))
-                .setLinearHeadingInterpolation(pickupPose21.getHeading(), finalShootPose.getHeading())
+                .addPath(new BezierLine(pickupPose21, scorePose))
+                .setLinearHeadingInterpolation(pickupPose21.getHeading(), scorePose.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -199,6 +206,11 @@ public class red_XV_Spinfinity extends OpMode {
                 break;
             case 11:
                 if (!follower.isBusy()) {
+                        setPathState(12);
+                }
+                break;
+            case 12:
+                if (pathTimer.getElapsedTimeSeconds() > 1) {
                     setPathState(1000);
                 }
                 break;
@@ -240,6 +252,7 @@ public class red_XV_Spinfinity extends OpMode {
                 shooter.downServoPaddle();
                 shooter.closeServoStop();
                 spintake.turnIntakeOff();
+                shooter.setServoHoodDownPos();
                 setPathState(10010);
                 break;
             case 10008: // updates shooting sequence flag
@@ -253,13 +266,12 @@ public class red_XV_Spinfinity extends OpMode {
                 } else if (shootingSequenceFlag == 2210) {
                     setPathState(300);
                 } else if (shootingSequenceFlag == 221023) {
-                    setPathState(230);
+                    setPathState(300);
                 } else if (shootingSequenceFlag == 22102321) {
-                    setPathState(210);
+                    setPathState(230);
                 } else if (shootingSequenceFlag == 777) {
-                    setPathState(999);
+                    setPathState(777);
                 }
-                //motorTransfer.setPower(transferOn);
                 break;
             case 210: // beginning of set of actions for spike mark 21, gets ready to pickup
                 spintake.turnIntakeOn();
@@ -337,7 +349,7 @@ public class red_XV_Spinfinity extends OpMode {
                 }
                 break;
             case 302:
-                if (pathTimer.getElapsedTimeSeconds() > 1.5)  {
+                if (pathTimer.getElapsedTimeSeconds() > 2)  {
                     follower.followPath(driveToAwayFromGate);
                     setPathState(303);
                 }
@@ -349,13 +361,13 @@ public class red_XV_Spinfinity extends OpMode {
                 break;
             case 777:
                 if (!follower.isBusy()) {
-                    follower.followPath(driveToEnd);
+                    follower.followPath(driveToFinaley);
                     TARGET_AUTON_RPM = 0.0;
                     setPathState(999);
                 }
                 break;
             case 999: // last state, just stops and waits
-                if(pathTimer.getElapsedTimeSeconds() > 1) {
+                if (!follower.isBusy()) {
                     TARGET_AUTON_RPM = 0.0;
                     spintake.turnIntakeOff();
                     setPathState(912);
@@ -449,6 +461,8 @@ public class red_XV_Spinfinity extends OpMode {
 
         shooter.closeServoStop();
         shooter.downServoPaddle();
+
+        shooter.setServoHoodMidPos();
 
         shooter.centerMotorTurret();
 
