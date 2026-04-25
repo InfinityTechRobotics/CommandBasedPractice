@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -18,7 +17,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -34,7 +32,7 @@ import java.util.function.Supplier;
 @Disabled
 //@Configurable
 @TeleOp
-public class TeleOpSpinfinityDuoMk7 extends OpMode {
+public class TeleOpSpinfinityDuoMk6 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -58,8 +56,6 @@ public class TeleOpSpinfinityDuoMk7 extends OpMode {
     private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
 
     double LONG_DIST_ANGLE_CORRECTION = 2; // Red = 4; Blue = -4;
-
-    public Servo servoHood;
 
     // Turret variables
     double error;
@@ -145,10 +141,6 @@ public class TeleOpSpinfinityDuoMk7 extends OpMode {
 
     public void init() {
 
-        servoHood = hardwareMap.get(Servo.class, "servoHood");
-
-        servoHood.setPosition(0.1);
-
 //        drive.init(hardwareMap);
         pinpoint.init(hardwareMap);
         shooter.init(hardwareMap);
@@ -206,15 +198,6 @@ public class TeleOpSpinfinityDuoMk7 extends OpMode {
     }
 
     public void loop() {
-
-        if (gamepad2.dpadLeftWasPressed()) {
-            servoHood.setPosition(0.5);
-        } else if (gamepad2.leftBumperWasPressed()) {
-            servoHood.setPosition(0.3);
-        } else if (gamepad2.dpadRightWasPressed()) {
-            servoHood.setPosition(0.1);
-
-        }
 
         autonomousPathUpdate();
 
@@ -515,7 +498,6 @@ public class TeleOpSpinfinityDuoMk7 extends OpMode {
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
         panelsTelemetry.addData("Robot Centric", robotCentric);
-        panelsTelemetry.addData("Turret Encoder Calc", newPosePos);
         //        panelsTelemetry.addData("Timer", timer.seconds());
 //        panelsTelemetry.addData("Pinpoint Robot X Position", robotXPos);
 //        panelsTelemetry.addData("Pinpoint Robot Y Position", robotYPos);

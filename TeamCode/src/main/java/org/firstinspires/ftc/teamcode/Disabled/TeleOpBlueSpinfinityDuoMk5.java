@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -14,6 +13,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -29,9 +29,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Configurable
+@Disabled
+//@Configurable
 @TeleOp
-public class TeleOpBlueSpinfinityDuoMk6 extends OpMode {
+public class TeleOpBlueSpinfinityDuoMk5 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -135,9 +136,6 @@ public class TeleOpBlueSpinfinityDuoMk6 extends OpMode {
 
     double robotHeading;
 
-    boolean endgameRumbleFlag;
-    boolean parkRumbleFlag;
-
     public void init() {
 
 //        drive.init(hardwareMap);
@@ -202,13 +200,11 @@ public class TeleOpBlueSpinfinityDuoMk6 extends OpMode {
 
         follower.update();
 
-        if (timer.seconds() > 98 && !endgameRumbleFlag) {
-            gamepad1.rumble(1, 1,200);
-            endgameRumbleFlag = true;
+        if (elapsedTime > 100) {
+            gamepad1.rumble(1, 1,100);
         }
-        if (timer.seconds() > 110 && !parkRumbleFlag) {
+        if (elapsedTime > 110) {
             gamepad1.rumble(1, 1,500);
-            parkRumbleFlag = true;
         }
 
         // Laser Artifact Detection (Detected = TRUE --> counter +1)
@@ -563,7 +559,6 @@ public class TeleOpBlueSpinfinityDuoMk6 extends OpMode {
                 if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
                     shootTimer.resetTimer();
                     shooter.openServoStop();
-                    counter = 0;
                     setPathState(10006);
                 }
                 break;

@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinity;
+import org.firstinspires.ftc.teamcode.DisabledHardware.ShooterSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
     @Disabled
