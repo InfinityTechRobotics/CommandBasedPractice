@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -14,6 +13,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -29,9 +29,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Configurable
+@Disabled
+//@Configurable
 @TeleOp
-public class TeleOpSpinfinityDuoMk11 extends OpMode {
+public class TeleOpRedSpinfinityDuoMk14 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -54,7 +55,7 @@ public class TeleOpSpinfinityDuoMk11 extends OpMode {
 
     public static int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
 
-    public static double LONG_DIST_ANGLE_CORRECTION = 0; // Red = 4; Blue = -4;
+    public static double LONG_DIST_ANGLE_CORRECTION = 3; // Red = 4; Blue = -4;
 
     // Turret variables
     double error;
@@ -95,7 +96,7 @@ public class TeleOpSpinfinityDuoMk11 extends OpMode {
     boolean autoRPM = true;
     boolean robotCentric = false;
 
-    public static double FAR_ZONE_RPM = 3300.;
+    public static double FAR_ZONE_RPM = 3250.;
     public static double FAR_ZONE_DISTANCE_THRESHOLD = 85.;
     public static double FAR_ZONE_HOOD_POS = 0.5;
 
@@ -143,6 +144,11 @@ public class TeleOpSpinfinityDuoMk11 extends OpMode {
 
     boolean endgameRumbleFlag;
     boolean parkRumbleFlag;
+
+    boolean rightTriggerPressed;
+    boolean leftTriggerPressed;
+    boolean prevRightTrigger = false;
+    boolean prevLeftTrigger = false;
 
     public void init() {
 
@@ -319,7 +325,7 @@ public class TeleOpSpinfinityDuoMk11 extends OpMode {
 
         if (targetFound) {
             distanceToGoalInches = flywheel.distanceToGoalCalc(a2);
-            if (distanceToGoalInches < 85.) {
+            if (distanceToGoalInches < FAR_ZONE_DISTANCE_THRESHOLD) {
                 error = -bearing;
             } else {
                 error = -bearing - LONG_DIST_ANGLE_CORRECTION;
@@ -387,7 +393,7 @@ public class TeleOpSpinfinityDuoMk11 extends OpMode {
             } else {
                 targetRPM = flywheel.targetRPMCalc(distanceToGoalInches);
 //                shooter.setServoHoodDownPos();
-                shooter.setServoHoodManual(FAR_ZONE_HOOD_POS);
+                shooter.setServoHoodDownPos();
             }
 //            }
 //            else {
@@ -439,22 +445,31 @@ public class TeleOpSpinfinityDuoMk11 extends OpMode {
         prevIntake = intakeOn;
 
         //start shooting sequence
-        if (gamepad2.right_trigger > 0.25) {
-            setPathState(10);
+        rightTriggerPressed = gamepad2.right_trigger > 0.25;
+        leftTriggerPressed  = gamepad2.left_trigger > 0.25;
+
+        if (rightTriggerPressed && !prevRightTrigger) {
             counter = 0;
+            laserTimer.reset();
+            setPathState(10);
+
         }
+
+        if (leftTriggerPressed && !prevLeftTrigger) {
+            counter = 0;
+            laserTimer.reset();
+            setPathState(10100); //10100
+        }
+
+        prevRightTrigger = rightTriggerPressed;
+        prevLeftTrigger = leftTriggerPressed;
+
 
         if (counter != prevCount) {
             spintake.setArtifactIndicator(counter);
         }
 
         prevCount = counter;
-
-        //start sequence for shooting paddle
-        if (gamepad2.left_trigger > 0.25) {
-            setPathState(10100);
-            counter = 0;
-        }
 
         //flywheelRPM = motorFlywheel.getVelocity() / CPR * 60;
         flywheelRPM = flywheel.getFlywheelVel();

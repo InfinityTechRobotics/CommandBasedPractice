@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 
-//@Disabled
-@Configurable
+@Disabled
+//@Configurable
 @TeleOp
 public class FlywheelDuoTuning extends OpMode {
 
@@ -95,13 +95,13 @@ public class FlywheelDuoTuning extends OpMode {
 
         // Set Flywheel Velocity
         if (gamepad2.xWasPressed()) {
-            targetRPM = 0.;
+            targetRPM = 3250.;
         } else if (gamepad2.bWasPressed()) {
             targetRPM = 2400.;
         } else if (gamepad2.aWasPressed()) {
-            targetRPM -= 50.;
+            targetRPM -= 100.;
         } else if (gamepad2.yWasPressed()) {
-            targetRPM += 50.;
+            targetRPM += 100.;
         }
 
         if (gamepad2.dpadLeftWasPressed()) {

@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.Practice;
+package org.firstinspires.ftc.teamcode.Disabled;
 
-import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -14,6 +13,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -29,12 +29,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Configurable
+@Disabled
+//@Configurable
 @TeleOp
-public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
-
-    boolean RED_ALLIANCE = true;
-    boolean NEAR_AUTON = true;
+public class TeleOpSpinfinityDuoMk11 extends OpMode {
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -42,6 +40,7 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
     SpintakeSpinfinity spintake = new SpintakeSpinfinity();
 //    Drive drive = new Drive();
 
+    Pose2D pose2D;
     double a2 = 0.;
 
     double distanceToGoalInches;
@@ -54,13 +53,9 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
 
     double laserTime;
 
-    public int DESIRED_TAG_ID_RED = 24;
-    public int DESIRED_TAG_ID_BLUE = 20;
-    public int DESIRED_TAG_ID;
+    public static int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
 
-    public static double LONG_DIST_ANGLE_CORRECTION_RED = 3;
-    public static double LONG_DIST_ANGLE_CORRECTION_BLUE = -3;
-    public double LONG_DIST_ANGLE_CORRECTION;
+    public static double LONG_DIST_ANGLE_CORRECTION = 0; // Red = 4; Blue = -4;
 
     // Turret variables
     double error;
@@ -76,17 +71,21 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
 
     public static double TURRET_TRACKING_TIMER_THRESHOLD = .25;
 
+    public static double MOTOR_TURRET_PROPORTIONAL_TERM = 5;
+
+    public static double MOTOR_TURRET_DERIVATIVE_TERM = 0.; //0.0
+
     // Pinpoint Robot Positions
     public static double robotXPos, robotYPos, botHeading;
 
-    double correctedBotHeading;
+    //MegaTag Robot Positions
+    public static double MT1XPos, MT1YPos, MT1botHeading;
+
     double robotToGoalRelativeAngle;
 
     boolean targetFound = false;
 
     boolean turretTracking = true;
-    boolean autoRPM = true;
-    boolean robotCentric = false;
 
     double DRIVE_POWER_FACTOR = 0.95;
     double DRIVE_POWER_FACTOR_LOW = 0.6;
@@ -94,11 +93,15 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
 
     double powerFactor = DRIVE_POWER_FACTOR;
 
-    public static double FAR_ZONE_RPM = 3250.;
+    boolean autoRPM = true;
+    boolean robotCentric = false;
+
+    public static double FAR_ZONE_RPM = 3300.;
     public static double FAR_ZONE_DISTANCE_THRESHOLD = 85.;
     public static double FAR_ZONE_HOOD_POS = 0.5;
 
     public boolean intakeOn;
+
     public boolean prevIntake;
 
     public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 0.4; //0.25
@@ -121,7 +124,10 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
 
     int i = 0;
 
+    double shootingTime = 0.;
     private Timer pathTimer, opmodeTimer;
+
+    private Timer shootTimer;
 
     private int pathState;
 
@@ -132,57 +138,14 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
 
     private boolean automatedDrive;
 
+    double robotHeading;
+
+    double correctedBotHeading;
+
     boolean endgameRumbleFlag;
     boolean parkRumbleFlag;
 
-    boolean rightTriggerPressed;
-    boolean leftTriggerPressed;
-    boolean prevRightTrigger = false;
-    boolean prevLeftTrigger = false;
-
     public void init() {
-
-        if (RED_ALLIANCE) {
-            DESIRED_TAG_ID = DESIRED_TAG_ID_RED;
-            LONG_DIST_ANGLE_CORRECTION = LONG_DIST_ANGLE_CORRECTION_RED;
-            if (NEAR_AUTON) {
-                startingPose = new Pose(114, 75, Math.toRadians(90));
-
-                pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                        .addPath(new Path(new BezierLine(follower::getPose, new Pose(90, 102))))
-                        .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37.5), 0.8))
-                        .build();
-
-            } else {
-                startingPose = new Pose(107, 15, Math.toRadians(0));
-
-                pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                        .addPath(new Path(new BezierLine(follower::getPose, new Pose(72, 30))))
-                        .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(30), 0.8))
-                        .build();
-
-            }
-        } else {
-            DESIRED_TAG_ID = DESIRED_TAG_ID_BLUE;
-            LONG_DIST_ANGLE_CORRECTION = LONG_DIST_ANGLE_CORRECTION_BLUE;
-            if (NEAR_AUTON) {
-                startingPose = new Pose(54, 67, Math.toRadians(180));
-
-                pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                        .addPath(new Path(new BezierLine(follower::getPose, new Pose(54, 102))))
-                        .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(142.5), 0.8))
-                        .build();
-
-            } else {
-                startingPose = new Pose(37, 15, Math.toRadians(180));
-
-                pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                        .addPath(new Path(new BezierLine(follower::getPose, new Pose(72, 30))))
-                        .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(150), 0.8))
-                        .build();
-
-            }
-        }
 
 //        drive.init(hardwareMap);
         pinpoint.init(hardwareMap);
@@ -219,11 +182,17 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
 
+        shootTimer = new Timer();
+
+        startingPose = new Pose(91, 108, Math.toRadians(30));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
 
-
+        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(90, 102))))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37.5), 0.8))
+                .build();
 
     }
 
@@ -289,16 +258,13 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
 //        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
 
         if (gamepad1.aWasPressed()) {
-            if (RED_ALLIANCE) {
-                follower.setPose(new Pose(72, 72, Math.toRadians(0)));
-            } else {
-                follower.setPose(new Pose(72, 72, Math.toRadians(180)));
-            }
+            follower.setPose(new Pose(72, 72, Math.toRadians(0)));
+            //pinpoint.pinpointReset();
         }
 
-        if (gamepad1.dpad_down) {
+        if (gamepad1.left_bumper) {
             powerFactor = DRIVE_POWER_FACTOR_LOW;
-        } else if (gamepad1.dpad_up) {
+        } else if (gamepad1.right_bumper) {
             powerFactor = DRIVE_POWER_FACTOR_HIGH;
         } else {
             powerFactor = DRIVE_POWER_FACTOR;
@@ -313,23 +279,13 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
             //Make the last parameter false for field-centric
             //In case the drivers want to use a "slowMode" you can scale the vectors
             //This is the normal version to use in the TeleOp
-            if (RED_ALLIANCE) {
-                follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y * powerFactor,
-                        -gamepad1.left_stick_x * powerFactor,
-                        -gamepad1.right_stick_x * powerFactor,
-                        robotCentric // Field Centric
-                );
-            } else {
-                follower.setTeleOpDrive(
-                        gamepad1.left_stick_y * powerFactor,
-                        gamepad1.left_stick_x * powerFactor,
-                        -gamepad1.right_stick_x * powerFactor,
-                        robotCentric // Field Centric
-                );
-            }
+            follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y * powerFactor,
+                    -gamepad1.left_stick_x * powerFactor,
+                    -gamepad1.right_stick_x * powerFactor,
+                    robotCentric // Field Centric
+            );
         }
-
 
         //Automated PathFollowing
         if (gamepad1.rightBumperWasPressed()) {
@@ -364,7 +320,7 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
 
         if (targetFound) {
             distanceToGoalInches = flywheel.distanceToGoalCalc(a2);
-            if (distanceToGoalInches < FAR_ZONE_DISTANCE_THRESHOLD) {
+            if (distanceToGoalInches < 85.) {
                 error = -bearing;
             } else {
                 error = -bearing - LONG_DIST_ANGLE_CORRECTION;
@@ -374,16 +330,14 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
             distanceToGoalInches = 54.;
         }
 
+
+
         turretTimer = timer.seconds() - turretTimer;
+
 
         // Toggle turret auto tracking when B is pressed on gamepad 1
         if (gamepad1.bWasPressed()) {
             turretTracking = !turretTracking;
-        }
-
-        //  Reset center pos for turret
-        if (gamepad1.xWasPressed()) {
-            shooter.resetTurretPos();
         }
 
         // Rotate turret based on limelight reading or pose
@@ -406,12 +360,7 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
                     correctedBotHeading = botHeading;
                 }
 
-                if (RED_ALLIANCE) {
-                    robotToGoalRelativeAngle = shooter.newTurretPoseCalc(robotXPos, robotYPos, correctedBotHeading);
-                } else {
-                    robotToGoalRelativeAngle = shooter.newTurretBluePoseCalc(robotXPos, robotYPos, correctedBotHeading);
-                }
-
+                robotToGoalRelativeAngle = shooter.newTurretPoseCalc(robotXPos, robotYPos, correctedBotHeading);
                 newPosePos = shooter.turretPosEncoderCalc(robotToGoalRelativeAngle);
                 shooter.motorTurretSetPosition(newPosePos);
             }
@@ -439,7 +388,7 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
             } else {
                 targetRPM = flywheel.targetRPMCalc(distanceToGoalInches);
 //                shooter.setServoHoodDownPos();
-                shooter.setServoHoodDownPos();
+                shooter.setServoHoodManual(FAR_ZONE_HOOD_POS);
             }
 //            }
 //            else {
@@ -491,31 +440,22 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
         prevIntake = intakeOn;
 
         //start shooting sequence
-        rightTriggerPressed = gamepad2.right_trigger > 0.25;
-        leftTriggerPressed  = gamepad2.left_trigger > 0.25;
-
-        if (rightTriggerPressed && !prevRightTrigger) {
-            counter = 0;
-            laserTimer.reset();
+        if (gamepad2.right_trigger > 0.25) {
             setPathState(10);
-
-        }
-
-        if (leftTriggerPressed && !prevLeftTrigger) {
             counter = 0;
-            laserTimer.reset();
-            setPathState(10100); //10100
         }
-
-        prevRightTrigger = rightTriggerPressed;
-        prevLeftTrigger = leftTriggerPressed;
-
 
         if (counter != prevCount) {
             spintake.setArtifactIndicator(counter);
         }
 
         prevCount = counter;
+
+        //start sequence for shooting paddle
+        if (gamepad2.left_trigger > 0.25) {
+            setPathState(10100);
+            counter = 0;
+        }
 
         //flywheelRPM = motorFlywheel.getVelocity() / CPR * 60;
         flywheelRPM = flywheel.getFlywheelVel();
@@ -541,8 +481,6 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
 
 
         // Panels Telemetry Data
-        panelsTelemetry.addData("Red Alliance", RED_ALLIANCE);
-        panelsTelemetry.addData("Near Auton", NEAR_AUTON);
         panelsTelemetry.addData("Auto Turret", turretTracking);
         panelsTelemetry.addData("Auto RPM", autoRPM);
         panelsTelemetry.addData("Distance To AprilTag", distanceToGoalInches);
@@ -615,6 +553,7 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
                 break;
             case 10001:
                 if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
+                    shootTimer.resetTimer();
                     shooter.openServoStop();
                     counter = 0;
                     setPathState(10006);
@@ -631,6 +570,7 @@ public class TeleOpRedSpinfinityDuoMk15 extends OpMode {
                 break;
             case 10007:
                 if (pathTimer.getElapsedTimeSeconds() > 0.2) {
+                    shootingTime = shootTimer.getElapsedTimeSeconds();
                     shooter.downServoPaddle();
                     shooter.closeServoStop();
                     setPathState(999);

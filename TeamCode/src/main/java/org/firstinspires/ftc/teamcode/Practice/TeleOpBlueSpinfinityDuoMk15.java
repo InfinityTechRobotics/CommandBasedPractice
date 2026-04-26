@@ -14,6 +14,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -28,12 +29,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Configurable
+@Disabled
+//@Configurable
 @TeleOp
 public class TeleOpBlueSpinfinityDuoMk15 extends OpMode {
 
-    boolean RED_ALLIANCE = false;
-    boolean NEAR_AUTON = true;
+    boolean RED_ALLIANCE = true;
+    boolean NEAR_AUTON = false;
 
     Pinpoint pinpoint = new Pinpoint();
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
@@ -144,43 +146,33 @@ public class TeleOpBlueSpinfinityDuoMk15 extends OpMode {
         if (RED_ALLIANCE) {
             DESIRED_TAG_ID = DESIRED_TAG_ID_RED;
             LONG_DIST_ANGLE_CORRECTION = LONG_DIST_ANGLE_CORRECTION_RED;
+
             if (NEAR_AUTON) {
                 startingPose = new Pose(90, 67, Math.toRadians(0));
-
-                pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                        .addPath(new Path(new BezierLine(follower::getPose, new Pose(90, 102))))
-                        .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37.5), 0.8))
-                        .build();
-
             } else {
                 startingPose = new Pose(107, 15, Math.toRadians(0));
-
-                pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                        .addPath(new Path(new BezierLine(follower::getPose, new Pose(72, 30))))
-                        .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(30), 0.8))
-                        .build();
-
             }
+
+            pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                    .addPath(new Path(new BezierLine(follower::getPose, new Pose(72, 30))))
+                    .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(30), 0.8))
+                    .build();
+
         } else {
             DESIRED_TAG_ID = DESIRED_TAG_ID_BLUE;
             LONG_DIST_ANGLE_CORRECTION = LONG_DIST_ANGLE_CORRECTION_BLUE;
+
             if (NEAR_AUTON) {
                 startingPose = new Pose(30, 73, Math.toRadians(90));
-
-                pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                        .addPath(new Path(new BezierLine(follower::getPose, new Pose(54, 102))))
-                        .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(142.5), 0.8))
-                        .build();
-
             } else {
-                startingPose = new Pose(37, 15, Math.toRadians(180));
-
-                pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                        .addPath(new Path(new BezierLine(follower::getPose, new Pose(72, 30))))
-                        .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(150), 0.8))
-                        .build();
-
+                startingPose = new Pose(33, 13, Math.toRadians(180));
             }
+
+            pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                    .addPath(new Path(new BezierLine(follower::getPose, new Pose(72, 29))))
+                    .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(150), 0.8))
+                    .build();
+
         }
 
 //        drive.init(hardwareMap);

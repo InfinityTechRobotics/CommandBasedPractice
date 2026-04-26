@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Disabled;
+package org.firstinspires.ftc.teamcode.Competition;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -14,35 +14,33 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.Hardware.Drive;
-import org.firstinspires.ftc.teamcode.DisabledHardware.Flywheel;
+import org.firstinspires.ftc.teamcode.Hardware.FlywheelSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.Hardware.Pinpoint;
-import org.firstinspires.ftc.teamcode.DisabledHardware.Shooter;
-import org.firstinspires.ftc.teamcode.DisabledHardware.Spintake;
+import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
+import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
 import java.util.function.Supplier;
 
-@Disabled
-//@Configurable
+@Configurable
 @TeleOp
-public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
+public class TeleOpBlueFar extends OpMode {
+
+    boolean RED_ALLIANCE = false;
+    boolean NEAR_AUTON = false;
 
     Pinpoint pinpoint = new Pinpoint();
-    Shooter shooter = new Shooter();
-    Flywheel flywheel = new Flywheel();
-    Spintake spintake = new Spintake();
-    Drive drive = new Drive();
+    ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
+    FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
+    SpintakeSpinfinity spintake = new SpintakeSpinfinity();
+//    Drive drive = new Drive();
 
-    Pose2D pose2D;
     double a2 = 0.;
 
     double distanceToGoalInches;
@@ -55,12 +53,18 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
 
     double laserTime;
 
-    private static final int DESIRED_TAG_ID = 24; // Red = 24; Blue = 20;
+    public int DESIRED_TAG_ID_RED = 24;
+    public int DESIRED_TAG_ID_BLUE = 20;
+    public int DESIRED_TAG_ID;
 
-    double LONG_DIST_ANGLE_CORRECTION = 4; // Red = 4; Blue = -4;
+    public static double LONG_DIST_ANGLE_CORRECTION_RED = 3;
+    public static double LONG_DIST_ANGLE_CORRECTION_BLUE = -3;
+    public double LONG_DIST_ANGLE_CORRECTION;
 
     // Turret variables
-    double error, currentPos, newPos;
+    double error;
+
+    int currentPos, newPos, newPosePos;
 
     double prevError;
     double turretTimer;
@@ -69,17 +73,19 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
 
     double aprilTagTimer;
 
-    public static double TURRET_TRACKING_TIMER_THRESHOLD = 1.0;
+    public static double TURRET_TRACKING_TIMER_THRESHOLD = .25;
 
-    public static double SERVO_TURRET_PROPORTIONAL_TERM = 0.0008; //0.0016
+    // Pinpoint Robot Positions
+    public static double robotXPos, robotYPos, botHeading;
 
-    public static double SERVO_TURRET_DERIVATIVE_TERM = 0.; //0.0
-
-    double botHeading;
+    double correctedBotHeading;
+    double robotToGoalRelativeAngle;
 
     boolean targetFound = false;
 
     boolean turretTracking = true;
+    boolean autoRPM = true;
+    boolean robotCentric = false;
 
     double DRIVE_POWER_FACTOR = 0.95;
     double DRIVE_POWER_FACTOR_LOW = 0.6;
@@ -87,30 +93,20 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
 
     double powerFactor = DRIVE_POWER_FACTOR;
 
-    double prevX, prevY, prevRX;
+    public static double FAR_ZONE_RPM = 3250.;
+    public static double FAR_ZONE_DISTANCE_THRESHOLD = 85.;
+    public static double FAR_ZONE_HOOD_POS = 0.5;
 
-    boolean autoRPM = true;
-    boolean robotCentric = false;
+    public boolean intakeOn;
+    public boolean prevIntake;
 
-    public boolean intakeOn, transferOn;
-
-    public boolean prevIntake, prevTransfer;
-
-    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 1; //0.25
-
-    boolean paddleOn;
-    boolean stopOn;
-
-    boolean prevPaddle;
-    boolean prevStop;
+    public static double SPINTAKE_AUTO_SHUTOFF_THRESHOLD = 0.4; //0.25
 
     boolean activeDetecting = false;
     boolean stateHigh;
 
     int counter = 0;
     int prevCount = 0;
-
-    boolean stopAlreadyEngaged = false;
 
     double targetRPM = 0.;
     double flywheelRPM = 0.;
@@ -124,43 +120,75 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
 
     int i = 0;
 
-    double shootingTime = 0.;
     private Timer pathTimer, opmodeTimer;
-
-    private Timer shootTimer;
 
     private int pathState;
 
     private Follower follower;
     public static Pose startingPose; // Start Pose of our robot.
 
-    private boolean slowMode = false;
-    private double slowModeMultiplier = 0.95;
-
     private Supplier<PathChain> pathChain;
 
     private boolean automatedDrive;
 
+    boolean endgameRumbleFlag;
+    boolean parkRumbleFlag;
+
+    boolean rightTriggerPressed;
+    boolean leftTriggerPressed;
+    boolean prevRightTrigger = false;
+    boolean prevLeftTrigger = false;
+
     public void init() {
 
-        drive.init(hardwareMap);
+        if (RED_ALLIANCE) {
+            DESIRED_TAG_ID = DESIRED_TAG_ID_RED;
+            LONG_DIST_ANGLE_CORRECTION = LONG_DIST_ANGLE_CORRECTION_RED;
+
+            if (NEAR_AUTON) {
+                startingPose = new Pose(114, 7, Math.toRadians(90));
+            } else {
+                startingPose = new Pose(107, 15, Math.toRadians(0));
+            }
+
+            pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                    .addPath(new Path(new BezierLine(follower::getPose, new Pose(72, 30))))
+                    .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(30), 0.8))
+                    .build();
+
+        } else {
+            DESIRED_TAG_ID = DESIRED_TAG_ID_BLUE;
+            LONG_DIST_ANGLE_CORRECTION = LONG_DIST_ANGLE_CORRECTION_BLUE;
+
+            if (NEAR_AUTON) {
+                startingPose = new Pose(30, 73, Math.toRadians(90));
+            } else {
+                startingPose = new Pose(33, 13, Math.toRadians(180));
+            }
+
+            pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                    .addPath(new Path(new BezierLine(follower::getPose, new Pose(72, 29))))
+                    .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(150), 0.8))
+                    .build();
+
+        }
+
+//        drive.init(hardwareMap);
         pinpoint.init(hardwareMap);
         shooter.init(hardwareMap);
         flywheel.init(hardwareMap);
         spintake.init(hardwareMap);
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(1);
+        limelight.start();
 
         laserInput = hardwareMap.get(DigitalChannel.class, "laserDigitalInput");
 
         laserInput.setMode(DigitalChannel.Mode.INPUT);
 
-        limelight.pipelineSwitch(0);
-
-        limelight.start();
-
-        shooter.centerServoTurret();
-        currentPos = shooter.servoTurretGetPosition();
+        shooter.centerMotorTurret();
+        currentPos = shooter.motorTurretGetPosition();
 
         shooter.closeServoStop();
         shooter.downServoPaddle();
@@ -174,21 +202,18 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
+        shooter.setServoHoodDownPos();
+
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
 
-        shootTimer = new Timer();
-
-        startingPose = new Pose(80, 8, Math.toRadians(90));
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
 
-        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(90, 102))))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(37.5), 0.8))
-                .build();
+
+
     }
 
     public void start() {
@@ -202,9 +227,28 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
 
     public void loop() {
 
+//        shooter.setMotorTurretPIDF(NEW_P,NEW_I,NEW_D,NEW_F);
+
+        if (gamepad2.dpadLeftWasPressed()) {
+            FAR_ZONE_HOOD_POS = 0.5;
+        } else if (gamepad2.leftBumperWasPressed()) {
+            FAR_ZONE_HOOD_POS = 0.4;
+        } else if (gamepad2.dpadRightWasPressed()) {
+            FAR_ZONE_HOOD_POS = 0.2;;
+        }
+
         autonomousPathUpdate();
 
         follower.update();
+
+        if (timer.seconds() > 98 && !endgameRumbleFlag) {
+            gamepad1.rumble(1, 1,1000);
+            endgameRumbleFlag = true;
+        }
+        if (timer.seconds() > 110 && !parkRumbleFlag) {
+            gamepad1.rumble(1, 1,500);
+            parkRumbleFlag = true;
+        }
 
         // Laser Artifact Detection (Detected = TRUE --> counter +1)
         stateHigh = laserInput.getState();
@@ -217,7 +261,6 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
             if (activeDetecting) {
                 if (laserTimer.seconds() > SPINTAKE_AUTO_SHUTOFF_THRESHOLD) {
                     intakeOn = false;
-                    transferOn = false;
                     laserTimer.reset();
                 }
             }
@@ -235,13 +278,16 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
 //        double rx = drive.squareInputWithSign(gamepad1.right_stick_x);
 
         if (gamepad1.aWasPressed()) {
-            follower.setHeading(Math.toRadians(0));
-            pinpoint.pinpointReset();
+            if (RED_ALLIANCE) {
+                follower.setPose(new Pose(72, 72, Math.toRadians(0)));
+            } else {
+                follower.setPose(new Pose(72, 72, Math.toRadians(180)));
+            }
         }
 
-        if (gamepad1.left_bumper) {
+        if (gamepad1.dpad_down) {
             powerFactor = DRIVE_POWER_FACTOR_LOW;
-        } else if (gamepad1.right_bumper) {
+        } else if (gamepad1.dpad_up) {
             powerFactor = DRIVE_POWER_FACTOR_HIGH;
         } else {
             powerFactor = DRIVE_POWER_FACTOR;
@@ -256,13 +302,23 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
             //Make the last parameter false for field-centric
             //In case the drivers want to use a "slowMode" you can scale the vectors
             //This is the normal version to use in the TeleOp
-            follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y * powerFactor,
-                    -gamepad1.left_stick_x * powerFactor,
-                    -gamepad1.right_stick_x * powerFactor,
-                    robotCentric // Field Centric
-            );
+            if (RED_ALLIANCE) {
+                follower.setTeleOpDrive(
+                        -gamepad1.left_stick_y * powerFactor,
+                        -gamepad1.left_stick_x * powerFactor,
+                        -gamepad1.right_stick_x * powerFactor,
+                        robotCentric // Field Centric
+                );
+            } else {
+                follower.setTeleOpDrive(
+                        gamepad1.left_stick_y * powerFactor,
+                        gamepad1.left_stick_x * powerFactor,
+                        -gamepad1.right_stick_x * powerFactor,
+                        robotCentric // Field Centric
+                );
+            }
         }
+
 
         //Automated PathFollowing
         if (gamepad1.rightBumperWasPressed()) {
@@ -274,27 +330,6 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
             follower.startTeleopDrive();
             automatedDrive = false;
         }
-
-//        if (gamepad1.a) {
-//            pinpoint.pinpointReset();
-//        }
-
-//        pose2D = pinpoint.getPinpointPose();
-//
-//        if (robotCentric) {
-//            botHeading = pose2D.getHeading(AngleUnit.RADIANS);
-//        }
-//        else {
-//            botHeading = 0;
-//        }
-
-//        if (x != prevX || y != prevY || rx != prevRX) {
-//            drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
-//        }
-//
-//        prevX = x;
-//        prevY = y;
-//        prevRX = rx;
 
         LLResult result = limelight.getLatestResult();
         targetFound = false;
@@ -318,10 +353,10 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
 
         if (targetFound) {
             distanceToGoalInches = flywheel.distanceToGoalCalc(a2);
-            if (distanceToGoalInches < 80.) {
-                error = bearing;
+            if (distanceToGoalInches < FAR_ZONE_DISTANCE_THRESHOLD) {
+                error = -bearing;
             } else {
-                error = bearing + LONG_DIST_ANGLE_CORRECTION;
+                error = -bearing - LONG_DIST_ANGLE_CORRECTION;
             }
         } else {
             error = 0;
@@ -335,16 +370,42 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
             turretTracking = !turretTracking;
         }
 
+        //  Reset center pos for turret
+        if (gamepad1.xWasPressed()) {
+            shooter.resetTurretPos();
+        }
+
+        // Rotate turret based on limelight reading or pose
         if (turretTracking) {
             if ((timer.seconds() - aprilTagTimer < TURRET_TRACKING_TIMER_THRESHOLD)) {
-                currentPos = shooter.servoTurretGetPosition();
-                newPos = shooter.newTurretPDCalc(currentPos, error, prevError, turretTimer, SERVO_TURRET_PROPORTIONAL_TERM, SERVO_TURRET_DERIVATIVE_TERM);
-                shooter.servoTurretSetPosition(newPos);
+                currentPos = shooter.motorTurretGetPosition();
+                newPos = shooter.newTurretPositionClampedCalc(currentPos, error);
+                shooter.motorTurretSetPosition(newPos);
             } else {
-                shooter.centerServoTurret();
+                // Calculate robot angle to AprilTag
+                robotXPos = follower.getPose().getX();
+                robotYPos = follower.getPose().getY();
+                botHeading = follower.getHeading();
+
+                if (botHeading > -1.658 && botHeading < -1.4835) {  // -95 to -85 degrees
+                    correctedBotHeading = -1.5708;  // -90 degrees
+                } else if (botHeading > -3.14159 && botHeading < -1.658) {  // -180 to -95 degrees
+                    correctedBotHeading = 6.28319 + botHeading;
+                } else {
+                    correctedBotHeading = botHeading;
+                }
+
+                if (RED_ALLIANCE) {
+                    robotToGoalRelativeAngle = shooter.newTurretPoseCalc(robotXPos, robotYPos, correctedBotHeading);
+                } else {
+                    robotToGoalRelativeAngle = shooter.newTurretBluePoseCalc(robotXPos, robotYPos, correctedBotHeading);
+                }
+
+                newPosePos = shooter.turretPosEncoderCalc(robotToGoalRelativeAngle);
+                shooter.motorTurretSetPosition(newPosePos);
             }
         } else {
-            shooter.centerServoTurret();
+            shooter.centerMotorTurret();
         }
 
         prevError = error;
@@ -359,12 +420,20 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
         // Calculate Flywheel Target RPM
         if (autoRPM) {
             // dynamically set flywheel speed based off Limelight distance measurement
-            if (distanceToGoalInches < 80. || distanceToGoalInches > 100) {
+//            if (distanceToGoalInches < 80. || distanceToGoalInches > 100) {
+            if (distanceToGoalInches > FAR_ZONE_DISTANCE_THRESHOLD) {
+                targetRPM = FAR_ZONE_RPM;
+//                shooter.setServoHoodUpPos();
+                shooter.setServoHoodManual(FAR_ZONE_HOOD_POS);
+            } else {
                 targetRPM = flywheel.targetRPMCalc(distanceToGoalInches);
+//                shooter.setServoHoodDownPos();
+                shooter.setServoHoodDownPos();
             }
-            else {
-                targetRPM = 2400;
-            }
+//            }
+//            else {
+//                targetRPM = 2400;
+//            }
         } else {
             // manually set RPM distance
             if (gamepad2.x) {
@@ -380,22 +449,19 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
 
         // Calculate and set flywheel motor velocity
         flywheel.setFlywheelVel(targetRPM);
+//        flywheel.setFlywheelVel(0);
 
         // Control Direction of Intake and Transfer Motors
         if (gamepad2.dpadUpWasPressed()) {
             spintake.forwardSpintakes();
             spintake.turnIntakeOff();
-            spintake.turnTransferOff();
             intakeOn = false;
-            transferOn = false;
         }
 
         if (gamepad2.dpadDownWasPressed()) {
             spintake.reverseSpintakes();
             spintake.turnIntakeOff();
-            spintake.turnTransferOff();
             intakeOn = false;
-            transferOn = false;
         }
 
         // Toggle intake when right_bumper is pressed
@@ -413,80 +479,32 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
 
         prevIntake = intakeOn;
 
-        // Toggle transfer when left_bumper is pressed
-        if (gamepad2.leftBumperWasPressed()) {
-            transferOn = !transferOn;
-        }
-
-        if (transferOn != prevTransfer) {
-            if (transferOn) {
-                spintake.turnTransferOn();
-                spintake.setTransferLEDOn();
-            } else {
-                spintake.turnTransferOff();
-                spintake.setTransferLEDOff();
-            }
-        }
-
-        prevTransfer = transferOn;
-
-        // Control Paddle Servo
-//        paddleOn = (gamepad2.right_trigger > 0.25);
-
         //start shooting sequence
-        if (gamepad2.right_trigger > 0.25) {
-            setPathState(10);
+        rightTriggerPressed = gamepad2.right_trigger > 0.25;
+        leftTriggerPressed  = gamepad2.left_trigger > 0.25;
+
+        if (rightTriggerPressed && !prevRightTrigger) {
             counter = 0;
+            laserTimer.reset();
+            setPathState(10);
+
         }
+
+        if (leftTriggerPressed && !prevLeftTrigger) {
+            counter = 0;
+            laserTimer.reset();
+            setPathState(10100); //10100
+        }
+
+        prevRightTrigger = rightTriggerPressed;
+        prevLeftTrigger = leftTriggerPressed;
+
 
         if (counter != prevCount) {
             spintake.setArtifactIndicator(counter);
         }
 
         prevCount = counter;
-
-        if (paddleOn != prevPaddle) {
-            if (paddleOn) {
-                shooter.shootServoPaddle();
-                counter = 0;
-            } else {
-                shooter.downServoPaddle();
-            }
-        }
-
-        prevPaddle = paddleOn;
-
-        // Control Servo Stop and turn intake and transfer on
-//        if (gamepad2.left_trigger > 0.25) {
-//            stopOn = true;
-//            intakeOn = true;
-//            transferOn = true;
-//        }
-//        else {
-//            stopOn = false;
-//        }
-
-        //start sequence for shooting paddle
-        if (gamepad2.left_trigger > 0.25) {
-            setPathState(10100);
-            counter = 0;
-        }
-
-        if (stopOn != prevStop) {
-            if (stopOn) {
-                shooter.openServoStop();
-                if (!stopAlreadyEngaged) {
-                    counter -= 1;
-                }
-                stopAlreadyEngaged = true;
-            } else {
-                shooter.closeServoStop();
-                stopAlreadyEngaged = false;
-            }
-        }
-
-        prevStop = stopOn;
-
 
         //flywheelRPM = motorFlywheel.getVelocity() / CPR * 60;
         flywheelRPM = flywheel.getFlywheelVel();
@@ -512,29 +530,41 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
 
 
         // Panels Telemetry Data
-        panelsTelemetry.addData("Timer", timer.seconds());
-        panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
-        panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
-        panelsTelemetry.addData("Shooting Sequence State", pathState);
-        panelsTelemetry.addData("Artifact Counter", counter);
-        panelsTelemetry.addData("Laser Detection Time", laserTime);
-        panelsTelemetry.addData("Object Detected", stateHigh);
+        panelsTelemetry.addData("Red Alliance", RED_ALLIANCE);
+        panelsTelemetry.addData("Near Auton", NEAR_AUTON);
+        panelsTelemetry.addData("Auto Turret", turretTracking);
+        panelsTelemetry.addData("Auto RPM", autoRPM);
         panelsTelemetry.addData("Distance To AprilTag", distanceToGoalInches);
-        panelsTelemetry.addData("Bearing Error", error);
         panelsTelemetry.addData("Target RPM", targetRPM);
         panelsTelemetry.addData("Flywheel RPM", flywheelRPM);
         panelsTelemetry.addData("Robot Centric", robotCentric);
-        panelsTelemetry.addData("Drive Power Factor", powerFactor);
-        panelsTelemetry.addData("Auto Turret", turretTracking);
-        panelsTelemetry.addData("Auto RPM", autoRPM);
-        panelsTelemetry.addData("Intake On", intakeOn);
+        //        panelsTelemetry.addData("Timer", timer.seconds());
+        panelsTelemetry.addData("Pinpoint Robot X Position", robotXPos);
+        panelsTelemetry.addData("Pinpoint Robot Y Position", robotYPos);
+        panelsTelemetry.addData("Pinpoint Robot Heading", Math.toDegrees(botHeading));
+//        panelsTelemetry.addData("Corrected Bot Heading", Math.toDegrees(correctedBotHeading));
+//        panelsTelemetry.addData("Relative Angle To Goal", robotToGoalRelativeAngle);
+//        panelsTelemetry.addData("Turret Encoder Calc", newPosePos);
+//        panelsTelemetry.addData("MegaTag Robot X Position", MT1XPos);
+//        panelsTelemetry.addData("MegaTag Robot Y Position", MT1YPos);
+//        panelsTelemetry.addData("MegaTag Robot Heading", MT1botHeading);
+        panelsTelemetry.addData("Elapsed Time (100 loops)", elapsedTime);
+        panelsTelemetry.addData("Elapsed Time (1000 loops)", elapsedTime1000);
+////        panelsTelemetry.addData("Shooting Sequence State", pathState);
+////        panelsTelemetry.addData("Artifact Counter", counter);
+////        panelsTelemetry.addData("Laser Detection Time", laserTime);
+////        panelsTelemetry.addData("Object Detected", stateHigh);
+//        panelsTelemetry.addData("A2 Angle", a2);
+//        panelsTelemetry.addData("Drive Power Factor", powerFactor);
+//        panelsTelemetry.addData("Intake On", intakeOn);
+        panelsTelemetry.addData("Bearing Error", error);
         panelsTelemetry.addData("Turret Target Pos", newPos);
         panelsTelemetry.addData("Turret Current Pos", currentPos);
-        panelsTelemetry.debug("Position", follower.getPose());
-        panelsTelemetry.debug("Velocity", follower.getVelocity());
-        panelsTelemetry.debug("Automated Drive", automatedDrive);
-        panelsTelemetry.debug("Slow Mode", slowMode);
-        panelsTelemetry.debug("Slow Mode Multiplier", slowModeMultiplier);
+//        panelsTelemetry.addData("Turret Target Pose Pos", newPosePos);
+//        panelsTelemetry.debug("Pinpoint Velocity", follower.getVelocity());
+//        panelsTelemetry.debug("Automated Drive", automatedDrive);
+//        panelsTelemetry.debug("Slow Mode", slowMode);
+//        panelsTelemetry.debug("Slow Mode Multiplier", slowModeMultiplier);
 //        panelsTelemetry.addData("Transfer On", transferOn);
 //        panelsTelemetry.addData("Stop Servo Position", shooter.servoStopPosition());
 //        panelsTelemetry.addData("Paddle Servo Position", shooter.servoPaddlePosition());
@@ -550,6 +580,7 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
     }
 
     public void stop() {
+        shooter.centerMotorTurret();
         limelight.stop();
     }
 
@@ -569,30 +600,22 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
                 break;
             case 1001:
                 spintake.turnIntakeOn();
-                spintake.turnTransferOn();
                 setPathState(10001);
                 break;
             case 10001:
                 if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
-                    shootTimer.resetTimer();
                     shooter.openServoStop();
+                    counter = 0;
                     setPathState(10006);
                 }
                 break;
             case 10006:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2){
+                    gamepad1.rumble(0.5, 0.5, 200);
+                }
                 if (pathTimer.getElapsedTimeSeconds() > 0.6) {
                     shooter.shootServoPaddle();
-                    setPathState(10007);
-                }
-                break;
-            case 10007:
-                if (pathTimer.getElapsedTimeSeconds() > 0.2) {
-                    spintake.turnIntakeOff();
-                    shootingTime = shootTimer.getElapsedTimeSeconds();
-                    shooter.downServoPaddle();
-                    shooter.closeServoStop();
-                    spintake.turnIntakeOff();
-                    setPathState(999);
+                    setPathState(777);
                 }
                 break;
             case 10100:
@@ -603,9 +626,53 @@ public class TeleOpRedWorldsTestmk6LoopTimeTest extends OpMode {
                 break;
             case 10101:
                 shooter.shootServoPaddle();
-                setPathState(10102);
+                setPathState(777);
                 break;
-            case 10102:
+            case 11000:
+                spintake.turnIntakeOn();
+                setPathState(11001);
+                break;
+            case 11001:
+                if (pathTimer.getElapsedTimeSeconds() > 0.01) { // changed from 0.5 to 0.25
+                    shooter.openServoStop();
+                    counter = 0;
+                    setPathState(11002);
+                }
+                break;
+            case 11002:
+                if (pathTimer.getElapsedTimeSeconds() > 0.1) {
+                    shooter.closeServoStop();
+                    setPathState(11003);
+                }
+                break;
+            case 11003:
+                if (pathTimer.getElapsedTimeSeconds() > 0.4) {
+                    shooter.openServoStop();
+                    setPathState(11004);
+                }
+                break;
+            case 11004:
+                if (pathTimer.getElapsedTimeSeconds() > 0.1) {
+                    shooter.closeServoStop();
+                    setPathState(11005);
+                }
+                break;
+            case 11005:
+                if (pathTimer.getElapsedTimeSeconds() > 0.4) {
+                    shooter.openServoStop();
+                    setPathState(11006);
+                }
+                break;
+            case 11006:
+                if (pathTimer.getElapsedTimeSeconds() > 0.2){
+                    gamepad1.rumble(0.5, 0.5, 200);
+                }
+                if (pathTimer.getElapsedTimeSeconds() > 0.6) {
+                    shooter.shootServoPaddle();
+                    setPathState(777);
+                }
+                break;
+            case 777:
                 if (pathTimer.getElapsedTimeSeconds() > 0.2) {
                     shooter.downServoPaddle();
                     shooter.closeServoStop();

@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.DisabledHardware.Spintake;
 import java.util.List;
 
 @Disabled
-@Configurable
+//@Configurable
 @TeleOp
 public class TeleOpBlueStatesSISHardwareRev12 extends OpMode {
 

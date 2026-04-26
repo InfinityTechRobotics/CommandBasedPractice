@@ -18,10 +18,10 @@ public class ShooterSpinfinityDuo {
 
 
     // Turret Motor PID Values
-    public static double NEW_P = 20.;
+    public static double NEW_P = 15.;
     public static double NEW_I = 0.;
     public static double NEW_D = 1.;
-    public static double NEW_F = 1.;
+    public static double NEW_F = 1.25;
 
     double SERVO_HOOD_UP_POS = 0.5;
     double SERVO_HOOD_DOWN_POS = 0.2;
