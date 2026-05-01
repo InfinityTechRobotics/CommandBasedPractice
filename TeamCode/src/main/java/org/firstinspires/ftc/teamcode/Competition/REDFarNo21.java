@@ -23,11 +23,11 @@ public class REDFarNo21 extends OpMode {
     private DigitalChannel laserInput;
     
     private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
-    private final Pose loadingZone = new Pose(135, 20, Math.toRadians(0));
+    private final Pose loadingZone = new Pose(132, 20, Math.toRadians(0));
     private final Pose reLoadingZone = new Pose(115, 18, Math.toRadians(0));
     private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
     private final Pose finaley = new Pose(107.5, 15, Math.toRadians(0));
-    private final Pose shiftL = new Pose(135, 13, Math.toRadians(0));
+    private final Pose shiftL = new Pose(132, 13, Math.toRadians(0));
     
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
@@ -65,7 +65,7 @@ public class REDFarNo21 extends OpMode {
     double flywheelRPM2 = 0.0;
 
 
-    double TARGET_AUTON_RPM = 3300; //2475.0
+    double TARGET_AUTON_RPM = 3200; //2475.0
 
     int shootingSequenceFlag = 1;
 

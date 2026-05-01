@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Competition;
+package org.firstinspires.ftc.teamcode.Competition.tests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -18,16 +18,16 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Autonomous
-public class REDFarWith21 extends OpMode {
+public class REDFarWith21MR extends OpMode {
 
     private DigitalChannel laserInput;
     
     private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
-    private final Pose loadingZone = new Pose(132, 20, Math.toRadians(0));
+    private final Pose loadingZone = new Pose(126, 20, Math.toRadians(0));
     private final Pose reLoadingZone = new Pose(115, 18, Math.toRadians(0));
     private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
     private final Pose finaley = new Pose(107.5, 15, Math.toRadians(0));
-    private final Pose shiftL = new Pose(132, 13, Math.toRadians(0));
+    private final Pose shiftL = new Pose(126, 13, Math.toRadians(0));
     private final Pose prePickupPose21 = new Pose(92, 41, Math.toRadians(0)); // Preparing to intake third set of artifacts.
     private final Pose pickupPose21 = new Pose(133, 41, Math.toRadians(0)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
 

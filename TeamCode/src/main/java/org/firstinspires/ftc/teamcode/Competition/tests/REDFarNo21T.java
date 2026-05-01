@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Competition;
+package org.firstinspires.ftc.teamcode.Competition.tests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -18,20 +18,17 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Autonomous
-public class REDFarWith21 extends OpMode {
+public class REDFarNo21T extends OpMode {
 
     private DigitalChannel laserInput;
     
     private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
     private final Pose loadingZone = new Pose(132, 20, Math.toRadians(0));
-    private final Pose reLoadingZone = new Pose(115, 18, Math.toRadians(0));
+    private final Pose reLoadingZone = new Pose(111, 18, Math.toRadians(0)); //115
     private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
     private final Pose finaley = new Pose(107.5, 15, Math.toRadians(0));
     private final Pose shiftL = new Pose(132, 13, Math.toRadians(0));
-    private final Pose prePickupPose21 = new Pose(92, 41, Math.toRadians(0)); // Preparing to intake third set of artifacts.
-    private final Pose pickupPose21 = new Pose(133, 41, Math.toRadians(0)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
-
-
+    
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
     SpintakeSpinfinity spintake = new SpintakeSpinfinity();
@@ -76,7 +73,7 @@ public class REDFarWith21 extends OpMode {
 
     int telemtryUpdate = 0;
 
-    private PathChain driveToTheFinaley, driveTo21, drive21Shhooting, driveToLoadingZone, driveToScorePoseL, driveToScorePoseS, driveAwayFromLoadingZone, driveReLoadingToLZone;
+    private PathChain driveToTheFinaley, driveToLoadingZone, driveToScorePoseL, driveToScorePoseS, driveAwayFromLoadingZone, driveReLoadingToLZone;
 
     private void buildPaths() {
 
@@ -112,20 +109,6 @@ public class REDFarWith21 extends OpMode {
                 .setTimeoutConstraint(0)
                 .build();
 
-        driveTo21 = follower.pathBuilder()
-                .addPath(new BezierLine(shhooting, prePickupPose21))
-                .setLinearHeadingInterpolation(shhooting.getHeading(), prePickupPose21.getHeading())
-                .addPath(new BezierLine(prePickupPose21, pickupPose21))
-                .setLinearHeadingInterpolation(prePickupPose21.getHeading(), pickupPose21.getHeading())
-                .setTimeoutConstraint(0)
-                .build();
-
-        drive21Shhooting = follower.pathBuilder()
-                .addPath(new BezierLine(pickupPose21, shhooting))
-                .setLinearHeadingInterpolation(pickupPose21.getHeading(), shhooting.getHeading())
-                .setTimeoutConstraint(0)
-                .build();
-
         driveToTheFinaley = follower.pathBuilder()
                 .addPath(new BezierLine(shhooting, finaley))
                 .setLinearHeadingInterpolation(shhooting.getHeading(), finaley.getHeading())
@@ -148,9 +131,7 @@ public class REDFarWith21 extends OpMode {
                 break;
             case 11:
                 if (!follower.isBusy()) {
-                    if (pathTimer.getElapsedTimeSeconds() > 3) {
                         setPathState(1000);
-                    }
                 }
                 break;
             case 1000:
@@ -231,7 +212,7 @@ public class REDFarWith21 extends OpMode {
                 break;
             case 10010:  // sends to next driving path
                 if (shootingSequenceFlag == 22) {
-                    setPathState(2100);
+                    setPathState(220);
                 } else if (shootingSequenceFlag == 2210) {
                     setPathState(220);
                 } else if (shootingSequenceFlag == 221023) {
@@ -246,10 +227,17 @@ public class REDFarWith21 extends OpMode {
             case 210: // beginning of set of actions for spike mark 21, gets ready to pickup
                 spintake.turnIntakeOn();
                 if (!follower.isBusy()) {
+//                        follower.followPath(driveToPickup21);
                     setPathState(211);
                 }
                 break;
             case 211: // drives toward goal to score first set of artifacts (21)
+                if (!follower.isBusy()) {
+//                            follower.followPath(driveToGoal21);
+                    setPathState(214);
+                }
+                break;
+            case 214: // case for shooting
                 if (!follower.isBusy()) {
                     setPathState(1000);
                 }
@@ -262,7 +250,7 @@ public class REDFarWith21 extends OpMode {
                 }
                 break;
             case 221:
-                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
                     follower.followPath(driveAwayFromLoadingZone);
                     setPathState(222);
                 }
@@ -280,7 +268,7 @@ public class REDFarWith21 extends OpMode {
                 }
                 break;
             case 224: // case for shooting
-                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
                     setPathState(1000);
                 }
                 break;
@@ -329,24 +317,6 @@ public class REDFarWith21 extends OpMode {
                 }
                 break;
             case 303:
-                if (!follower.isBusy()) {
-                    setPathState(1000);
-                }
-                break;
-            case 2100: // beginning of set of actions for spike mark 21, gets ready to pickup
-                spintake.turnIntakeOn();
-                if (!follower.isBusy()) {
-                    follower.followPath(driveTo21);
-                    setPathState(2101);
-                }
-                break;
-            case 2101: // drives toward goal to score first set of artifacts (21)
-                if (!follower.isBusy()) {
-                    follower.followPath(drive21Shhooting);
-                    setPathState(2102);
-                }
-                break;
-            case 2102: // case for shooting
                 if (!follower.isBusy()) {
                     setPathState(1000);
                 }

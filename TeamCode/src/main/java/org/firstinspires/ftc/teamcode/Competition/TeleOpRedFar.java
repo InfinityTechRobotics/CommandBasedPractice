@@ -93,7 +93,7 @@ public class TeleOpRedFar extends OpMode {
 
     double powerFactor = DRIVE_POWER_FACTOR;
 
-    public static double FAR_ZONE_RPM = 3250.;
+    public static double FAR_ZONE_RPM = 3200.;
     public static double FAR_ZONE_DISTANCE_THRESHOLD = 85.;
     public static double FAR_ZONE_HOOD_POS = 0.5;
 

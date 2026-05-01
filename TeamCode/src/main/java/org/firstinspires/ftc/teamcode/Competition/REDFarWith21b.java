@@ -18,16 +18,16 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Autonomous
-public class REDFarWith21 extends OpMode {
+public class REDFarWith21b extends OpMode {
 
     private DigitalChannel laserInput;
     
     private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
-    private final Pose loadingZone = new Pose(132, 20, Math.toRadians(0));
+    private final Pose loadingZone = new Pose(135, 20, Math.toRadians(0));
     private final Pose reLoadingZone = new Pose(115, 18, Math.toRadians(0));
     private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
     private final Pose finaley = new Pose(107.5, 15, Math.toRadians(0));
-    private final Pose shiftL = new Pose(132, 13, Math.toRadians(0));
+    private final Pose shiftL = new Pose(135, 13, Math.toRadians(0));
     private final Pose prePickupPose21 = new Pose(92, 41, Math.toRadians(0)); // Preparing to intake third set of artifacts.
     private final Pose pickupPose21 = new Pose(133, 41, Math.toRadians(0)); // Last (Third Set) of Artifacts from the Spike Mark(GPP).
 
@@ -68,7 +68,7 @@ public class REDFarWith21 extends OpMode {
     double flywheelRPM2 = 0.0;
 
 
-    double TARGET_AUTON_RPM = 3200; //2475.0
+    double TARGET_AUTON_RPM = 3300; //2475.0
 
     int shootingSequenceFlag = 1;
 
@@ -76,7 +76,7 @@ public class REDFarWith21 extends OpMode {
 
     int telemtryUpdate = 0;
 
-    private PathChain driveToTheFinaley, driveTo21, drive21Shhooting, driveToLoadingZone, driveToScorePoseL, driveToScorePoseS, driveAwayFromLoadingZone, driveReLoadingToLZone;
+    private PathChain driveToTheFinaley, driveToLoadingZoneFromRe, driveTo21, drive21Shhooting, driveToLoadingZone, driveToScorePoseL, driveToScorePoseS, driveAwayFromLoadingZone, driveReLoadingToLZone;
 
     private void buildPaths() {
 
@@ -117,6 +117,12 @@ public class REDFarWith21 extends OpMode {
                 .setLinearHeadingInterpolation(shhooting.getHeading(), prePickupPose21.getHeading())
                 .addPath(new BezierLine(prePickupPose21, pickupPose21))
                 .setLinearHeadingInterpolation(prePickupPose21.getHeading(), pickupPose21.getHeading())
+                .setTimeoutConstraint(0)
+                .build();
+
+        driveToLoadingZoneFromRe = follower.pathBuilder()
+                .addPath((new BezierLine(reLoadingZone, loadingZone)))
+                .setLinearHeadingInterpolation(reLoadingZone.getHeading(), shhooting.getHeading())
                 .setTimeoutConstraint(0)
                 .build();
 
@@ -258,9 +264,16 @@ public class REDFarWith21 extends OpMode {
                 spintake.turnIntakeOn();
                 if (!follower.isBusy()) {
                     follower.followPath(driveToLoadingZone);
-                    setPathState(221);
+                    setPathState(2210);
                 }
                 break;
+            case 2210:
+                if (!follower.isBusy()) {
+                    follower.followPath(driveToLoadingZoneFromRe);
+                }
+                if (pathTimer.getElapsedTimeSeconds() > 3) {
+                    setPathState(223);
+                }
             case 221:
                 if (!follower.isBusy()) {
                     follower.followPath(driveAwayFromLoadingZone);

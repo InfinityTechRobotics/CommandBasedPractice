@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Competition;
+package org.firstinspires.ftc.teamcode.Competition.tests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Autonomous
-public class REDFarWith21 extends OpMode {
+public class REDFarWith21T extends OpMode {
 
     private DigitalChannel laserInput;
     
@@ -148,9 +148,7 @@ public class REDFarWith21 extends OpMode {
                 break;
             case 11:
                 if (!follower.isBusy()) {
-                    if (pathTimer.getElapsedTimeSeconds() > 3) {
                         setPathState(1000);
-                    }
                 }
                 break;
             case 1000:
@@ -262,10 +260,11 @@ public class REDFarWith21 extends OpMode {
                 }
                 break;
             case 221:
-                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
                     follower.followPath(driveAwayFromLoadingZone);
                     setPathState(222);
                 }
+
                 break;
             case 222:
                 if (!follower.isBusy()) {
@@ -280,7 +279,7 @@ public class REDFarWith21 extends OpMode {
                 }
                 break;
             case 224: // case for shooting
-                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
                     setPathState(1000);
                 }
                 break;
