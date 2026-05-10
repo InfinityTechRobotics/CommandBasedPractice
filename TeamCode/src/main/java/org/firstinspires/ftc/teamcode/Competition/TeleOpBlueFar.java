@@ -152,7 +152,7 @@ public class TeleOpBlueFar extends OpMode {
             }
 
             pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                    .addPath(new Path(new BezierLine(follower::getPose, new Pose(72, 30))))
+                    .addPath(new Path(new BezierLine(follower::getPose, new Pose(68, 30))))
                     .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(30), 0.8))
                     .build();
 

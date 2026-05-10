@@ -352,7 +352,7 @@ public class BLUENearNo21 extends OpMode {
                 }
                 break;
             case 302:
-                if (pathTimer.getElapsedTimeSeconds() > 1.5)  {
+                if (pathTimer.getElapsedTimeSeconds() > 2)  {
                     follower.followPath(driveToAwayFromGate);
                     setPathState(303);
                 }

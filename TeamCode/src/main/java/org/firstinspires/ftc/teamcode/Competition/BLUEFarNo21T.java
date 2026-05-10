@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Competition.tests;
+package org.firstinspires.ftc.teamcode.Competition;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -18,16 +18,16 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 @Autonomous
-public class REDFarNo21T extends OpMode {
+public class BLUEFarNo21T extends OpMode {
 
     private DigitalChannel laserInput;
-    
-    private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
-    private final Pose loadingZone = new Pose(132, 20, Math.toRadians(0));
-    private final Pose reLoadingZone = new Pose(111, 18, Math.toRadians(0)); //115
-    private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
-    private final Pose finaley = new Pose(107.5, 15, Math.toRadians(0));
-    private final Pose shiftL = new Pose(132, 13, Math.toRadians(0));
+
+    private final Pose startPose = new Pose(64, 8, Math.toRadians(90));
+    private final Pose loadingZone = new Pose(16, 18, Math.toRadians(180));
+    private final Pose reLoadingZone = new Pose(36, 16, Math.toRadians(180));
+    private final Pose shhooting = new Pose(60, 16, Math.toRadians(115));
+    private final Pose finaley = new Pose(36.5, 13, Math.toRadians(180));
+    private final Pose shiftL = new Pose(16, 11, Math.toRadians(180));
     
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();

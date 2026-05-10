@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Competition.tests;
+package org.firstinspires.ftc.teamcode.Competition;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -6,7 +6,6 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -17,18 +16,18 @@ import org.firstinspires.ftc.teamcode.Hardware.ShooterSpinfinityDuo;
 import org.firstinspires.ftc.teamcode.Hardware.SpintakeSpinfinity;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Disabled
+
 @Autonomous
-public class REDFarNo21MR extends OpMode {
+public class REDFarNo21T extends OpMode {
 
     private DigitalChannel laserInput;
     
     private final Pose startPose = new Pose(80, 8, Math.toRadians(90));
-    private final Pose loadingZone = new Pose(126, 20, Math.toRadians(0));
-    private final Pose reLoadingZone = new Pose(111, 18, Math.toRadians(0));
+    private final Pose loadingZone = new Pose(132, 20, Math.toRadians(0));
+    private final Pose reLoadingZone = new Pose(111, 18, Math.toRadians(0)); //115
     private final Pose shhooting = new Pose(84, 16, Math.toRadians(65));
     private final Pose finaley = new Pose(107.5, 15, Math.toRadians(0));
-    private final Pose shiftL = new Pose(126, 13, Math.toRadians(0));
+    private final Pose shiftL = new Pose(132, 13, Math.toRadians(0));
     
     ShooterSpinfinityDuo shooter = new ShooterSpinfinityDuo();
     FlywheelSpinfinityDuo flywheel = new FlywheelSpinfinityDuo();
@@ -132,9 +131,7 @@ public class REDFarNo21MR extends OpMode {
                 break;
             case 11:
                 if (!follower.isBusy()) {
-                    if (pathTimer.getElapsedTimeSeconds() > 3) {
                         setPathState(1000);
-                    }
                 }
                 break;
             case 1000:
@@ -253,7 +250,7 @@ public class REDFarNo21MR extends OpMode {
                 }
                 break;
             case 221:
-                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
                     follower.followPath(driveAwayFromLoadingZone);
                     setPathState(222);
                 }
@@ -271,7 +268,7 @@ public class REDFarNo21MR extends OpMode {
                 }
                 break;
             case 224: // case for shooting
-                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds() > 2.5) {
                     setPathState(1000);
                 }
                 break;
