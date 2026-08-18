@@ -3,16 +3,18 @@ package org.firstinspires.ftc.teamcode.Hardware;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import com.pedropathing.ivy;
+
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-public class Drive {
+public class DriveSubsystem {
 
-    public DcMotorEx frontLeftMotor;
-    public DcMotorEx frontRightMotor;
-    public DcMotorEx backRightMotor;
-    public DcMotorEx backLeftMotor;
+    private DcMotorEx frontLeftMotor;
+    private DcMotorEx frontRightMotor;
+    private DcMotorEx backRightMotor;
+    private DcMotorEx backLeftMotor;
 
-    public void init (HardwareMap hardwareMap) {
+    public Drive(HardwareMap hardwareMap) {
 
         frontLeftMotor = hardwareMap.get(DcMotorEx.class, "motorFrontLeft");
         backLeftMotor = hardwareMap.get(DcMotorEx.class, "motorRearLeft");
@@ -79,6 +81,13 @@ public class Drive {
             square = square * -1;
         }
         return square;
+    }
+
+    public void stop(){
+        frontLeftMotor.setPower(0);
+        frontRightMotor.setPower(0);
+        backLeftMotor.setPower(0);
+        backRightMotor.setPower(0);
     }
 
     public double getMotorFLCurrent () {
