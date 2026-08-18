@@ -1,9 +1,8 @@
-package org.firstinspires.ftc.teamcode.Hardware;
+package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import com.pedropathing.ivy;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
@@ -14,7 +13,7 @@ public class DriveSubsystem {
     private DcMotorEx backRightMotor;
     private DcMotorEx backLeftMotor;
 
-    public Drive(HardwareMap hardwareMap) {
+    public DriveSubsystem(HardwareMap hardwareMap) {
 
         frontLeftMotor = hardwareMap.get(DcMotorEx.class, "motorFrontLeft");
         backLeftMotor = hardwareMap.get(DcMotorEx.class, "motorRearLeft");
