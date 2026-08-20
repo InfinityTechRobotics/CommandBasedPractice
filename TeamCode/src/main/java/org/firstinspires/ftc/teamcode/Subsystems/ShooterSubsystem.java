@@ -1,20 +1,18 @@
-package org.firstinspires.ftc.teamcode.Hardware;
+package org.firstinspires.ftc.teamcode.Subsystems;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-public class ShooterSpinfinityDuo {
+public class ShooterSubsystem {
 
-    public Servo servoStop;
-    public Servo servoPaddleLeft;
-    public Servo servoHood;
-    public DcMotorEx motorTurret;
+    private Servo servoStop;
+    private Servo servoPaddleLeft;
+    private Servo servoHood;
+    private DcMotorEx motorTurret;
 
 
     // Turret Motor PID Values
@@ -208,6 +206,10 @@ public class ShooterSpinfinityDuo {
         PIDFCoefficients pidfNew = new PIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
         motorTurret.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, pidfNew);
         motorTurret.setPower(0.75);
+    }
+
+    public void stop(){
+        motorTurret.setPower(0);
     }
 
 }
