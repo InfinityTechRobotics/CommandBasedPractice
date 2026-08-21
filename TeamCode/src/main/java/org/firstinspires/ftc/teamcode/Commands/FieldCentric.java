@@ -12,10 +12,12 @@ import java.util.Set;
 
 public class FieldCentric implements Command {
 
-    private DriveSubsystem drive;
-    private Follower follower;
-    private Gamepad gamepad1;
-    private double powerFactor = 0.95;
+    private final DriveSubsystem drive;
+    private final Follower follower;
+    private final Gamepad gamepad1;
+    private final double powerFactor = 0.95;
+
+
 
     public FieldCentric (DriveSubsystem drive, Follower follower, Gamepad gamepad1){
         this.drive = drive;
@@ -67,7 +69,7 @@ public class FieldCentric implements Command {
 
         double botHeading = follower.getHeading();
 
-        drive.moveRobotFC(y,x,rx,botHeading,powerFactor);
+        drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
     }
 
     @Override

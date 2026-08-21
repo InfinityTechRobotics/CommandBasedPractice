@@ -44,7 +44,7 @@ public class ShooterSubsystem {
     double BLUE_GOAL_Y_POS = 127.65;
 
 
-    public void init(HardwareMap hardwareMap) {
+    public ShooterSubsystem(HardwareMap hardwareMap) {
         servoStop = hardwareMap.get(Servo.class, "servoStop");
         servoPaddleLeft = hardwareMap.servo.get("servoPaddleLeft");
 
