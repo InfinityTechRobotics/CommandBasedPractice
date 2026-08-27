@@ -16,10 +16,12 @@ public class RobotCentric implements Command {
 
     private DriveSubsystem drive;
     private Gamepad gamepad1;
+    private Follower follower;
     private double powerFactor = 0.95;
 
-    public RobotCentric(DriveSubsystem drive, Gamepad gamepad1){
+    public RobotCentric(DriveSubsystem drive, Follower follower, Gamepad gamepad1){
         this.drive = drive;
+        this.follower = follower;
         this.gamepad1 = gamepad1;
     }
 
@@ -51,7 +53,7 @@ public class RobotCentric implements Command {
 
     @Override
     public void start() {
-
+        follower.startTeleOpDrive();
     }
 
     @Override
@@ -61,11 +63,13 @@ public class RobotCentric implements Command {
 
     @Override
     public void execute() {
-        double y = -gamepad1.left_stick_y;
-        double x = gamepad1.left_stick_x;
-        double rx = gamepad1.right_stick_x;
-
-        drive.moveRobotRC(y,x,rx,powerFactor);
+        follower.setTeleOpDrive(
+                gamepad1.left_stick_y,
+                gamepad1.left_stick_x,
+                -gamepad1.right_stick_x,
+                false,
+                powerFactor
+        );
     }
 
     @Override

@@ -53,7 +53,7 @@ public class FieldCentric implements Command {
 
     @Override
     public void start() {
-
+        follower.startTeleOpDrive();
     }
 
     @Override
@@ -63,13 +63,13 @@ public class FieldCentric implements Command {
 
     @Override
     public void execute() {
-        double y = -gamepad1.left_stick_y;
-        double x = gamepad1.left_stick_x;
-        double rx = gamepad1.right_stick_x;
-
-        double botHeading = follower.getHeading();
-
-        drive.moveRobotFC(y, x, rx, botHeading, powerFactor);
+        follower.setTeleOpDrive(
+                gamepad1.left_stick_y,
+                gamepad1.left_stick_x,
+                -gamepad1.right_stick_x,
+                false,
+                powerFactor
+        );
     }
 
     @Override

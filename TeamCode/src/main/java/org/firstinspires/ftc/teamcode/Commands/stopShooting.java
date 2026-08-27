@@ -14,23 +14,16 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpintakeSubsystem;
 import java.util.Set;
 
 
-public class ShootingSequence implements Command {
+public class stopShooting implements Command {
     private final ShooterSubsystem shooter;
     private final FlywheelSubsystem flywheel;
     private final SpintakeSubsystem spintake;
-
-    private Timer time;
-
-    public boolean shotStarted = false;
     private boolean finished = false;
 
-    private double targetRPM = 1000;
-
-    public ShootingSequence(ShooterSubsystem shooter, FlywheelSubsystem flywheel, SpintakeSubsystem spintake, Timer time){
+    public stopShooting(ShooterSubsystem shooter, FlywheelSubsystem flywheel, SpintakeSubsystem spintake){
         this.shooter = shooter;
         this.flywheel = flywheel;
         this.spintake = spintake;
-        this.time = time;
     }
 
     @Override
@@ -60,11 +53,10 @@ public class ShootingSequence implements Command {
 
     @Override
     public void start() {
-        time.resetTimer();
-
-        shooter.openServoStop();
+        shooter.closeServoStop();
         shooter.downServoPaddle();
-
+        flywheel.setFlywheelVel(0);
+        spintake.turnIntakeOff();
     }
 
     @Override
@@ -74,11 +66,9 @@ public class ShootingSequence implements Command {
 
     @Override
     public void execute() {
-        flywheel.setFlywheelVel(targetRPM);
-        spintake.turnIntakeOn();
     }
-
     @Override
     public void end(EndCondition endCondition) {
+
     }
 }

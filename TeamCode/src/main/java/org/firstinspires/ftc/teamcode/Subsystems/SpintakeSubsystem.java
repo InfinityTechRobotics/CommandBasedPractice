@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Hardware;
+package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -7,11 +7,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 //@Configurable
-public class SpintakeSpinfinity {
+public class SpintakeSubsystem {
 
     public DcMotorEx motorIntake;
 
-    double INTAKE_MAX_POWER = 1.0;
+    double INTAKE_MAX_POWER = 0.7;
     public static double INTAKE_NO_POWER = 0.2;
 
     public static double INTAKE_LOW_POWER = 0.2;
@@ -19,7 +19,7 @@ public class SpintakeSpinfinity {
 
     private Servo artifactIndicator3, artifactIndicator2, artifactIndicator1;
 
-    public void init (HardwareMap hardwareMap) {
+    public SpintakeSubsystem(HardwareMap hardwareMap) {
 
         motorIntake = hardwareMap.get(DcMotorEx.class, "motorIntake");
 

@@ -1,14 +1,13 @@
-package org.firstinspires.ftc.teamcode.Hardware;
+package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-public class FlywheelSpinfinityDuo {
+public class FlywheelSubsystem {
 
     public DcMotorEx motorFlywheel1;
     public DcMotorEx motorFlywheel2;
@@ -37,7 +36,7 @@ public class FlywheelSpinfinityDuo {
     double x1 = -0.;    // Distance between camera and ramp
 
 
-    public void init (HardwareMap hardwareMap) {
+    public FlywheelSubsystem(HardwareMap hardwareMap){
 
         motorFlywheel1 = hardwareMap.get(DcMotorEx.class, "motorFlywheel");
         motorFlywheel2 = hardwareMap.get(DcMotorEx.class, "motorFlywheel2");
