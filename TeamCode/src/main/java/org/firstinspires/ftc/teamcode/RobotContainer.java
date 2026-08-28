@@ -1,12 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.ivy.Command;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.Commands.FieldCentric;
-import org.firstinspires.ftc.teamcode.Commands.RobotCentric;
 import org.firstinspires.ftc.teamcode.Commands.ShootingSequence;
 
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
@@ -23,8 +22,8 @@ public class RobotContainer {
     private final SpintakeSubsystem spintake;
 
     // Commands
-    public final FieldCentric fieldCentric;
-    public final RobotCentric robotCentric;
+    public final Command fieldCentric;
+    public final Command robotCentric;
     public final ShootingSequence shooting;
 
     public RobotContainer(
@@ -40,17 +39,9 @@ public class RobotContainer {
         spintake = new SpintakeSubsystem(hardwareMap);
 
         // Create commands
-        fieldCentric = new FieldCentric(
-                drive,
-                follower,
-                gamepad1
-        );
+        fieldCentric = drive.fieldCentric(follower, gamepad1);
 
-        robotCentric = new RobotCentric(
-                drive,
-                follower,
-                gamepad1
-        );
+        robotCentric = drive.robotCentric(gamepad1);
 
         shooting = new ShootingSequence(
                 shooter,
