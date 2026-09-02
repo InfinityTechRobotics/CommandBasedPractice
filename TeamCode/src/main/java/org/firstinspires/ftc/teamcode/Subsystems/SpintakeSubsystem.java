@@ -42,7 +42,7 @@ public class SpintakeSubsystem {
     }
 
     public void turnIntakeOff () {
-        motorIntake.setPower(INTAKE_NO_POWER);
+        motorIntake.setPower(0);
     }
 
     public void intakeLowPower () {

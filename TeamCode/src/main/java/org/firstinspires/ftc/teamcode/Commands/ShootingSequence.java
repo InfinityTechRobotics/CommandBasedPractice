@@ -24,7 +24,8 @@ public class ShootingSequence implements Command {
     public boolean shotStarted = false;
     private boolean finished = false;
 
-    private double targetRPM = 1000;
+    private double targetRPM = 500;
+    private int turretPosition = 500;
 
     public ShootingSequence(ShooterSubsystem shooter, FlywheelSubsystem flywheel, SpintakeSubsystem spintake, Timer time){
         this.shooter = shooter;
@@ -62,7 +63,7 @@ public class ShootingSequence implements Command {
     public void start() {
         time.resetTimer();
 
-        shooter.openServoStop();
+        shooter.closeServoStop();
         shooter.downServoPaddle();
 
     }
@@ -74,11 +75,19 @@ public class ShootingSequence implements Command {
 
     @Override
     public void execute() {
+        shooter.openServoStop();
         flywheel.setFlywheelVel(targetRPM);
         spintake.turnIntakeOn();
+
+        if(time.getElapsedTime() > 3000){
+            shooter.shootServoPaddle();
+        }
     }
 
     @Override
     public void end(EndCondition endCondition) {
+        flywheel.setFlywheelVel(100);
+        spintake.turnIntakeOff();
+
     }
 }

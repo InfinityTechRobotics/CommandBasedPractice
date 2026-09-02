@@ -120,19 +120,6 @@ public class DriveSubsystem {
         return backRightMotor.getPower();
     }
 
-    public Command fieldCentric(Follower follower, Gamepad gamepad1) {
-        return infinite(() -> {
-
-            double y = -gamepad1.left_stick_y;
-            double x = gamepad1.left_stick_x;
-            double rx = gamepad1.right_stick_x;
-
-            double botHeading = follower.getHeading();
-
-            moveRobotFC(y, x, rx, botHeading, 0.95);
-        });
-    }
-
     public Command robotCentric(Gamepad gamepad1) {
         return infinite(() -> {
 

@@ -4,50 +4,40 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Commands.ShootingSequence;
 
-import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
-import org.firstinspires.ftc.teamcode.Subsystems.FlywheelSubsystem;
-import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem;
-import org.firstinspires.ftc.teamcode.Subsystems.SpintakeSubsystem;
+import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.groups.Groups.loop;
 
 public class RobotContainer {
-
-    // Subsystems
-    private final DriveSubsystem drive;
-    private final ShooterSubsystem shooter;
-    private final FlywheelSubsystem flywheel;
-    private final SpintakeSubsystem spintake;
-
-    // Commands
-    public final Command fieldCentric;
     public final Command robotCentric;
-    public final ShootingSequence shooting;
+    public final Command shooting;
+    public final Command shootingControl;
 
     public RobotContainer(
-            HardwareMap hardwareMap,
+            Robot robot,
             Follower follower,
             Gamepad gamepad1
     ) {
 
-        // Create subsystems
-        drive = new DriveSubsystem(hardwareMap);
-        shooter = new ShooterSubsystem(hardwareMap);
-        flywheel = new FlywheelSubsystem(hardwareMap);
-        spintake = new SpintakeSubsystem(hardwareMap);
+        robotCentric = robot.drive.robotCentric(
+                gamepad1
+        );
 
-        // Create commands
-        fieldCentric = drive.fieldCentric(follower, gamepad1);
-
-        robotCentric = drive.robotCentric(gamepad1);
-
+        // Shooting command
         shooting = new ShootingSequence(
-                shooter,
-                flywheel,
-                spintake,
+                robot.shooter,
+                robot.flywheel,
+                robot.spintake,
                 new Timer()
+        );
+
+        shootingControl = loop(
+                waitUntil(() -> gamepad1.a)
+                        .then(
+                                shooting.until(() -> gamepad1.b)
+                        )
         );
     }
 }

@@ -1,13 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.ivy.Command;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import static com.pedropathing.ivy.commands.Commands.*;
-
 import com.pedropathing.ivy.Scheduler;
 
 @TeleOp(name = "Ivy Test")
@@ -18,15 +15,18 @@ public class IvyTest extends LinearOpMode {
 
         Follower follower = Constants.createFollower(hardwareMap);
 
+        Robot robot = new Robot(hardwareMap);
+
         RobotContainer container = new RobotContainer(
-                hardwareMap,
+                robot,
                 follower,
                 gamepad1
         );
 
         waitForStart();
 
-        container.fieldCentric.schedule();
+        container.robotCentric.schedule();
+        container.shootingControl.schedule();
 
         while (opModeIsActive()) {
 
