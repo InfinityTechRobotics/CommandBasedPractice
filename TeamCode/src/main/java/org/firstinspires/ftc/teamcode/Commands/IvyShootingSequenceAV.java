@@ -13,8 +13,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.SpintakeSubsystem;
 
 import java.util.Set;
 
-
-public class ShootingSequence implements Command {
+public class IvyShootingSequenceAV implements Command{
     private final ShooterSubsystem shooter;
     private final FlywheelSubsystem flywheel;
     private final SpintakeSubsystem spintake;
@@ -24,11 +23,9 @@ public class ShootingSequence implements Command {
     public boolean shotStarted = false;
     private boolean finished = false;
 
-    private double slowFlywheel = 500;
     private double targetRPM = 1000;
-    private int turretPosition = 500;
 
-    public ShootingSequence(ShooterSubsystem shooter, FlywheelSubsystem flywheel, SpintakeSubsystem spintake, Timer time){
+    public IvyShootingSequenceAV(ShooterSubsystem shooter, FlywheelSubsystem flywheel, SpintakeSubsystem spintake, Timer time) {
         this.shooter = shooter;
         this.flywheel = flywheel;
         this.spintake = spintake;
@@ -64,11 +61,8 @@ public class ShootingSequence implements Command {
     public void start() {
         time.resetTimer();
 
-        shooter.closeServoStop();
+        shooter.openServoStop();
         shooter.downServoPaddle();
-
-        flywheel.setFlywheelVel(slowFlywheel);
-        spintake.turnIntakeOn();
 
     }
 
@@ -80,18 +74,11 @@ public class ShootingSequence implements Command {
     @Override
     public void execute() {
         flywheel.setFlywheelVel(targetRPM);
-        shooter.openServoStop();
-        if(time.getElapsedTime() > 0.6){
-            shooter.shootServoPaddle();
-        }
+        spintake.turnIntakeOn();
     }
 
     @Override
     public void end(EndCondition endCondition) {
-        flywheel.setFlywheelVel(100);
-        spintake.turnIntakeOff();
-        shooter.downServoPaddle();
-        shooter.closeServoStop();
-
     }
+
 }
