@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import com.pedropathing.ivy.Command;
+import com.pedropathing.ivy.commands.Commands;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -40,6 +42,9 @@ public class SpintakeSubsystem {
     public void turnIntakeOn () {
         motorIntake.setPower(INTAKE_MAX_POWER);
     }
+    public Command intakeOn(){
+        return Commands.infinite(this::turnIntakeOn);
+    };
 
     public void turnIntakeOff () {
         motorIntake.setPower(0);

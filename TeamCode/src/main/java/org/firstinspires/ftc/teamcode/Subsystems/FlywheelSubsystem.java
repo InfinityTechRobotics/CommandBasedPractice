@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import com.pedropathing.ivy.Command;
+import com.pedropathing.ivy.commands.Commands;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -76,6 +78,10 @@ public class FlywheelSubsystem {
     public void setFlywheelVel (double targetRPM) {
         motorFlywheel1.setVelocity(targetRPM / 60. * CPR);
         motorFlywheel2.setVelocity(targetRPM / 60. * CPR);
+    }
+
+    public Command setFlywheel(double targetRPM){
+        return Commands.infinite(() -> setFlywheelVel(targetRPM));
     }
 
     // Calculate current flywheel motor RPM

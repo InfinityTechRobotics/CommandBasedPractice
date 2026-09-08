@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
+import com.pedropathing.ivy.Command;
+import com.pedropathing.ivy.commands.Commands;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
@@ -70,18 +72,32 @@ public class ShooterSubsystem {
         servoStop.setPosition(SERVO_STOP_OPEN_POS);
     }
 
+    public Command openStop(){
+        return Commands.instant(this::openServoStop);
+    }
+
     public void closeServoStop() {
         servoStop.setPosition(SERVO_STOP_CLOSE_POS);
+    }
+
+    public Command closeStop(){
+        return Commands.instant(this::closeServoStop);
     }
 
     public void shootServoPaddle() {
         servoPaddleLeft.setPosition(SERVO_PADDLE_SHOOT_POS);
     }
 
+    public Command shootPaddle(){
+        return Commands.instant(this::shootServoPaddle);
+    }
     public void downServoPaddle() {
         servoPaddleLeft.setPosition(SERVO_PADDLE_DOWN_POS);
     }
 
+    public Command downPaddle(){
+        return Commands.instant(this::downServoPaddle);
+    }
     public double servoStopPosition() {
         return servoStop.getPosition();
     }

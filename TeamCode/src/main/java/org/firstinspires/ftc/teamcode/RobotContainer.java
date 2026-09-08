@@ -9,11 +9,17 @@ import org.firstinspires.ftc.teamcode.Commands.ShootingSequence;
 
 import static com.pedropathing.ivy.commands.Commands.*;
 import static com.pedropathing.ivy.groups.Groups.loop;
+import static com.pedropathing.ivy.groups.Groups.parallel;
+import static com.pedropathing.ivy.groups.Groups.sequential;
 
 public class RobotContainer {
     public final Command robotCentric;
-    public final Command shooting;
     public final Command shootingControl;
+    public final Command openStop;
+    public final Command closeStop;
+    public final Command shootPaddle;
+    public final Command downPaddle;
+    public final Command shootingSequence;
 
     public RobotContainer(
             Robot robot,
@@ -24,20 +30,30 @@ public class RobotContainer {
         robotCentric = robot.drive.robotCentric(
                 gamepad1
         );
+        openStop = robot.shooter.openStop();
+        closeStop = robot.shooter.closeStop();
+        shootPaddle = robot.shooter.shootPaddle();
+        downPaddle = robot.shooter.downPaddle();
 
-        // Shooting command
-        shooting = new ShootingSequence(
-                robot.shooter,
-                robot.flywheel,
-                robot.spintake,
-                new Timer()
-        );
-
-        shootingControl = loop(
-                waitUntil(() -> gamepad1.a)
-                        .then(
-                                shooting.until(() -> gamepad1.b)
+        shootingSequence = conditional(
+                () -> gamepad1.a,
+                sequential(openStop,
+                        waitMs(600),
+                        shootPaddle,
+                        waitMs(200),
+                        parallel(
+                                closeStop, downPaddle
                         )
+                        ),
+                closeStop
         );
+
+
+        shootingControl =
+                parallel(
+                        robot.flywheel.setFlywheel(700),
+                        robot.spintake.intakeOn(),
+                        shootingSequence);
+
     }
 }

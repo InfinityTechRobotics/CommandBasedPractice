@@ -66,8 +66,6 @@ public class ShootingSequence implements Command {
 
         shooter.closeServoStop();
         shooter.downServoPaddle();
-
-        flywheel.setFlywheelVel(slowFlywheel);
         spintake.turnIntakeOn();
 
     }
@@ -81,17 +79,20 @@ public class ShootingSequence implements Command {
     public void execute() {
         flywheel.setFlywheelVel(targetRPM);
         shooter.openServoStop();
-        if(time.getElapsedTime() > 0.6){
+        if(time.getElapsedTimeSeconds() > 0.6){
             shooter.shootServoPaddle();
+        }
+        if (time.getElapsedTimeSeconds() > 1){
+            shooter.downServoPaddle();
+            shooter.closeServoStop();
         }
     }
 
     @Override
     public void end(EndCondition endCondition) {
-        flywheel.setFlywheelVel(100);
-        spintake.turnIntakeOff();
         shooter.downServoPaddle();
         shooter.closeServoStop();
+        flywheel.setFlywheelVel(slowFlywheel);
 
     }
 }
