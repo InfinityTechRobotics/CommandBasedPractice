@@ -19,21 +19,23 @@ public class IntakeIvyTest extends LinearOpMode {
     public void runOpMode () {
         Scheduler.reset();
 
-        DcMotor intakeMotor = hardwareMap.get(DcMotor.class, "spintake");
+        DcMotor intakeMotor = hardwareMap.get(DcMotor.class, "motorIntake");
 
         Command startIntake = Command.build()
-                .setExecute(() -> intakeMotor.setPower(0.75)).raceWith(waitMs(5000))
+                .setExecute(() -> intakeMotor.setPower(-0.75))
                 .setDone(() -> gamepad1.a)
                 .setEnd(endCondition -> intakeMotor.setPower(0))
                 .requiring(intakeMotor);
 
-        Command sequence = sequential(
-                startIntake
-        );
+//        Command sequence = sequential(
+//                startIntake
+//        );
 
         waitForStart();
 
-        schedule(sequence);
+//        gamepad1.y.onPress(startIntake);
+
+        schedule(startIntake);
 
         while (opModeIsActive()) {
             Scheduler.execute();
