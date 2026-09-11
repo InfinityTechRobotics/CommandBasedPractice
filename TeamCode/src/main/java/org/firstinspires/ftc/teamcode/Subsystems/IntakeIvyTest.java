@@ -35,9 +35,12 @@ public class IntakeIvyTest extends LinearOpMode {
 
 //        gamepad1.y.onPress(startIntake);
 
-        schedule(startIntake);
+
 
         while (opModeIsActive()) {
+            if(gamepad1.y){
+                schedule(startIntake);
+            }
             Scheduler.execute();
         }
     }
